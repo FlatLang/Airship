@@ -1,0 +1,16 @@
+{
+  "name": "Airship",
+  "version": "0.1.0",
+  "description": "Flat package manager",
+  "mainClass": "flatlang/airship/Airship",
+  "outDirectory": "dist",
+  "source": "src/main",
+  "scripts": {
+
+  },
+  "author": "Braden Steffaniak",
+  "license": "ISC",
+  "dependencies": {
+    "../Json": "local"
+  }
+}

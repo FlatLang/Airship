@@ -1,0 +1,100 @@
+package "flatlang/airship"
+
+import "flatlang/datastruct/HashMap"
+import "flatlang/json/JsonDeserializer"
+import "flatlang/io/File"
+import "flatlang/io/FileReader"
+
+class {
+  Package package
+  String flatHome
+  String outDirectory
+  String outFile
+  String source
+  Bool debug
+
+  public static async main(String[] args) {
+    if (args.count < 2) {
+      throw new Exception("Missing command")
+    }
+
+    let airship = await new Airship(args.skip(1)):run()
+  }
+
+  construct(private String[] commands) {
+    let packageFile = new File("#{System.workingDirectory}/flat.json")
+    let map = new JsonDeserializer().parse(packageFile)
+
+    package = new Package((HashMap)map)
+    flatHome = System.getEnv("FLAT_HOME")
+    outDirectory = validateOutDirectory(package.outDirectory ?: "dist")
+    outFile = package.outFile ?: "index.js"
+    source = package.source ?: "src"
+
+    debug = commands.any({ _ == "--debug"})
+  }
+
+  validateOutDirectory(String location) => location {
+    if (location.trim().count == 0) {
+      throw new Exception("outDirectory cannot not be empty")
+    } else if (location.trim().startsWith(/[/\\.]/)) {
+      throw new Exception("outDirectory cannot start with #location.first")
+    } else if (location.contains("://") || location.contains(":\\")) {
+      throw new Exception("outDirectory cannot be absolute")
+    }
+  }
+
+  async run() {
+    let commandIterator = commands.iterator
+
+    while (commandIterator.hasNext) {
+      let command = commandIterator.stepNext
+
+      match (command) {
+        "install" => await install()
+        "clean" => await clean()
+      }
+    }
+  }
+
+  async install() {
+    let dependencies = package.dependencies
+      .map((dependency) => {
+        if (dependency.value == "local") {
+          return dependency.key
+        } else {
+          return null
+        }
+      })
+      .filterNull()
+
+    let cmd = [
+      "java",
+      "-jar",
+      "#{flatHome}/Flat/target/flatc.jar",
+      source
+    ]
+
+    dependencies.forEach(d => cmd.addAll(["-l", d]))
+
+    cmd.addAll([
+      "-install-dir", flatHome,
+      "-main", package.mainClass,
+      "-o", "#{outDirectory}/#{outFile}",
+      "-target", "js"
+    ])
+
+    if (debug) {
+      Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
+      return
+    }
+
+    await System.execute(cmd)
+  }
+
+  async clean() {
+    if (!await new File(outDirectory).delete()) {
+      throw new Exception("Failed to clean directory '#outDirectory'")
+    }
+  }
+}
