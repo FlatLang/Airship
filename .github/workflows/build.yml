@@ -108,6 +108,18 @@ jobs:
           repository: FlatLang/Stability-Test
           path: Stability-Test
 
+      - name: Checkout Network library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Network
+          path: Network
+
+      - name: Checkout Redis library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Redis
+          path: Redis
+
       - name: Build Stability-Test with Airship
         env:
           FLAT_HOME: ..
