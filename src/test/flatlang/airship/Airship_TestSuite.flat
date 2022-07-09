@@ -1,0 +1,47 @@
+package "flatlang/airship"
+
+import "flatlang/time/Timer"
+import "flatlang/io/FancyOutputStream"
+
+import "novex/nest/TestResult"
+
+[TestSuite [
+  Airship_Test
+]]
+class {
+  public static async main(String args[]) {
+    let test = new Airship_TestSuite()
+
+    Timer timer = new Timer().start()
+
+    let results = new TestResult[]
+
+    let suites = args.skip(2)
+
+    await test.runTests({
+      results.add(_)
+    })
+
+    let fancy = new FancyOutputStream(headerPattern: "/\\")
+
+    let unsuccessful = results.filter({ !_.success })
+
+    if (unsuccessful.count > 0) {
+      fancy.writeHeader("#unsuccessful.count Failure#{unsuccessful.count == 1 ? "" : "s"} out of #results.count test#{results.count == 1 ? "" : "s"}", pattern: ":'( ", symmetrical: true)
+
+      unsuccessful.forEach({
+        Console.log("#_")
+      })
+    } else {
+      fancy.writeHeader("All #results.count Successful", pattern: ":) ", symmetrical: true)
+    }
+
+    timer.stop()
+
+    Console.writeLine("Took " + timer.duration + "ms")
+
+    if (unsuccessful.count > 0) {
+        System.exit(1)
+    }
+  }
+}
