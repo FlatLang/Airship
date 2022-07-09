@@ -1,0 +1,46 @@
+package "flatlang/airship"
+
+import "flatlang/datastruct/HashMap"
+
+class {
+  visible String[] localDependencies => dependencies.filter({ _.value == "local" }).map({ _.key })
+
+  public construct(
+    visible String mainClass,
+    visible String outDirectory,
+    visible String outFile,
+    visible String source,
+    visible HashMap<String, String> dependencies
+  ) {}
+
+  public construct(HashMap<String, Object> map) {
+    this(
+      mainClass: (String)map["mainClass"],
+      outDirectory: (String)map["outDirectory"],
+      outFile: (String)map["outFile"],
+      source: (String)map["source"],
+      dependencies: (HashMap)map["dependencies"]
+    )
+  }
+
+  override public toString() => "{\n
+      mainClass: \"#mainClass\",\n
+      outDirectory: \"#outDirectory\",\n
+      outFile: \"#outFile\",\n
+      source: \"#source\",\n
+    }"
+
+  public clone(
+    String mainClass = mainClass,
+    String outDirectory = outDirectory,
+    String outFile = outFile,
+    String source = source,
+    HashMap<String, String> dependencies = dependencies
+  ) => new PackageSource(
+    mainClass,
+    outDirectory,
+    outFile,
+    source,
+    dependencies
+  )
+}

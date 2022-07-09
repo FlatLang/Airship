@@ -6,41 +6,30 @@ class {
   visible String name
   visible String version
   visible String description
-  visible String mainClass
   visible String author
   visible String license
-  visible String outDirectory
-  visible String outFile
-  visible String source
   visible HashMap<String, String> scripts
-  visible HashMap<String, String> dependencies
-
-  visible String[] localDependencies => dependencies.filter({ _.value == "local" }).map({ _.key })
+  visible PackageSource main
+  visible PackageSource test
 
   public construct(HashMap<String, Object> map) {
     name = (String)map["name"]
     version = (String)map["version"]
     description = (String)map["description"]
-    mainClass = (String)map["mainClass"]
     author = (String)map["author"]
     license = (String)map["license"]
-    outDirectory = (String)map["outDirectory"]
-    outFile = (String)map["outFile"]
-    source = (String)map["source"]
     scripts = (HashMap)map["scripts"]
-    dependencies = (HashMap)map["dependencies"]
+    main = map.containsKey("main") ? new PackageSource((HashMap)map["main"]) : null
+    test = map.containsKey("test") ? new PackageSource((HashMap)map["test"]) : null
   }
 
   override public toString() => "{\n
       name: \"#name\",\n
       version: \"#version\",\n
       description: \"#description\",\n
-      mainClass: \"#mainClass\",\n
       author: \"#author\",\n
       license: \"#license\",\n
-      outDirectory: \"#outDirectory\",\n
-      outFile: \"#outFile\",\n
-      source: \"#source\",\n
-      scripts: \"#scripts\"\n
+      main: \"#main\"\n
+      test: \"#test\"\n
     }"
 }

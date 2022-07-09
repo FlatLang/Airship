@@ -12,6 +12,8 @@ class {
   visible String outFile
   visible String source
   visible Bool debug
+  visible PackageSource mainSource
+  visible PackageSource testSource
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -26,12 +28,25 @@ class {
     let map = new JsonDeserializer().parse(packageFile)
 
     package = new Package((HashMap)map)
+
     flatHome = System.getEnv("FLAT_HOME")
-    outDirectory = validateOutDirectory(package.outDirectory ?: "dist")
-    outFile = package.outFile ?: "index.js"
-    source = package.source ?: "src"
+
+    mainSource = package.main?.clone(
+      outDirectory: validateOutDirectory(package.main.outDirectory ?: "dist"),
+      outFile: package.main.outFile ?: "index.js",
+      source: package.main.source ?: "src"
+    )
+
+    testSource = package.test?.clone(
+      outDirectory: validateOutDirectory(package.test.outDirectory ?: "dist"),
+      outFile: package.test.outFile ?: "test.js",
+      source: package.test.source ?: "src"
+    )
+
+    mainSource?.dependencies.forEach(pair => testSource.dependencies.add(pair.key, pair.value))
 
     debug = commands.any({ _ == "--debug"})
+    this.commands = commands.filter({ _ != "--debug"})
   }
 
   getFlatJsonPath() -> String {
@@ -63,34 +78,36 @@ class {
       let command = commandIterator.stepNext
 
       match (command.toLowerCase()) {
-        "install" => await install()
+        "install" => await install(mainSource)
+        "installtest" => await install(testSource)
         "clean" => await clean()
+        default => throw new InvalidCommandException("Invalid command '#command'")
       }
     }
   }
 
-  public getInstallCommand() -> String[] {
+  public getInstallCommand(PackageSource source) -> String[] {
     let cmd = [
       "java",
       "-jar",
       "#{flatHome}/Flat/target/flatc.jar",
-      source
+      source.source
     ]
 
-    package.localDependencies.forEach({ cmd.addAll(["-l", _]) })
+    source.localDependencies.forEach({ cmd.addAll(["-l", _]) })
 
     cmd.addAll([
       "-install-dir", flatHome,
-      "-main", package.mainClass,
-      "-o", "#{outDirectory}/#{outFile}",
+      "-main", source.mainClass,
+      "-o", "#{source.outDirectory}/#{source.outFile}",
       "-target", "js"
     ])
 
     return cmd
   }
 
-  public async install() {
-    let cmd = getInstallCommand()
+  public async install(PackageSource source) {
+    let cmd = getInstallCommand(source)
 
     if (debug) {
       Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
