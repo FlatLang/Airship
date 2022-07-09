@@ -6,13 +6,11 @@
   "outDirectory": "C:/test",
   "outFile": "airship.js",
   "source": "src/main",
-  "scripts": {
-
-  },
-  "author": "Braden Steffaniak",
-  "license": "ISC",
   "dependencies": {
     "../Json": "local",
     "../Compiler-String-Extensions": "local"
-  }
+  },
+  "scripts": {},
+  "author": "Braden Steffaniak",
+  "license": "ISC"
 }
