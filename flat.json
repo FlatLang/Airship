@@ -4,6 +4,7 @@
   "description": "Flat package manager",
   "mainClass": "flatlang/airship/Airship",
   "outDirectory": "dist",
+  "outFile": "airship.js",
   "source": "src/main",
   "scripts": {
 
