@@ -1,0 +1,119 @@
+name: Test Airship
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout Flat CLI
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Flat
+          path: Flat
+
+      - name: Checkout Flat JS Writer
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Flat-js
+          path: Flat-JS
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build CLI
+        run: |
+          mvn -f Flat install
+
+      - name: Build JS Writer
+        run: |
+          mvn -f Flat-JS install
+
+      - name: Checkout Standard library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Standard-Library
+          path: Standard-Library
+
+      - name: Checkout Nest library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Nest
+          path: Nest
+
+      - name: Checkout Json library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Json
+          path: Json
+
+      - name: Checkout Compiler-String-Extensions library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Compiler-String-Extensions
+          path: Compiler-String-Extensions
+
+      - name: Build Airship
+        run: |
+          java -jar Flat/target/flatc.jar \
+            src/main \
+            -l Json \
+            -l Compiler-String-Extensions \
+            -install-dir . \
+            -main flatlang/airship/Airship \
+            -o ./airship.js \
+            -target js
+
+      - name: Build Airship Test
+        run: |
+          java -jar Flat/target/flatc.jar \
+            src \
+            -l Json \
+            -l Nest \
+            -l Compiler-String-Extensions \
+            -install-dir . \
+            -main flatlang/airship/Airship_TestSuite \
+            -o ./test.js \
+            -target js
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: airship.js
+          path: airship.js
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Run Airship Tests
+        run: |
+          node test.js
+
+      - name: Checkout Stability-Test
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Stability-Test
+          path: Stability-Test
+
+      - name: Build Stability-Test with Airship
+        working-directory: Stability-Test
+        run: |
+          node ../airship.js install
+
+      - name: Run Stability-Test
+        working-directory: Stability-Test
+        run: |
+          node dist/index.js
