@@ -4,7 +4,9 @@
   "description": "Flat package manager",
   "author": "Braden Steffaniak",
   "license": "ISC",
-  "scripts": {},
+  "scripts": {
+    "test": "node dist/test.js"
+  },
   "main": {
     "mainClass": "flatlang/airship/Airship",
     "outDirectory": "dist",

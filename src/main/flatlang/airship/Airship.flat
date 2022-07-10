@@ -81,6 +81,7 @@ class {
         "install" => await install(mainSource)
         "installtest" => await install(testSource)
         "clean" => await clean()
+        "run" => await run(commandIterator.stepNext)
         default => throw new InvalidCommandException("Invalid command '#command'")
       }
     }
@@ -125,5 +126,20 @@ class {
     if (!await new File(outDirectory).delete()) {
       throw new Exception("Failed to clean directory '#outDirectory'")
     }
+  }
+
+  public async run(String script) {
+    if (!package.scripts.containsKey(script)) {
+      throw new InvalidScriptException("Script command '#script' is not defined")
+    }
+
+    let cmd = package.scripts[script]
+
+    if (debug) {
+      Console.writeLine(cmd)
+      return
+    }
+
+    await System.execute(cmd)
   }
 }
