@@ -13,6 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: Airship
 
       - name: Checkout Flat CLI
         uses: actions/checkout@master
@@ -66,33 +68,43 @@ jobs:
           path: Compiler-String-Extensions
 
       - name: Build Airship
+        working-directory: Airship
         run: |
-          java -jar Flat/target/flatc.jar \
+          java -jar ../Flat/target/flatc.jar \
             src/main \
-            -l Json \
-            -l Compiler-String-Extensions \
-            -install-dir . \
+            -l ../Json \
+            -l ../Compiler-String-Extensions \
+            -install-dir .. \
             -main flatlang/airship/Airship \
-            -o ./airship.js \
+            -o dist/airship.js \
             -target js
 
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: airship.js
-          path: airship.js
+          path: Airship/dist/airship.js
 
       - uses: actions/setup-node@v3
         with:
           node-version: 14
 
-      - name: Build Airship Tests with Airship
+      - name: Rebuild Airship with Airship
+        working-directory: Airship
         env:
-          FLAT_HOME: .
+          FLAT_HOME: ..
         run: |
-          node ./airship.js install
+          node dist/airship.js install
+
+      - name: Build Airship Tests with Airship
+        working-directory: Airship
+        env:
+          FLAT_HOME: ..
+        run: |
+          node dist/airship.js installTest
 
       - name: Run Airship Tests
+        working-directory: Airship
         run: |
           node dist/test.js
 
@@ -119,9 +131,9 @@ jobs:
           FLAT_HOME: ..
         working-directory: Stability-Test
         run: |
-          node ../airship.js install
+          node ../Airship/dist/airship.js install
 
       - name: Run Stability-Test
         working-directory: Stability-Test
         run: |
-          node dist/index.js
+          node dist/test.js
