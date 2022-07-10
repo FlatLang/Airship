@@ -87,6 +87,10 @@ class {
   }
 
   public getInstallCommand(PackageSource source) -> String[] {
+    if (!source) {
+      throw new InvalidCommandException("No source found for installation")
+    }
+
     let cmd = [
       "java",
       "-jar",
