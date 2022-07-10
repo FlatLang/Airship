@@ -1,0 +1,55 @@
+package "flatlang/airship"
+
+import "flatlang/io/File"
+
+class {
+  public static async downloadAsset(String repo, String assetName, String outputFile = assetName) {
+    external js {
+      var request = require('request');
+
+      return await new Promise((resolve) => {
+        request({
+          url: "https://api.github.com/repos/" + #{repo.chars.data} + "/releases/latest",
+          headers: {
+            'User-Agent': 'request module',
+            'Accept': 'application/vnd.github+json'
+          },
+          encoding: null // we want a buffer and not a string
+        }, (error, response, body) => {
+          if (error) {
+              console.error(error);
+          }
+
+          if (!error && response.statusCode == 200) {
+            var release = JSON.parse(body.toString());
+            var asset = release.assets.filter(a => a.name === #{assetName.chars.data})[0];
+
+            request({
+              url: asset.url,
+              headers: {
+                'Accept': asset.content_type,
+                'User-Agent': 'request module'
+              },
+              encoding: null // we want a buffer and not a string
+            }, (error, response, body) => {
+              if (error) {
+                console.error(error);
+              }
+              if (!error && response.statusCode == 200) {
+                #{File.FileGlobal.fs}.writeFile(#{outputFile.chars.data}, body, (err) => {
+                    if(err) {
+                      console.log(err);
+                    }
+
+                    resolve();
+                });
+              }
+            });
+          } else {
+              resolve();
+          }
+        });
+      });
+    }
+  }
+}
