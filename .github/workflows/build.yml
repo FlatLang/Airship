@@ -76,18 +76,6 @@ jobs:
             -o ./airship.js \
             -target js
 
-      - name: Build Airship Test
-        run: |
-          java -jar Flat/target/flatc.jar \
-            src \
-            -l Json \
-            -l Nest \
-            -l Compiler-String-Extensions \
-            -install-dir . \
-            -main flatlang/airship/Airship_TestSuite \
-            -o ./test.js \
-            -target js
-
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
@@ -98,9 +86,15 @@ jobs:
         with:
           node-version: 14
 
+      - name: Build Airship Tests with Airship
+        env:
+          FLAT_HOME: .
+        run: |
+          node ./airship.js install
+
       - name: Run Airship Tests
         run: |
-          node test.js
+          node dist/test.js
 
       - name: Checkout Stability-Test
         uses: actions/checkout@master
