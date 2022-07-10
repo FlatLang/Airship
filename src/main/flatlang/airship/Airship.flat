@@ -78,9 +78,13 @@ class {
       let command = commandIterator.stepNext
 
       match (command.toLowerCase()) {
+        "i" => fallthrough
         "install" => await install(mainSource)
+        "it" => fallthrough
         "installtest" => await install(testSource)
+        "c" => fallthrough
         "clean" => await clean()
+        "r" => fallthrough
         "run" => await run(commandIterator.stepNext)
         default => throw new InvalidCommandException("Invalid command '#command'")
       }
