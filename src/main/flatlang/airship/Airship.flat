@@ -39,7 +39,7 @@ class {
     let errorCodes = airship.exitCodes.filter({ _ != 0 })
 
     if (errorCodes.isNotEmpty) {
-      Console.log("Encountered error codes: #{errorCodes.join(", ")}")
+      Console.log("Encountered error code#{errorCodes.count == 1 ? "" : 's'}: #{errorCodes.join(", ")}")
       System.exit(1)
     }
   }
