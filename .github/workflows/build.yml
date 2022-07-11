@@ -39,7 +39,7 @@ jobs:
         run: |
           mvn -f Flat install
           mkdir bin
-          cp target/flatc.jar bin/flatc.jar
+          cp Flat/target/flatc.jar bin/flatc.jar
 
       - name: Build JS Writer
         run: |
