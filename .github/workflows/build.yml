@@ -38,6 +38,8 @@ jobs:
       - name: Build CLI
         run: |
           mvn -f Flat install
+          mkdir bin
+          cp target/flatc.jar bin/flatc.jar
 
       - name: Build JS Writer
         run: |
@@ -101,12 +103,12 @@ jobs:
         env:
           FLAT_HOME: ..
         run: |
-          node dist/airship.js installTest
+          node dist/airship.js install test
 
       - name: Run Airship Tests
         working-directory: Airship
         run: |
-          node dist/test.js
+          node dist/airship.js run test
 
       - name: Checkout Stability-Test
         uses: actions/checkout@master
@@ -131,7 +133,7 @@ jobs:
           FLAT_HOME: ..
         working-directory: Stability-Test
         run: |
-          node ../Airship/dist/airship.js installTest
+          node ../Airship/dist/airship.js install test
 
       - name: Run Stability-Test
         working-directory: Stability-Test
