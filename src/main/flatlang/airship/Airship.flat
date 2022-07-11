@@ -1,9 +1,12 @@
 package "flatlang/airship"
 
 import "flatlang/datastruct/HashMap"
+import "flatlang/datastruct/Pair"
 import "flatlang/json/JsonDeserializer"
 import "flatlang/io/File"
 import "flatlang/io/FileReader"
+import "flatlang/fucli/FuCli"
+import "flatlang/fucli/CliArg"
 
 class {
   visible Package package
@@ -14,6 +17,16 @@ class {
   visible Bool debug
   visible PackageSource mainSource
   visible PackageSource testSource
+  visible String flatJsonLocation
+  visible File flatJsonFile
+  visible String target
+
+  visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
+  visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
+  visible CliArg debugArg = new CliArg("--debug", ["-d"])
+  visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
+  visible CliArg cleanCommand = new CliArg("clean", ["c"])
+  visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -23,42 +36,87 @@ class {
     let airship = await new Airship(args.skip(1)):run()
   }
 
-  public construct(private String[] commands) {
-    let packageFile = new File(getFlatJsonPath())
-    let map = new JsonDeserializer().parse(packageFile)
+  public construct(String[] args) {
+    this(
+      new FuCli([
+        installCommand,
+        cleanCommand,
+        runCommand,
+        targetArg,
+        fileArg,
+        debugArg
+      ]):parse(args)
+    )
+  }
 
-    package = new Package((HashMap)map)
+  public construct(visible FuCli cli) {
+    flatJsonLocation = fileArg.value ?: "#{System.workingDirectory}/flat.json"
+    debug = debugArg.enabled
+
+    flatJsonFile = new File(flatJsonLocation)
+    let map = new JsonDeserializer().parseObject(flatJsonFile)
+
+    let String defaultTarget = (String)map["defaultTarget"]
+    target = targetArg.value ?: defaultTarget
+
+    if (target) {
+      let parent = flatJsonFile.getParent().normalizedLocation
+      let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
+      let targetFileLocation = parent + "/" + targetFileName
+      let targetFlatJsonFile = new File(targetFileLocation)
+
+      if (targetFlatJsonFile.isFile) {
+        let targetMap = new JsonDeserializer().parseObject(targetFlatJsonFile)
+
+        merge(targetMap, map)
+      }
+    }
+
+    package = new Package(map)
 
     flatHome = System.getEnv("FLAT_HOME")
 
-    mainSource = package.main?.clone(
+    let sources = loadSources()
+    mainSource = sources[0]
+    testSource = sources[1]
+
+    if (mainSource?.dependencies && testSource?.dependencies) {
+      merge(mainSource.dependencies, testSource.dependencies)
+    }
+  }
+
+  merge(
+    HashMap<String, Object> source,
+    HashMap<String, Object> dest
+  ) {
+    source.forEach((Pair<String, Object> pair) => {
+      if (!dest.containsKey(pair.key)) {
+        dest[pair.key] = pair.value
+      }
+
+      if (pair.value.class.isOfType(HashMap.class)) {
+        let HashMap<String, Object> hashmap = (HashMap)pair.value
+        let HashMap<String, Object> existingHashmap = (HashMap)dest[pair.key]
+        merge(hashmap, existingHashmap)
+      } else {
+        dest[pair.key] = pair.value
+      }
+    })
+  }
+
+  loadSources() -> PackageSource[] {
+    let main = package.main?.clone(
       outDirectory: validateOutDirectory(package.main.outDirectory ?: "dist"),
       outFile: package.main.outFile ?: "index.js",
       source: package.main.source ?: "src"
     )
-
-    testSource = package.test?.clone(
+    let test = package.test?.clone(
       outDirectory: validateOutDirectory(package.test.outDirectory ?: "dist"),
       outFile: package.test.outFile ?: "test.js",
       source: package.test.source ?: "src"
     )
 
-    mainSource?.dependencies.forEach(pair => testSource.dependencies.add(pair.key, pair.value))
-
-    debug = commands.any({ _ == "--debug"})
-    this.commands = commands.filter({ _ != "--debug"})
-  }
-
-  getFlatJsonPath() -> String {
-    let fileOverride = commands.firstWhere((command, i) => {
-      if (command.equalsIgnoreCase("-f") && i == commands.count - 1) {
-        throw new InvalidFlatJsonException("Invalid -f value")
-      }
-
-      return i > 0 && commands[i - 1].equalsIgnoreCase("-f")
-    })
-
-    return fileOverride ?: "#{System.workingDirectory}/flat.json"
+    return [main, test]
   }
 
   validateOutDirectory(String location) => location {
@@ -72,21 +130,11 @@ class {
   }
 
   async run() {
-    let commandIterator = commands.iterator
-
-    while (commandIterator.hasNext) {
-      let command = commandIterator.stepNext
-
-      match (command.toLowerCase()) {
-        "i" => fallthrough
-        "install" => await install(mainSource)
-        "it" => fallthrough
-        "installtest" => await install(testSource)
-        "c" => fallthrough
-        "clean" => await clean()
-        "r" => fallthrough
-        "run" => await run(commandIterator.stepNext)
-        default => throw new InvalidCommandException("Invalid command '#command'")
+    for (command in cli.args.filter({ _.enabled })) {
+      match (command) {
+        installCommand => await install()
+        cleanCommand => await clean()
+        runCommand => await runScript(command.value)
       }
     }
   }
@@ -100,22 +148,32 @@ class {
       "java",
       "-jar",
       "#{flatHome}/Flat/target/flatc.jar",
-      source.source
+      source.source,
+      "-install-dir", flatHome,
+      "-o", "#{source.outDirectory}/#{source.outFile}",
+      "-target", target
     ]
 
     source.localDependencies.forEach({ cmd.addAll(["-l", _]) })
 
-    cmd.addAll([
-      "-install-dir", flatHome,
-      "-main", source.mainClass,
-      "-o", "#{source.outDirectory}/#{source.outFile}",
-      "-target", "js"
-    ])
+    if (source.mainClass) {
+      cmd.addAll(["-main", source.mainClass])
+    } else {
+      cmd.add("-library")
+    }
 
     return cmd
   }
 
-  public async install(PackageSource source) {
+  public async install() {
+    var source
+    match (installCommand.value) {
+      null => fallthrough
+      "main" => source = mainSource
+      "test" => source = testSource
+      default => throw new InvalidCommandException("Invalid installation target '#installCommand.value'")
+    }
+
     let cmd = getInstallCommand(source)
 
     if (debug) {
@@ -132,7 +190,7 @@ class {
     }
   }
 
-  public async run(String script) {
+  public async runScript(String script) {
     if (!package.scripts.containsKey(script)) {
       throw new InvalidScriptException("Script command '#script' is not defined")
     }
