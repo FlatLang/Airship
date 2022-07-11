@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "test": "node dist/test.js"
+  },
+  "main": {
+    "outDirectory": "dist",
+    "outFile": "airship.js",
+    "dependencies": {}
+  },
+  "test": {
+    "outDirectory": "dist",
+    "outFile": "test.js",
+    "dependencies": {}
+  }
+}
