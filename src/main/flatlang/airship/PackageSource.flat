@@ -28,6 +28,7 @@ class {
       outDirectory: \"#outDirectory\",\n
       outFile: \"#outFile\",\n
       source: \"#source\",\n
+      dependencies: \"#dependencies\"\n
     }"
 
   public clone(
