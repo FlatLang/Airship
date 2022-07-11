@@ -102,4 +102,10 @@ testable class {
     expect({ new Airship(["-f", "res/test/flat-single-dot-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
+
+  test async `can override flat.json location`() {
+    let airship = new Airship(["--file", "res/test/valid-flat.json"])
+
+    expect(airship.flatJsonLocation).toBe("res/test/valid-flat.json")
+  }
 }
