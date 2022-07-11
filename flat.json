@@ -4,23 +4,22 @@
   "description": "Flat package manager",
   "author": "Braden Steffaniak",
   "license": "ISC",
+  "defaultTarget": "js",
   "scripts": {
     "test": "node dist/test.js"
   },
   "main": {
     "mainClass": "flatlang/airship/Airship",
-    "outDirectory": "dist",
-    "outFile": "airship.js",
     "source": "src/main",
     "dependencies": {
+      "../FuCli": "local",
+      "../Http": "local",
       "../Json": "local",
       "../Compiler-String-Extensions": "local"
     }
   },
   "test": {
     "mainClass": "flatlang/airship/Airship_TestSuite",
-    "outDirectory": "dist",
-    "outFile": "test.js",
     "source": "src",
     "dependencies": {
       "../Nest": "local"
