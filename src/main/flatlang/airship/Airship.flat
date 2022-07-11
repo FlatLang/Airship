@@ -36,7 +36,10 @@ class {
 
     let airship = await new Airship(args.skip(1)):run()
 
-    if (airship.exitCodes.any({ _ != 0 })) {
+    let errorCodes = airship.exitCodes.filter({ _ != 0 })
+
+    if (errorCodes.isNotEmpty) {
+      Console.log("Encountered error codes: #{errorCodes.join(", ")}")
       System.exit(1)
     }
   }
