@@ -147,7 +147,7 @@ class {
     let cmd = [
       "java",
       "-jar",
-      "#{flatHome}/Flat/target/flatc.jar",
+      "#{flatHome}/bin/flatc.jar",
       source.source,
       "-install-dir", flatHome,
       "-o", "#{source.outDirectory}/#{source.outFile}",
