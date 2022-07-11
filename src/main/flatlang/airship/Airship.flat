@@ -20,6 +20,7 @@ class {
   visible String flatJsonLocation
   visible File flatJsonFile
   visible String target
+  visible Int[] exitCodes = new Array<Int>()
 
   visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
@@ -34,6 +35,10 @@ class {
     }
 
     let airship = await new Airship(args.skip(1)):run()
+
+    if (airship.exitCodes.any({ _ != 0 })) {
+      System.exit(1)
+    }
   }
 
   public construct(String[] args) {
@@ -132,9 +137,9 @@ class {
   async run() {
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
-        installCommand => await install()
+        installCommand => exitCodes.add(await install())
         cleanCommand => await clean()
-        runCommand => await runScript(command.value)
+        runCommand => exitCodes.add(await runScript(command.value))
       }
     }
   }
@@ -165,7 +170,7 @@ class {
     return cmd
   }
 
-  public async install() {
+  public async install() -> Int {
     var source
     match (installCommand.value) {
       null => fallthrough
@@ -178,19 +183,19 @@ class {
 
     if (debug) {
       Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
-      return
+      return 0
     }
 
-    await System.execute(cmd)
+    return await System.execute(cmd)
   }
 
-  public async clean() {
+  public async clean()  {
     if (!await new File(outDirectory).delete()) {
       throw new Exception("Failed to clean directory '#outDirectory'")
     }
   }
 
-  public async runScript(String script) {
+  public async runScript(String script) -> Int {
     if (!package.scripts.containsKey(script)) {
       throw new InvalidScriptException("Script command '#script' is not defined")
     }
@@ -199,9 +204,9 @@ class {
 
     if (debug) {
       Console.writeLine(cmd)
-      return
+      return 0
     }
 
-    await System.execute(cmd)
+    return await System.execute(cmd)
   }
 }
