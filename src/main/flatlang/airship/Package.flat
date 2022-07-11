@@ -8,6 +8,7 @@ class {
   visible String description
   visible String author
   visible String license
+  visible String defaultTarget
   visible HashMap<String, String> scripts
   visible PackageSource main
   visible PackageSource test
@@ -18,6 +19,7 @@ class {
     description = (String)map["description"]
     author = (String)map["author"]
     license = (String)map["license"]
+    defaultTarget = (String)map["defaultTarget"]
     scripts = (HashMap)map["scripts"]
     main = map.containsKey("main") ? new PackageSource((HashMap)map["main"]) : null
     test = map.containsKey("test") ? new PackageSource((HashMap)map["test"]) : null
@@ -29,7 +31,9 @@ class {
       description: \"#description\",\n
       author: \"#author\",\n
       license: \"#license\",\n
-      main: \"#main\"\n
-      test: \"#test\"\n
+      defaultTarget: \"#defaultTarget\",\n
+      main: \"#main\",\n
+      test: \"#test\",\n
+      scripts: \"#scripts\"\n
     }"
 }
