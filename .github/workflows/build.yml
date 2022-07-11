@@ -69,6 +69,18 @@ jobs:
           repository: FlatLang/Compiler-String-Extensions
           path: Compiler-String-Extensions
 
+      - name: Checkout Http library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Http
+          path: Http
+
+      - name: Checkout FuCli library
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/FuCli
+          path: FuCli
+
       - name: Build Airship
         working-directory: Airship
         run: |
@@ -76,6 +88,8 @@ jobs:
             src/main \
             -l ../Json \
             -l ../Compiler-String-Extensions \
+            -l ../Http \
+            -l ../FuCli \
             -install-dir .. \
             -main flatlang/airship/Airship \
             -o dist/airship.js \
