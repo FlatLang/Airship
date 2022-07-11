@@ -1,7 +1,7 @@
 package "flatlang/airship"
 
 import "flatlang/airship/Airship"
-import "flatlang/airship/InvalidFlatJsonException"
+import "flatlang/fucli/FuCli.InvalidCliArgumentException"
 import "flatlang/airship/InvalidOutDirException"
 
 import "flatlang/extensions/SyntaxStringFunctions"
@@ -20,7 +20,7 @@ testable class {
 
     expect(airship.debug).toBe(true, "Expected debug flag to be true")
 
-    let allOutput = await Console.out.captureOutput(async { await airship.install(airship.mainSource) })
+    let allOutput = await Console.out.captureOutput(async { await airship.install() })
 
     expect(allOutput.count).toBe(1)
 
@@ -29,33 +29,27 @@ testable class {
     let flatHome = System.getEnv("FLAT_HOME")
 
     let expected = [
-      "java",
-      "\"-jar\"",
-      "\"#{flatHome}/Flat/target/flatc.jar\"",
+      "java", "\"-jar\"", "\"#{flatHome}/Flat/target/flatc.jar\"",
       "\"src/main\"",
-      "\"-l\"",
-      "\"../Json\"",
-      "\"-l\"",
-      "\"../Compiler-String-Extensions\"",
-      "\"-install-dir\"",
-      "\"#{flatHome}\"",
-      "\"-main\"",
-      "\"flatlang/airship/Airship\"",
-      "\"-o\"",
-      "\"dist/airship.js\"",
-      "\"-target\"",
-      "\"js\""
+      "\"-install-dir\"", "\"#{flatHome}\"",
+      "\"-o\"", "\"dist/airship.js\"",
+      "\"-target\"", "\"js\"",
+      "\"-l\"", "\"../FuCli\"",
+      "\"-l\"", "\"../Http\"",
+      "\"-l\"", "\"../Json\"",
+      "\"-l\"", "\"../Compiler-String-Extensions\"",
+      "\"-main\"", "\"flatlang/airship/Airship\""
     ]
 
     expect(cmdOutput).toBe(expected)
   }
 
   test `fails on invalid -f arg (only arg given, with no value)`() {
-    expect({ new Airship(["-f"]) }).toThrow(InvalidFlatJsonException.class)
+    expect({ new Airship(["-f"]) }).toThrow(InvalidCliArgumentException.class)
   }
 
   test `fails on invalid -f arg (last arg given, with no value)`() {
-    expect({ new Airship(["--debug", "-f"]) }).toThrow(InvalidFlatJsonException.class)
+    expect({ new Airship(["--debug", "-f"]) }).toThrow(InvalidCliArgumentException.class)
   }
 
   test `fails on absolute backslash outDirectory path`() {
