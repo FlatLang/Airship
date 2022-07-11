@@ -97,6 +97,16 @@ testable class {
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
 
+  test async `can set target compile language`() {
+    var airship = new Airship(["--target", "js"])
+
+    expect(airship.target).toBe("js")
+
+    airship = new Airship(["-t", "c"])
+
+    expect(airship.target).toBe("c")
+  }
+
   test async `can override flat.json location`() {
     let airship = new Airship(["--file", "res/test/valid-flat.json"])
 
