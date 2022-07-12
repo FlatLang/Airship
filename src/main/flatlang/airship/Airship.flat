@@ -7,6 +7,7 @@ import "flatlang/io/File"
 import "flatlang/io/FileReader"
 import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
+import "flatlang/http/Http"
 
 class {
   visible Package package
@@ -28,6 +29,8 @@ class {
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
   visible CliArg cleanCommand = new CliArg("clean", ["c"])
   visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
+
+  let visible static String FLAT_REPO = "FlatLang/Flat"
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -140,7 +143,7 @@ class {
   async run() {
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
-        installCommand => exitCodes.add(await install())
+        installCommand => exitCodes.addAll(await install())
         cleanCommand => await clean()
         runCommand => exitCodes.add(await runScript(command.value))
       }
@@ -173,13 +176,34 @@ class {
     return cmd
   }
 
-  public async install() -> Int {
+  public async install() -> Int[] {
+    let exitCodes = new Array<Int>()
+
+    if (installCommand.values.isEmpty) {
+      return exitCodes:add(await install("main"))
+    }
+
+    for (package in installCommand.values) {
+      exitCodes.add(await install(package))
+    }
+
+    return exitCodes
+  }
+
+  async install(String package) -> Int {
+    if (package == "flat") {
+      return await installFlat()
+    } else {
+      return await installLocalPackage(package)
+    }
+  }
+
+  async installLocalPackage(String package) -> Int {
     var source
-    match (installCommand.value) {
-      null => fallthrough
+    match (package) {
       "main" => source = mainSource
       "test" => source = testSource
-      default => throw new InvalidCommandException("Invalid installation target '#installCommand.value'")
+      default => throw new InvalidCommandException("Invalid installation package '#package'")
     }
 
     let cmd = getInstallCommand(source)
@@ -190,6 +214,19 @@ class {
     }
 
     return await System.execute(cmd)
+  }
+
+  async installFlat() -> Int {
+    let response = await Http.get(
+      url: "https://api.github.com/repos/#{FLAT_REPO}/releases/latest",
+      headers: new HashMap<String, String>()
+        :add("User-Agent", "request module")
+        :add("Accept", "application/vnd.github+json")
+    )
+
+    let data = new JsonDeserializer().parseObject(response.data)
+
+    return 0
   }
 
   public async clean()  {
