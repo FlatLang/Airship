@@ -7,7 +7,6 @@ import "flatlang/io/File"
 import "flatlang/io/FileReader"
 import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
-import "flatlang/http/Http"
 
 class {
   visible Package package
@@ -217,14 +216,7 @@ class {
   }
 
   async installFlat() -> Int {
-    let response = await Http.get(
-      url: "https://api.github.com/repos/#{FLAT_REPO}/releases/latest",
-      headers: new HashMap<String, String>()
-        :add("User-Agent", "request module")
-        :add("Accept", "application/vnd.github+json")
-    )
 
-    let data = new JsonDeserializer().parseObject(response.data)
 
     return 0
   }
