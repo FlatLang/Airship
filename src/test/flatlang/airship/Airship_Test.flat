@@ -29,10 +29,10 @@ testable class {
     let flatHome = System.getEnv("FLAT_HOME")
 
     let expected = [
-      "java", "\"-jar\"", "\"#{flatHome}/bin/flatc.jar\"",
-      "\"src/main\"",
-      "\"-install-dir\"", "\"#{flatHome}\"",
-      "\"-o\"", "\"dist/airship.js\"",
+      "java", "\"-jar\"", "\"#{flatHome}/packages/Flat/target/flatc.jar\"",
+      "\"#{airship.packageLocation.normalizedLocation}/src/main\"",
+      "\"-install-dir\"", "\"#{flatHome}/packages\"",
+      "\"-o\"", "\"#{airship.packageLocation.normalizedLocation}/dist/airship.js\"",
       "\"-target\"", "\"js\"",
       "\"-l\"", "\"../FuCli\"",
       "\"-l\"", "\"../Http\"",

@@ -19,17 +19,21 @@ class {
   visible PackageSource testSource
   visible String flatJsonLocation
   visible File flatJsonFile
+  visible File packageLocation
   visible String target
   visible Int[] exitCodes = new Array<Int>()
 
   visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
+  visible CliArg linkArg = new CliArg("--link", new Array<String>(), count: 1)
   visible CliArg debugArg = new CliArg("--debug", ["-d"])
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
+  visible CliArg uninstallCommand = new CliArg("uninstall", new Array<String>(), minCount: 1)
+  visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 1)
   visible CliArg cleanCommand = new CliArg("clean", ["c"])
   visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
 
-  let visible static String FLAT_REPO = "FlatLang/Flat"
+  let visible static String FLAT_REPO = "https://GitHub.com/FlatLang/Flat.git"
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -50,27 +54,47 @@ class {
     this(
       new FuCli([
         installCommand,
+        uninstallCommand,
+        reinstallCommand,
         cleanCommand,
         runCommand,
         targetArg,
         fileArg,
+        linkArg,
         debugArg
       ]):parse(args)
     )
   }
 
+  getFlatJsonLocation(String location) -> String => null {
+    if (!location) {
+      return null
+    }
+
+    let file = new File(location)
+
+    if (file.isDirectory || file.isSymbolicLink) {
+      return location + "/flat.json"
+    } else if (file.isFile) {
+      return file.location
+    } else {
+      throw new InvalidFlatJsonException("Invalid flat.json location '#file.location'")
+    }
+  }
+
   public construct(visible FuCli cli) {
-    flatJsonLocation = fileArg.value ?: "#{System.workingDirectory}/flat.json"
+    flatJsonLocation = getFlatJsonLocation(fileArg.value) ?: "#{System.workingDirectory}/flat.json"
     debug = debugArg.enabled
 
     flatJsonFile = new File(flatJsonLocation)
+    packageLocation = flatJsonFile.getParent()
     let map = new JsonDeserializer().parseObject(flatJsonFile)
 
     let String defaultTarget = (String)map["defaultTarget"]
     target = targetArg.value ?: defaultTarget
 
     if (target) {
-      let parent = flatJsonFile.getParent().normalizedLocation
+      let parent = packageLocation.normalizedLocation
       let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
       let targetFileLocation = parent + "/" + targetFileName
       let targetFlatJsonFile = new File(targetFileLocation)
@@ -143,6 +167,8 @@ class {
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
         installCommand => exitCodes.addAll(await install())
+        uninstallCommand => exitCodes.addAll(await uninstall())
+        reinstallCommand => exitCodes.addAll(await reinstall())
         cleanCommand => await clean()
         runCommand => exitCodes.add(await runScript(command.value))
       }
@@ -157,12 +183,15 @@ class {
     let cmd = [
       "java",
       "-jar",
-      "#{flatHome}/bin/flatc.jar",
-      source.source,
-      "-install-dir", flatHome,
-      "-o", "#{source.outDirectory}/#{source.outFile}",
-      "-target", target
+      "#{flatHome}/packages/Flat/target/flatc.jar",
+      "#{packageLocation.normalizedLocation}/#{source.source}",
+      "-install-dir", "#{flatHome}/packages",
+      "-o", "#{packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ]
+
+    if (target) {
+      cmd.addAll(["-target", target])
+    }
 
     source.localDependencies.forEach({ cmd.addAll(["-l", _]) })
 
@@ -190,8 +219,12 @@ class {
   }
 
   async install(String package) -> Int {
-    if (package == "flat") {
-      return await installFlat()
+    if (linkArg.enabled) {
+      return await installAndLink(package)
+    } else if (package == "flat") {
+      return await installGitPackage(FLAT_REPO)
+    } else if (package.endsWith(".git")) {
+      return await installGitPackage(package)
     } else {
       return await installLocalPackage(package)
     }
@@ -215,14 +248,159 @@ class {
     return await System.execute(cmd)
   }
 
-  async installFlat() -> Int {
+  async checkFlatHome() => true {
+    let flatHomeFile = new File("#{flatHome}")
 
+    if (!flatHomeFile.isDirectory) {
+      if (!flatHomeFile.getParent().isDirectory) {
+        Console.writeLine("Invalid FLAT_HOME directory location '#{flatHome}'")
+        return false
+      }
 
-    return 0
+      flatHomeFile.mkdirs()
+    }
+  }
+
+  async installGitPackage(String url) -> Int {
+    if (!await checkFlatHome()) {
+      return 1
+    }
+
+    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let flatPackageDir = await new File("#{flatHome}/packages/#{packageName}"):mkdirs()
+
+    if (flatPackageDir.getChild(".git").isDirectory) {
+      Console.writeLine("#packageName already installed. Skipping installation")
+      return 0
+    }
+
+    let cloneExitCode = await System.execute([
+      "git",
+      "clone",
+      url,
+      "--depth", "1",
+      flatPackageDir.normalizedLocation
+    ])
+
+    if (cloneExitCode != 0) {
+      return cloneExitCode
+    }
+
+    return await postInstallPackage(flatPackageDir)
+  }
+
+  async installAndLink(String url) -> Int {
+    if (!await checkFlatHome()) {
+      return 1
+    }
+
+    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let flatPackageDir = new File("#{flatHome}/packages/#{packageName}")
+
+    await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{linkArg.value}"))
+
+    return postInstallPackage(flatPackageDir)
+  }
+
+  async postInstallPackage(File flatPackageDir) -> Int {
+    let args = [
+      "-f", flatPackageDir.normalizedLocation
+    ]
+
+    if (target) {
+      args.addAll(["-t", target])
+    }
+
+    let airship = await new Airship(args)
+
+    if (airship.package.scripts.containsKey("build")) {
+      let buildExitCode = await airship.runScript("build")
+
+      if (buildExitCode != 0) {
+        return buildExitCode
+      }
+    }
+
+    if (airship.package.main) {
+      let installExitCodes = await airship.install()
+      let code = installExitCodes.filter({ _ != 0 }).first
+
+      if (code) {
+        return code
+      }
+    }
+
+    return airship.exitCodes.filter({ _ != 0 }).first ?: 0
+  }
+
+  public async uninstall() -> Int[] {
+    let exitCodes = new Array<Int>()
+
+    for (package in uninstallCommand.values) {
+      exitCodes.add(await uninstall(package))
+    }
+
+    return exitCodes
+  }
+
+  async uninstall(String package) -> Int {
+    if (package == "flat") {
+      return await uninstallGitPackage(FLAT_REPO)
+    } else if (package.endsWith(".git")) {
+      return await uninstallGitPackage(package)
+    } else {
+      throw new InvalidCommandException("Cannot uninstall package '#package'")
+    }
+  }
+
+  async uninstallGitPackage(String url) -> Int {
+    if (!await checkFlatHome()) {
+      return 1
+    }
+
+    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let flatPackageDir = new File("#{flatHome}/packages/#{packageName}")
+
+    if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
+      throw new InvalidCommandException("Package '#packageName' is not installed")
+    }
+
+    if (await flatPackageDir.delete(recursive: true)) {
+      return 0
+    } else {
+      return 1
+    }
+  }
+
+  public async reinstall() -> Int[] {
+    let exitCodes = new Array<Int>()
+
+    for (package in reinstallCommand.values) {
+      exitCodes.addAll(await reinstall(package))
+    }
+
+    return exitCodes
+  }
+
+  async reinstall(String package) -> Int[] {
+    if (package == "flat") {
+      return await reinstallGitPackage(FLAT_REPO)
+    } else if (package.endsWith(".git")) {
+      return await reinstallGitPackage(package)
+    } else {
+      throw new InvalidCommandException("Cannot reinstall package '#package'")
+    }
+  }
+
+  async reinstallGitPackage(String url) -> Int[] {
+    return [
+      await uninstallGitPackage(url),
+      await installGitPackage(url)
+    ]
   }
 
   public async clean()  {
-    if (!await new File(outDirectory).delete()) {
+    if (!await new File("#{packageLocation.normalizedLocation}/#{outDirectory}").delete(recursive: true)) {
       throw new Exception("Failed to clean directory '#outDirectory'")
     }
   }
@@ -232,13 +410,52 @@ class {
       throw new InvalidScriptException("Script command '#script' is not defined")
     }
 
+    let workingDirectory = flatJsonFile.getParent().location
     let cmd = package.scripts[script]
+
+    if (cmd?.class.isOfType(Array.class)) {
+      let Object[] array = (Object[])cmd
+
+      if (array.isEmpty) {
+        return 0
+      }
+
+      for (obj in array) {
+        if (obj.class.isOfType(Array.class)) {
+          let String[] c = (Array)obj
+
+          if (debug) {
+            Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
+          } else {
+            let exitCode = await System.execute(c, workingDirectory)
+
+            if (exitCode != 0) {
+              return exitCode
+            }
+          }
+        } else if (obj.class.isOfType(String.class)) {
+          let String c = (String)obj
+
+          if (debug) {
+            Console.writeLine(c)
+          } else {
+            let exitCode = await System.execute(c, workingDirectory)
+
+            if (exitCode != 0) {
+              return exitCode
+            }
+          }
+        }
+      }
+
+      return 0
+    }
 
     if (debug) {
       Console.writeLine(cmd)
       return 0
     }
 
-    return await System.execute(cmd)
+    return await System.execute(cmd.toString(), workingDirectory)
   }
 }
