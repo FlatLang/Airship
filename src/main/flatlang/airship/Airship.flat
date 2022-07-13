@@ -25,11 +25,11 @@ class {
 
   visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
-  visible CliArg linkArg = new CliArg("--link", new Array<String>(), count: 1)
+  visible CliArg linkArg = new CliArg("--link", new Array<String>(), minCount: 0, maxCount: 1)
   visible CliArg debugArg = new CliArg("--debug", ["-d"])
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
   visible CliArg uninstallCommand = new CliArg("uninstall", new Array<String>(), minCount: 1)
-  visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 1)
+  visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 0)
   visible CliArg cleanCommand = new CliArg("clean", ["c"])
   visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
 
@@ -212,6 +212,14 @@ class {
     let exitCodes = new Array<Int>()
 
     if (installCommand.values.isEmpty) {
+      if (linkArg.enabled) {
+        if (let gitUrl = await getGitOriginUrl()) {
+          linkArg.value = "."
+          return [await installAndLink(gitUrl)]
+        } else {
+          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
+        }
+      }
       return exitCodes:add(await install("main"))
     }
 
@@ -249,7 +257,9 @@ class {
       return 0
     }
 
-    return await System.execute(cmd)
+    let response = await System.execute(cmd)
+
+    return response.exitCode
   }
 
   async checkFlatHome() => true {
@@ -262,6 +272,14 @@ class {
       }
 
       flatHomeFile.mkdirs()
+    }
+  }
+
+  async getGitOriginUrl() -> String => null {
+    let response = await System.execute("git config --get remote.origin.url", silent: true)
+
+    if (response.exitCode == 0) {
+      return response.stdout.first?.trim()
     }
   }
 
@@ -278,7 +296,7 @@ class {
       return 0
     }
 
-    let cloneExitCode = await System.execute([
+    let response = await System.execute([
       "git",
       "clone",
       url,
@@ -286,8 +304,8 @@ class {
       flatPackageDir.normalizedLocation
     ])
 
-    if (cloneExitCode != 0) {
-      return cloneExitCode
+    if (response.exitCode != 0) {
+      return response.exitCode
     }
 
     return await postInstallPackage(flatPackageDir, install: false)
@@ -303,7 +321,7 @@ class {
 
     await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{linkArg.value}"))
 
-    return postInstallPackage(flatPackageDir, install: false)
+    return await postInstallPackage(flatPackageDir, install: false)
   }
 
   async postInstallPackage(
@@ -344,6 +362,19 @@ class {
   public async uninstall() -> Int[] {
     let exitCodes = new Array<Int>()
 
+    if (uninstallCommand.values.isEmpty) {
+      if (linkArg.enabled) {
+        if (let gitUrl = await getGitOriginUrl()) {
+          linkArg.value = "."
+          return [await uninstallGitPackage(gitUrl)]
+        } else {
+          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
+        }
+      }
+
+      throw new InvalidCommandException("Invalid uninstall command without a value")
+    }
+
     for (package in uninstallCommand.values) {
       exitCodes.add(await uninstall(package))
     }
@@ -382,6 +413,11 @@ class {
 
   public async reinstall() -> Int[] {
     let exitCodes = new Array<Int>()
+
+    if (reinstallCommand.values.isEmpty) {
+      let uninstallCodes = await uninstall()
+      return uninstallCodes.plus(await install())
+    }
 
     for (package in reinstallCommand.values) {
       exitCodes.addAll(await reinstall(package))
@@ -435,10 +471,10 @@ class {
           if (debug) {
             Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
           } else {
-            let exitCode = await System.execute(c, workingDirectory)
+            let response = await System.execute(c, workingDirectory)
 
-            if (exitCode != 0) {
-              return exitCode
+            if (response.exitCode != 0) {
+              return response.exitCode
             }
           }
         } else if (obj.class.isOfType(String.class)) {
@@ -447,10 +483,10 @@ class {
           if (debug) {
             Console.writeLine(c)
           } else {
-            let exitCode = await System.execute(c, workingDirectory)
+            let response = await System.execute(c, workingDirectory)
 
-            if (exitCode != 0) {
-              return exitCode
+            if (response.exitCode != 0) {
+              return response.exitCode
             }
           }
         }
@@ -464,6 +500,8 @@ class {
       return 0
     }
 
-    return await System.execute(cmd.toString(), workingDirectory)
+    let response = await System.execute(cmd.toString(), workingDirectory)
+
+    return response.exitCode
   }
 }
