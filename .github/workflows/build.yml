@@ -105,6 +105,27 @@ jobs:
         with:
           node-version: 14
 
+      - name: Install Flat with Airship
+        working-directory: Airship
+        env:
+          FLAT_HOME: ..
+        run: |
+          node dist/airship.js install "https://github.com/FlatLang/Flat.git"
+
+      - name: Install Flat-JS with Airship
+        working-directory: Airship
+        env:
+          FLAT_HOME: ..
+        run: |
+          node dist/airship.js install "https://github.com/FlatLang/Flat-JS.git"
+
+      - name: Install Standard Library with Airship
+        working-directory: Airship
+        env:
+          FLAT_HOME: ..
+        run: |
+          node dist/airship.js install "https://github.com/FlatLang/Standard-Library.git"
+
       - name: Rebuild Airship with Airship
         working-directory: Airship
         env:
