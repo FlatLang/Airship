@@ -212,6 +212,10 @@ class {
 
       let dependencyPackageFile = new File(getDependencyLocation(dependency))
 
+      if (!dependencyPackageFile.exists) {
+        return dependencies
+      }
+
       let airship = new Airship([
         "-f", dependencyPackageFile.normalizedLocation
       ])
