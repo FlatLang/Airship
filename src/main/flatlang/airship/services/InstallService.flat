@@ -74,6 +74,10 @@ class {
   async installLocalPackage(String package) -> Int {
     let source = airship.getSourceForPackage(package)
 
+    if (!source) {
+      throw new InvalidCommandException("No source found for installation package '#package'")
+    }
+
     let dependenciesCode = await installDependencies(source)
 
     if (dependenciesCode != 0) {
