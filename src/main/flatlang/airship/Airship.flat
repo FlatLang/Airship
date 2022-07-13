@@ -84,6 +84,14 @@ class {
     }
   }
 
+  getFlatHome() -> String {
+    if (System.getEnv("FLAT_HOME")) {
+      return new File(System.getEnv("FLAT_HOME")).normalizedLocation
+    } else {
+      return new File("#{System.homeDirectory}/.flat").normalizedLocation
+    }
+  }
+
   public construct(visible FuCli cli) {
     flatJsonLocation = getFlatJsonLocation(fileArg.value) ?: "#{System.workingDirectory}/flat.json"
     debug = debugArg.enabled
@@ -92,7 +100,7 @@ class {
     flatJsonFile = new File(flatJsonLocation)
     packageLocation = flatJsonFile.getParent()
 
-    flatHome = new File(System.getEnv("FLAT_HOME")).normalizedLocation
+    flatHome = getFlatHome()
 
     if (flatJsonFile.isFile) {
       let map = new JsonDeserializer().parseObject(flatJsonFile)
