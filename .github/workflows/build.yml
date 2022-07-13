@@ -120,6 +120,12 @@ jobs:
         run: |
           node dist/airship.js run test
 
+      - name: Checkout Stability-Test
+        uses: actions/checkout@master
+        with:
+          repository: FlatLang/Stability-Test
+          path: Stability-Test
+
       - name: Build Stability-Test with Airship
         working-directory: Stability-Test
         run: |
