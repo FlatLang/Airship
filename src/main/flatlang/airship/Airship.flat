@@ -88,34 +88,37 @@ class {
 
     flatJsonFile = new File(flatJsonLocation)
     packageLocation = flatJsonFile.getParent()
-    let map = new JsonDeserializer().parseObject(flatJsonFile)
-
-    let String defaultTarget = (String)map["defaultTarget"]
-    target = targetArg.value ?: defaultTarget
-
-    if (target) {
-      let parent = packageLocation.normalizedLocation
-      let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
-      let targetFileLocation = parent + "/" + targetFileName
-      let targetFlatJsonFile = new File(targetFileLocation)
-
-      if (targetFlatJsonFile.isFile) {
-        let targetMap = new JsonDeserializer().parseObject(targetFlatJsonFile)
-
-        merge(targetMap, map)
-      }
-    }
-
-    package = new Package(map)
 
     flatHome = System.getEnv("FLAT_HOME")
 
-    let sources = loadSources()
-    mainSource = sources[0]
-    testSource = sources[1]
+    if (flatJsonFile.isFile) {
+      let map = new JsonDeserializer().parseObject(flatJsonFile)
 
-    if (mainSource?.dependencies && testSource?.dependencies) {
-      merge(mainSource.dependencies, testSource.dependencies)
+      let String defaultTarget = (String)map["defaultTarget"]
+      target = targetArg.value ?: defaultTarget
+
+      if (target) {
+        let parent = packageLocation.normalizedLocation
+        let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
+        let targetFileLocation = parent + "/" + targetFileName
+        let targetFlatJsonFile = new File(targetFileLocation)
+
+        if (targetFlatJsonFile.isFile) {
+          let targetMap = new JsonDeserializer().parseObject(targetFlatJsonFile)
+
+          merge(targetMap, map)
+        }
+      }
+
+      package = new Package(map)
+
+      let sources = loadSources()
+      mainSource = sources[0]
+      testSource = sources[1]
+
+      if (mainSource?.dependencies && testSource?.dependencies) {
+        merge(mainSource.dependencies, testSource.dependencies)
+      }
     }
   }
 
