@@ -85,6 +85,7 @@ class {
   public construct(visible FuCli cli) {
     flatJsonLocation = getFlatJsonLocation(fileArg.value) ?: "#{System.workingDirectory}/flat.json"
     debug = debugArg.enabled
+    target = targetArg.value
 
     flatJsonFile = new File(flatJsonLocation)
     packageLocation = flatJsonFile.getParent()
@@ -95,7 +96,7 @@ class {
       let map = new JsonDeserializer().parseObject(flatJsonFile)
 
       let String defaultTarget = (String)map["defaultTarget"]
-      target = targetArg.value ?: defaultTarget
+      target = target ?: defaultTarget
 
       if (target) {
         let parent = packageLocation.normalizedLocation
