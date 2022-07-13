@@ -228,6 +228,10 @@ class {
   public async getDependenciesForSource(PackageSource source) -> Array<Pair<String, String>> {
     let dependencies = new Array<Pair<String, String>>()
 
+    if (!source.dependencies) {
+      return dependencies
+    }
+
     for (dependency in source.dependencies) {
       if (dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
         dependencies.add(dependency)
