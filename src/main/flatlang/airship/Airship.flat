@@ -27,6 +27,7 @@ class {
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
   visible CliArg linkArg = new CliArg("--link", new Array<String>(), minCount: 0, maxCount: 1)
   visible CliArg debugArg = new CliArg("--debug", ["-d"])
+  visible CliArg quietArg = new CliArg("--quiet", ["-q"])
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
   visible CliArg uninstallCommand = new CliArg("uninstall", new Array<String>(), minCount: 1)
   visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 0)
@@ -61,7 +62,8 @@ class {
         targetArg,
         fileArg,
         linkArg,
-        debugArg
+        debugArg,
+        quietArg
       ]):parse(args)
     )
   }
@@ -90,7 +92,7 @@ class {
     flatJsonFile = new File(flatJsonLocation)
     packageLocation = flatJsonFile.getParent()
 
-    flatHome = System.getEnv("FLAT_HOME")
+    flatHome = new File(System.getEnv("FLAT_HOME")).normalizedLocation
 
     if (flatJsonFile.isFile) {
       let map = new JsonDeserializer().parseObject(flatJsonFile)
@@ -179,7 +181,62 @@ class {
     }
   }
 
-  public getInstallCommand(PackageSource source) -> String[] {
+  getDependencyLocation(Pair<String, String> dependency) -> String {
+    if (dependency.value == "local") {
+      return dependency.key
+    } else if (dependency.key.toLowerCase().startsWith("github:")) {
+      let fullRepoName = dependency.key.substring("github:".count).trim()
+      let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
+      return "#{flatHome}/packages/#{repoName}"
+    } else {
+      throw InvalidFlatJsonException("Invalid dependency #dependency")
+    }
+  }
+
+  getDependencyGitUrl(Pair<String, String> dependency) -> String {
+    if (dependency.key.toLowerCase().startsWith("github:")) {
+      let repoName = dependency.key.substring("github:".count).trim()
+      return "https://GitHub.com/#{repoName}.git"
+    } else {
+      throw InvalidFlatJsonException("Invalid dependency #dependency")
+    }
+  }
+
+  async getDependenciesForSource(PackageSource source) -> Array<Pair<String, String>> {
+    let dependencies = new Array<Pair<String, String>>()
+
+    for (dependency in source.dependencies) {
+      if (dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
+        dependencies.add(dependency)
+      }
+
+      let dependencyPackageFile = new File(getDependencyLocation(dependency))
+
+      let airship = new Airship([
+        "-f", dependencyPackageFile.normalizedLocation
+      ])
+
+      var packageSource
+
+      match (source) {
+        mainSource => packageSource = airship.mainSource
+        testSource => packageSource = airship.testSource
+      }
+
+      if (packageSource) {
+        let nestedDependencies = await airship.getDependenciesForSource(packageSource)
+        let newDependencies = nestedDependencies.filter(nested => {
+          dependencies.none({ getDependencyLocation(_) == getDependencyLocation(nested) })
+        })
+
+        dependencies.addAll(newDependencies)
+      }
+    }
+
+    return dependencies
+  }
+
+  public async getInstallCommand(PackageSource source) -> String[] {
     if (!source) {
       throw new InvalidCommandException("No source found for installation")
     }
@@ -197,7 +254,9 @@ class {
       cmd.addAll(["-target", target])
     }
 
-    source.localDependencies.forEach({ cmd.addAll(["-l", _]) })
+    let allDependencies = await getDependenciesForSource(source)
+
+    allDependencies.forEach({ cmd.addAll(["-l", getDependencyLocation(_)]) })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
@@ -242,15 +301,28 @@ class {
     }
   }
 
-  async installLocalPackage(String package) -> Int {
+  getSourceForPackage(String package) -> PackageSource {
     var source
+
     match (package) {
       "main" => source = mainSource
       "test" => source = testSource
       default => throw new InvalidCommandException("Invalid installation package '#package'")
     }
 
-    let cmd = getInstallCommand(source)
+    return source
+  }
+
+  async installLocalPackage(String package) -> Int {
+    let source = getSourceForPackage(package)
+
+    let dependenciesCode = await installDependencies(source)
+
+    if (dependenciesCode != 0) {
+      return dependenciesCode
+    }
+
+    let cmd = await getInstallCommand(source)
 
     if (debug) {
       Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
@@ -292,7 +364,9 @@ class {
     let flatPackageDir = await new File("#{flatHome}/packages/#{packageName}"):mkdirs()
 
     if (flatPackageDir.getChild(".git").isDirectory) {
-      Console.writeLine("#packageName already installed. Skipping installation")
+      if (!quietArg.enabled) {
+        Console.writeLine("#packageName already installed. Skipping installation")
+      }
       return 0
     }
 
@@ -324,10 +398,23 @@ class {
     return await postInstallPackage(flatPackageDir, install: false)
   }
 
+  async installDependencies(PackageSource source) -> Int {
+    let exitCodes = new Array<Int>()
+
+    let dependencies = await getDependenciesForSource(source)
+
+    for (dependency in dependencies.filter({ _.value != "local" })) {
+      exitCodes.add(await installGitPackage(getDependencyGitUrl(dependency)))
+    }
+
+    return exitCodes.filter({ _ != 0 }).first ?: 0
+  }
+
   async postInstallPackage(
     File flatPackageDir,
     Bool: build = true,
-    Bool: install = true
+    Bool: install = true,
+    Bool: installDependencies = true
   ) -> Int {
     let args = [
       "-f", flatPackageDir.normalizedLocation
@@ -353,6 +440,14 @@ class {
 
       if (code) {
         return code
+      }
+    }
+
+    if (!install && installDependencies && airship.package?.main) {
+      let dependenciesExitCode = await airship.installDependencies(airship.package?.main)
+
+      if (dependenciesExitCode != 0) {
+        return dependenciesExitCode
       }
     }
 

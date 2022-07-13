@@ -3,6 +3,7 @@ package "flatlang/airship"
 import "flatlang/airship/Airship"
 import "flatlang/fucli/FuCli.InvalidCliArgumentException"
 import "flatlang/airship/InvalidOutDirException"
+import "flatlang/io/File"
 
 import "flatlang/extensions/SyntaxStringFunctions"
 
@@ -16,7 +17,7 @@ testable class {
   }
 
   test async `can debug basic install`() {
-    let airship = new Airship(["install", "--debug"])
+    let airship = new Airship(["install", "--debug", "-q"])
 
     expect(airship.debug).toBe(true, "Expected debug flag to be true")
 
@@ -26,7 +27,7 @@ testable class {
 
     let output = allOutput[0]
     let cmdOutput = output.splitOnTopLevel(' ')
-    let flatHome = System.getEnv("FLAT_HOME")
+    let flatHome = new File(System.getEnv("FLAT_HOME")).normalizedLocation
 
     let expected = [
       "java", "\"-jar\"", "\"#{flatHome}/packages/Flat/target/flatc.jar\"",
@@ -34,10 +35,10 @@ testable class {
       "\"-install-dir\"", "\"#{flatHome}/packages\"",
       "\"-o\"", "\"#{airship.packageLocation.normalizedLocation}/dist/airship.js\"",
       "\"-target\"", "\"js\"",
-      "\"-l\"", "\"../FuCli\"",
-      "\"-l\"", "\"../Http\"",
-      "\"-l\"", "\"../Json\"",
-      "\"-l\"", "\"../Compiler-String-Extensions\"",
+      "\"-l\"", "\"#{flatHome}/packages/FuCli\"",
+      "\"-l\"", "\"#{flatHome}/packages/Http\"",
+      "\"-l\"", "\"#{flatHome}/packages/Json\"",
+      "\"-l\"", "\"#{flatHome}/packages/Compiler-String-Extensions\"",
       "\"-main\"", "\"flatlang/airship/Airship\""
     ]
 
