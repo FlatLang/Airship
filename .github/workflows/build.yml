@@ -51,12 +51,6 @@ jobs:
           repository: FlatLang/Standard-Library
           path: Standard-Library
 
-      - name: Checkout Nest library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Nest
-          path: Nest
-
       - name: Checkout Json library
         uses: actions/checkout@master
         with:
@@ -68,12 +62,6 @@ jobs:
         with:
           repository: FlatLang/Compiler-String-Extensions
           path: Compiler-String-Extensions
-
-      - name: Checkout Http library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Http
-          path: Http
 
       - name: Checkout FuCli library
         uses: actions/checkout@master
@@ -88,7 +76,6 @@ jobs:
             src/main \
             -l ../Json \
             -l ../Compiler-String-Extensions \
-            -l ../Http \
             -l ../FuCli \
             -install-dir .. \
             -main flatlang/airship/Airship \
@@ -119,13 +106,6 @@ jobs:
         run: |
           node dist/airship.js install "https://github.com/FlatLang/Flat-JS.git"
 
-      - name: Install Standard Library with Airship
-        working-directory: Airship
-        env:
-          FLAT_HOME: ..
-        run: |
-          node dist/airship.js install "https://github.com/FlatLang/Standard-Library.git"
-
       - name: Rebuild Airship with Airship
         working-directory: Airship
         env:
@@ -146,24 +126,6 @@ jobs:
           FLAT_HOME: ..
         run: |
           node dist/airship.js run test
-
-      - name: Checkout Stability-Test
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Stability-Test
-          path: Stability-Test
-
-      - name: Checkout Network library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Network
-          path: Network
-
-      - name: Checkout Redis library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Redis
-          path: Redis
 
       - name: Build Stability-Test with Airship
         env:
