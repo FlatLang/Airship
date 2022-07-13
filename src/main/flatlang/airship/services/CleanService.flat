@@ -1,0 +1,19 @@
+package "flatlang/airship/services"
+
+import "flatlang/io/File"
+import "flatlang/airship/Airship"
+
+class {
+  public construct(private Airship airship) {}
+
+  public async clean() -> Int {
+    let location = "#{airship.packageLocation.normalizedLocation}/#{airship.outDirectory}"
+    let outDirectory = new File(location)
+
+    if (!await outDirectory.delete(recursive: true)) {
+      throw new Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
+    }
+
+    return 0
+  }
+}
