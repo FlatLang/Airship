@@ -84,7 +84,7 @@ class {
     }
   }
 
-  getFlatHome() -> String {
+  public getFlatHome() -> String {
     if (System.getEnv("FLAT_HOME")) {
       return new File(System.getEnv("FLAT_HOME")).normalizedLocation
     } else {

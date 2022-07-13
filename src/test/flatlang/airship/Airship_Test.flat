@@ -27,7 +27,7 @@ testable class {
 
     let output = allOutput[0]
     let cmdOutput = output.splitOnTopLevel(' ')
-    let flatHome = new File(System.getEnv("FLAT_HOME")).normalizedLocation
+    let flatHome = airship.flatHome
 
     let expected = [
       "java", "\"-jar\"", "\"#{flatHome}/packages/Flat/target/flatc.jar\"",
