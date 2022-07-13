@@ -290,7 +290,7 @@ class {
       return cloneExitCode
     }
 
-    return await postInstallPackage(flatPackageDir)
+    return await postInstallPackage(flatPackageDir, install: false)
   }
 
   async installAndLink(String url) -> Int {
@@ -303,10 +303,14 @@ class {
 
     await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{linkArg.value}"))
 
-    return postInstallPackage(flatPackageDir)
+    return postInstallPackage(flatPackageDir, install: false)
   }
 
-  async postInstallPackage(File flatPackageDir) -> Int {
+  async postInstallPackage(
+    File flatPackageDir,
+    Bool: build = true,
+    Bool: install = true
+  ) -> Int {
     let args = [
       "-f", flatPackageDir.normalizedLocation
     ]
@@ -317,7 +321,7 @@ class {
 
     let airship = await new Airship(args)
 
-    if (airship.package.scripts.containsKey("build")) {
+    if (build && airship.package?.scripts.containsKey("build")) {
       let buildExitCode = await airship.runScript("build")
 
       if (buildExitCode != 0) {
@@ -325,7 +329,7 @@ class {
       }
     }
 
-    if (airship.package.main) {
+    if (install && airship.package?.main) {
       let installExitCodes = await airship.install()
       let code = installExitCodes.filter({ _ != 0 }).first
 
