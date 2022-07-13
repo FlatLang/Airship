@@ -95,41 +95,41 @@ jobs:
       - name: Install Flat with Airship
         working-directory: Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         run: |
           node dist/airship.js install "https://github.com/FlatLang/Flat.git"
 
       - name: Install Flat-JS with Airship
         working-directory: Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         run: |
           node dist/airship.js install "https://github.com/FlatLang/Flat-JS.git"
 
       - name: Rebuild Airship with Airship
         working-directory: Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         run: |
           node dist/airship.js install
 
       - name: Build Airship Tests with Airship
         working-directory: Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         run: |
           node dist/airship.js install test
 
       - name: Run Airship Tests
         working-directory: Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         run: |
           node dist/airship.js run test
 
       - name: Build Stability-Test with Airship
         env:
-          FLAT_HOME: $HOME/.flat
+          FLAT_HOME: ${{env.HOME}}/.flat
         working-directory: Stability-Test
         run: |
           node ../Airship/dist/airship.js install test
