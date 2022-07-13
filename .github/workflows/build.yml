@@ -16,18 +16,6 @@ jobs:
         with:
           path: Airship
 
-      - name: Checkout Flat CLI
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Flat
-          path: Flat
-
-      - name: Checkout Flat JS Writer
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Flat-js
-          path: Flat-JS
-
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -35,77 +23,31 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build CLI
+      - name: Download latest Airship
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: FlatLang/Airship
+          file: airship.js
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Build Airship
         run: |
-          mvn -f Flat install
-          mkdir bin
-          cp Flat/target/flatc.jar bin/flatc.jar
-
-      - name: Build JS Writer
-        run: |
-          mvn -f Flat-JS install
-
-      - name: Checkout Standard library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Standard-Library
-          path: Standard-Library
-
-      - name: Checkout Json library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Json
-          path: Json
-
-      - name: Checkout Compiler-String-Extensions library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/Compiler-String-Extensions
-          path: Compiler-String-Extensions
-
-      - name: Checkout FuCli library
-        uses: actions/checkout@master
-        with:
-          repository: FlatLang/FuCli
-          path: FuCli
+          node ./airship.js install https://github.com/FlatLang/Flat.git
 
       - name: Build Airship
         working-directory: Airship
         run: |
-          java -jar ../Flat/target/flatc.jar \
-            src/main \
-            -l ../Json \
-            -l ../Compiler-String-Extensions \
-            -l ../FuCli \
-            -install-dir .. \
-            -main flatlang/airship/Airship \
-            -o dist/airship.js \
-            -target js
+          node ../airship.js install
+          node dist/airship.js install --link
 
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: airship.js
           path: Airship/dist/airship.js
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-
-      - name: Install Flat with Airship
-        working-directory: Airship
-        run: |
-          node dist/airship.js install "https://github.com/FlatLang/Flat.git"
-
-      - name: Install Flat-JS with Airship
-        working-directory: Airship
-        run: |
-          node dist/airship.js install "https://github.com/FlatLang/Flat-JS.git"
-
-      - name: Rebuild Airship with Airship
-        working-directory: Airship
-        run: |
-          node dist/airship.js install
 
       - name: Build Airship Tests with Airship
         working-directory: Airship
@@ -126,6 +68,7 @@ jobs:
       - name: Build Stability-Test with Airship
         working-directory: Stability-Test
         run: |
+          node ../Airship/dist/airship.js install --link
           node ../Airship/dist/airship.js install test
 
       - name: Run Stability-Test
