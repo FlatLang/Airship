@@ -9,7 +9,7 @@ class {
   visible String author
   visible String license
   visible String defaultTarget
-  visible HashMap<String, String> scripts
+  visible HashMap<String, Object> scripts
   visible PackageSource main
   visible PackageSource test
 
