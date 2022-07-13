@@ -16,12 +16,10 @@ jobs:
         with:
           path: Airship
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.4
         with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: maven
+          maven-version: 3.8.2
 
       - name: Download latest Airship
         uses: dsaltares/fetch-gh-release-asset@master
