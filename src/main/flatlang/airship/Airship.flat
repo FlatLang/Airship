@@ -8,6 +8,12 @@ import "flatlang/io/FileReader"
 import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
 
+import "flatlang/airship/services/InstallService"
+import "flatlang/airship/services/UninstallService"
+import "flatlang/airship/services/ReinstallService"
+import "flatlang/airship/services/CleanService"
+import "flatlang/airship/services/RunScriptService"
+
 class {
   visible Package package
   visible String flatHome
@@ -34,7 +40,11 @@ class {
   visible CliArg cleanCommand = new CliArg("clean", ["c"])
   visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
 
-  let visible static String FLAT_REPO = "https://GitHub.com/FlatLang/Flat.git"
+  visible InstallService installService = new InstallService(this)
+  visible UninstallService uninstallService = new UninstallService(this)
+  visible ReinstallService reinstallService = new ReinstallService(this)
+  visible CleanService cleanService = new CleanService(this)
+  visible RunScriptService runScriptService = new RunScriptService(this)
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -178,18 +188,23 @@ class {
   }
 
   async run() {
+    if (!await checkFlatHome()) {
+      exitCodes.add(1)
+      return
+    }
+
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
-        installCommand => exitCodes.addAll(await install())
-        uninstallCommand => exitCodes.addAll(await uninstall())
-        reinstallCommand => exitCodes.addAll(await reinstall())
-        cleanCommand => await clean()
-        runCommand => exitCodes.add(await runScript(command.value))
+        installCommand => exitCodes.addAll(await installService.install())
+        uninstallCommand => exitCodes.addAll(await uninstallService.uninstall())
+        reinstallCommand => exitCodes.addAll(await reinstallService.reinstall())
+        cleanCommand => exitCodes.add(await cleanService.clean())
+        runCommand => exitCodes.add(await runScriptService.runScript(command.value))
       }
     }
   }
 
-  getDependencyLocation(Pair<String, String> dependency) -> String {
+  public getDependencyLocation(Pair<String, String> dependency) -> String {
     if (dependency.value == "local") {
       return dependency.key
     } else if (dependency.key.toLowerCase().startsWith("github:")) {
@@ -201,7 +216,7 @@ class {
     }
   }
 
-  getDependencyGitUrl(Pair<String, String> dependency) -> String {
+  public getDependencyGitUrl(Pair<String, String> dependency) -> String {
     if (dependency.key.toLowerCase().startsWith("github:")) {
       let repoName = dependency.key.substring("github:".count).trim()
       return "https://GitHub.com/#{repoName}.git"
@@ -210,7 +225,7 @@ class {
     }
   }
 
-  async getDependenciesForSource(PackageSource source) -> Array<Pair<String, String>> {
+  public async getDependenciesForSource(PackageSource source) -> Array<Pair<String, String>> {
     let dependencies = new Array<Pair<String, String>>()
 
     for (dependency in source.dependencies) {
@@ -248,72 +263,7 @@ class {
     return dependencies
   }
 
-  public async getInstallCommand(PackageSource source) -> String[] {
-    if (!source) {
-      throw new InvalidCommandException("No source found for installation")
-    }
-
-    let cmd = [
-      "java",
-      "-jar",
-      "#{flatHome}/packages/Flat/target/flatc.jar",
-      "#{packageLocation.normalizedLocation}/#{source.source}",
-      "-install-dir", "#{flatHome}/packages",
-      "-o", "#{packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
-    ]
-
-    if (target) {
-      cmd.addAll(["-target", target])
-    }
-
-    let allDependencies = await getDependenciesForSource(source)
-
-    allDependencies.forEach({ cmd.addAll(["-l", getDependencyLocation(_)]) })
-
-    if (source.mainClass) {
-      cmd.addAll(["-main", source.mainClass])
-    } else {
-      cmd.add("-library")
-    }
-
-    return cmd
-  }
-
-  public async install() -> Int[] {
-    let exitCodes = new Array<Int>()
-
-    if (installCommand.values.isEmpty) {
-      if (linkArg.enabled) {
-        if (let gitUrl = await getGitOriginUrl()) {
-          linkArg.value = "."
-          return [await installAndLink(gitUrl)]
-        } else {
-          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
-        }
-      }
-      return exitCodes:add(await install("main"))
-    }
-
-    for (package in installCommand.values) {
-      exitCodes.add(await install(package))
-    }
-
-    return exitCodes
-  }
-
-  async install(String package) -> Int {
-    if (linkArg.enabled) {
-      return await installAndLink(package)
-    } else if (package == "flat") {
-      return await installGitPackage(FLAT_REPO)
-    } else if (package.endsWith(".git")) {
-      return await installGitPackage(package)
-    } else {
-      return await installLocalPackage(package)
-    }
-  }
-
-  getSourceForPackage(String package) -> PackageSource {
+  public getSourceForPackage(String package) -> PackageSource {
     var source
 
     match (package) {
@@ -323,27 +273,6 @@ class {
     }
 
     return source
-  }
-
-  async installLocalPackage(String package) -> Int {
-    let source = getSourceForPackage(package)
-
-    let dependenciesCode = await installDependencies(source)
-
-    if (dependenciesCode != 0) {
-      return dependenciesCode
-    }
-
-    let cmd = await getInstallCommand(source)
-
-    if (debug) {
-      Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
-      return 0
-    }
-
-    let response = await System.execute(cmd)
-
-    return response.exitCode
   }
 
   async checkFlatHome() => true {
@@ -359,256 +288,11 @@ class {
     }
   }
 
-  async getGitOriginUrl() -> String => null {
+  public async getGitOriginUrl() -> String => null {
     let response = await System.execute("git config --get remote.origin.url", silent: true)
 
     if (response.exitCode == 0) {
       return response.stdout.first?.trim()
     }
-  }
-
-  async installGitPackage(String url) -> Int {
-    if (!await checkFlatHome()) {
-      return 1
-    }
-
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = await new File("#{flatHome}/packages/#{packageName}"):mkdirs()
-
-    if (flatPackageDir.getChild(".git").isDirectory) {
-      if (!quietArg.enabled) {
-        Console.writeLine("#packageName already installed. Skipping installation")
-      }
-      return 0
-    }
-
-    let response = await System.execute([
-      "git",
-      "clone",
-      url,
-      "--depth", "1",
-      flatPackageDir.normalizedLocation
-    ])
-
-    if (response.exitCode != 0) {
-      return response.exitCode
-    }
-
-    return await postInstallPackage(flatPackageDir, install: false)
-  }
-
-  async installAndLink(String url) -> Int {
-    if (!await checkFlatHome()) {
-      return 1
-    }
-
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = new File("#{flatHome}/packages/#{packageName}")
-
-    await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{linkArg.value}"))
-
-    return await postInstallPackage(flatPackageDir, install: false)
-  }
-
-  async installDependencies(PackageSource source) -> Int {
-    let exitCodes = new Array<Int>()
-
-    let dependencies = await getDependenciesForSource(source)
-
-    for (dependency in dependencies.filter({ _.value != "local" })) {
-      exitCodes.add(await installGitPackage(getDependencyGitUrl(dependency)))
-    }
-
-    return exitCodes.filter({ _ != 0 }).first ?: 0
-  }
-
-  async postInstallPackage(
-    File flatPackageDir,
-    Bool: build = true,
-    Bool: install = true,
-    Bool: installDependencies = true
-  ) -> Int {
-    let args = [
-      "-f", flatPackageDir.normalizedLocation
-    ]
-
-    if (target) {
-      args.addAll(["-t", target])
-    }
-
-    let airship = await new Airship(args)
-
-    if (build && airship.package?.scripts.containsKey("build")) {
-      let buildExitCode = await airship.runScript("build")
-
-      if (buildExitCode != 0) {
-        return buildExitCode
-      }
-    }
-
-    if (install && airship.package?.main) {
-      let installExitCodes = await airship.install()
-      let code = installExitCodes.filter({ _ != 0 }).first
-
-      if (code) {
-        return code
-      }
-    }
-
-    if (!install && installDependencies && airship.package?.main) {
-      let dependenciesExitCode = await airship.installDependencies(airship.package?.main)
-
-      if (dependenciesExitCode != 0) {
-        return dependenciesExitCode
-      }
-    }
-
-    return airship.exitCodes.filter({ _ != 0 }).first ?: 0
-  }
-
-  public async uninstall() -> Int[] {
-    let exitCodes = new Array<Int>()
-
-    if (uninstallCommand.values.isEmpty) {
-      if (linkArg.enabled) {
-        if (let gitUrl = await getGitOriginUrl()) {
-          linkArg.value = "."
-          return [await uninstallGitPackage(gitUrl)]
-        } else {
-          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
-        }
-      }
-
-      throw new InvalidCommandException("Invalid uninstall command without a value")
-    }
-
-    for (package in uninstallCommand.values) {
-      exitCodes.add(await uninstall(package))
-    }
-
-    return exitCodes
-  }
-
-  async uninstall(String package) -> Int {
-    if (package == "flat") {
-      return await uninstallGitPackage(FLAT_REPO)
-    } else if (package.endsWith(".git")) {
-      return await uninstallGitPackage(package)
-    } else {
-      throw new InvalidCommandException("Cannot uninstall package '#package'")
-    }
-  }
-
-  async uninstallGitPackage(String url) -> Int {
-    if (!await checkFlatHome()) {
-      return 1
-    }
-
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = new File("#{flatHome}/packages/#{packageName}")
-
-    if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
-      throw new InvalidCommandException("Package '#packageName' is not installed")
-    }
-
-    if (await flatPackageDir.delete(recursive: true)) {
-      return 0
-    } else {
-      return 1
-    }
-  }
-
-  public async reinstall() -> Int[] {
-    let exitCodes = new Array<Int>()
-
-    if (reinstallCommand.values.isEmpty) {
-      let uninstallCodes = await uninstall()
-      return uninstallCodes.plus(await install())
-    }
-
-    for (package in reinstallCommand.values) {
-      exitCodes.addAll(await reinstall(package))
-    }
-
-    return exitCodes
-  }
-
-  async reinstall(String package) -> Int[] {
-    if (package == "flat") {
-      return await reinstallGitPackage(FLAT_REPO)
-    } else if (package.endsWith(".git")) {
-      return await reinstallGitPackage(package)
-    } else {
-      throw new InvalidCommandException("Cannot reinstall package '#package'")
-    }
-  }
-
-  async reinstallGitPackage(String url) -> Int[] {
-    return [
-      await uninstallGitPackage(url),
-      await installGitPackage(url)
-    ]
-  }
-
-  public async clean()  {
-    if (!await new File("#{packageLocation.normalizedLocation}/#{outDirectory}").delete(recursive: true)) {
-      throw new Exception("Failed to clean directory '#outDirectory'")
-    }
-  }
-
-  public async runScript(String script) -> Int {
-    if (!package.scripts.containsKey(script)) {
-      throw new InvalidScriptException("Script command '#script' is not defined")
-    }
-
-    let workingDirectory = flatJsonFile.getParent().location
-    let cmd = package.scripts[script]
-
-    if (cmd?.class.isOfType(Array.class)) {
-      let Object[] array = (Object[])cmd
-
-      if (array.isEmpty) {
-        return 0
-      }
-
-      for (obj in array) {
-        if (obj.class.isOfType(Array.class)) {
-          let String[] c = (Array)obj
-
-          if (debug) {
-            Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
-          } else {
-            let response = await System.execute(c, workingDirectory)
-
-            if (response.exitCode != 0) {
-              return response.exitCode
-            }
-          }
-        } else if (obj.class.isOfType(String.class)) {
-          let String c = (String)obj
-
-          if (debug) {
-            Console.writeLine(c)
-          } else {
-            let response = await System.execute(c, workingDirectory)
-
-            if (response.exitCode != 0) {
-              return response.exitCode
-            }
-          }
-        }
-      }
-
-      return 0
-    }
-
-    if (debug) {
-      Console.writeLine(cmd)
-      return 0
-    }
-
-    let response = await System.execute(cmd.toString(), workingDirectory)
-
-    return response.exitCode
   }
 }

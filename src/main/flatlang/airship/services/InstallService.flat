@@ -1,0 +1,185 @@
+package "flatlang/airship/services"
+
+import "flatlang/io/File"
+import "flatlang/airship/Airship"
+import "flatlang/airship/PackageSource"
+import "flatlang/airship/InvalidCommandException"
+
+class {
+  public construct(private Airship airship) {}
+
+  public async install() -> Int[] {
+    let exitCodes = new Array<Int>()
+
+    if (airship.installCommand.values.isEmpty) {
+      if (airship.linkArg.enabled) {
+        if (let gitUrl = await airship.getGitOriginUrl()) {
+          airship.linkArg.value = "."
+          return [await installAndLink(gitUrl)]
+        } else {
+          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
+        }
+      }
+      return exitCodes:add(await install("main"))
+    }
+
+    for (package in airship.installCommand.values) {
+      exitCodes.add(await install(package))
+    }
+
+    return exitCodes
+  }
+
+  async install(String package) -> Int {
+    if (airship.linkArg.enabled) {
+      return await installAndLink(package)
+    } else if (package.endsWith(".git")) {
+      return await installGitPackage(package)
+    } else {
+      return await installLocalPackage(package)
+    }
+  }
+
+  public async getInstallCommand(PackageSource source) -> String[] {
+    if (!source) {
+      throw new InvalidCommandException("No source found for installation")
+    }
+
+    let cmd = [
+      "java",
+      "-jar",
+      "#{airship.flatHome}/packages/Flat/target/flatc.jar",
+      "#{airship.packageLocation.normalizedLocation}/#{source.source}",
+      "-install-dir", "#{airship.flatHome}/packages",
+      "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
+    ]
+
+    if (airship.target) {
+      cmd.addAll(["-target", airship.target])
+    }
+
+    let allDependencies = await airship.getDependenciesForSource(source)
+
+    allDependencies.forEach({ cmd.addAll(["-l", airship.getDependencyLocation(_)]) })
+
+    if (source.mainClass) {
+      cmd.addAll(["-main", source.mainClass])
+    } else {
+      cmd.add("-library")
+    }
+
+    return cmd
+  }
+
+  async installLocalPackage(String package) -> Int {
+    let source = airship.getSourceForPackage(package)
+
+    let dependenciesCode = await installDependencies(source)
+
+    if (dependenciesCode != 0) {
+      return dependenciesCode
+    }
+
+    let cmd = await getInstallCommand(source)
+
+    if (airship.debug) {
+      Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
+      return 0
+    }
+
+    let response = await System.execute(cmd)
+
+    return response.exitCode
+  }
+
+  public async installGitPackage(String url) -> Int {
+    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let flatPackageDir = await new File("#{airship.flatHome}/packages/#{packageName}"):mkdirs()
+
+    if (flatPackageDir.getChild(".git").isDirectory) {
+      if (!airship.quietArg.enabled) {
+        Console.writeLine("#packageName already installed. Skipping installation")
+      }
+      return 0
+    }
+
+    let response = await System.execute([
+      "git",
+      "clone",
+      url,
+      "--depth", "1",
+      flatPackageDir.normalizedLocation
+    ])
+
+    if (response.exitCode != 0) {
+      return response.exitCode
+    }
+
+    return await postInstallPackage(flatPackageDir, install: false)
+  }
+
+  async installAndLink(String url) -> Int {
+    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let flatPackageDir = new File("#{airship.flatHome}/packages/#{packageName}")
+
+    await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{airship.linkArg.value}"))
+
+    return await postInstallPackage(flatPackageDir, install: false)
+  }
+
+  async installDependencies(PackageSource source) -> Int {
+    let exitCodes = new Array<Int>()
+
+    let dependencies = await airship.getDependenciesForSource(source)
+
+    for (dependency in dependencies.filter({ _.value != "local" })) {
+      exitCodes.add(await installGitPackage(airship.getDependencyGitUrl(dependency)))
+    }
+
+    return exitCodes.filter({ _ != 0 }).first ?: 0
+  }
+
+  async postInstallPackage(
+    File flatPackageDir,
+    Bool: build = true,
+    Bool: install = true,
+    Bool: installDependencies = true
+  ) -> Int {
+    let args = [
+      "-f", flatPackageDir.normalizedLocation
+    ]
+
+    if (airship.target) {
+      args.addAll(["-t", airship.target])
+    }
+
+    let airship = await new Airship(args)
+
+    if (build && airship.package?.scripts.containsKey("build")) {
+      let buildExitCode = await airship.runScriptService.runScript("build")
+
+      if (buildExitCode != 0) {
+        return buildExitCode
+      }
+    }
+
+    if (install && airship.package?.main) {
+      let installExitCodes = await airship.installService.install()
+      let code = installExitCodes.filter({ _ != 0 }).first
+
+      if (code) {
+        return code
+      }
+    }
+
+    if (!install && installDependencies && airship.package?.main) {
+      let dependenciesExitCode = await airship.installService.installDependencies(airship.package?.main)
+
+      if (dependenciesExitCode != 0) {
+        return dependenciesExitCode
+      }
+    }
+
+    return airship.exitCodes.filter({ _ != 0 }).first ?: 0
+  }
+}
