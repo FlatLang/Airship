@@ -36,7 +36,6 @@ testable class {
       "\"-o\"", "\"#{airship.packageLocation.normalizedLocation}/dist/airship.js\"",
       "\"-target\"", "\"js\"",
       "\"-l\"", "\"#{flatHome}/packages/FuCli\"",
-      "\"-l\"", "\"#{flatHome}/packages/Http\"",
       "\"-l\"", "\"#{flatHome}/packages/Json\"",
       "\"-l\"", "\"#{flatHome}/packages/Compiler-String-Extensions\"",
       "\"-main\"", "\"flatlang/airship/Airship\""
