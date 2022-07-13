@@ -8,8 +8,8 @@
     "outFile": "airship.js",
     "source": "src/main",
     "dependencies": {
-      "../Json": "local",
-      "../Compiler-String-Extensions": "local"
+      "github:FlatLang/Json": "master",
+      "github:FlatLang/Compiler-String-Extensions": "master"
     }
   },
   "scripts": {

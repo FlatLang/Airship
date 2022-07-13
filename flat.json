@@ -12,17 +12,16 @@
     "mainClass": "flatlang/airship/Airship",
     "source": "src/main",
     "dependencies": {
-      "../FuCli": "local",
-      "../Http": "local",
-      "../Json": "local",
-      "../Compiler-String-Extensions": "local"
+      "github:FlatLang/FuCli": "master",
+      "github:FlatLang/Http": "master",
+      "github:FlatLang/Json": "master"
     }
   },
   "test": {
     "mainClass": "flatlang/airship/Airship_TestSuite",
     "source": "src",
     "dependencies": {
-      "../Nest": "local"
+      "github:FlatLang/Nest": "master"
     }
   }
 }
