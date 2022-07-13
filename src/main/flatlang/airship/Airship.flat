@@ -213,7 +213,7 @@ class {
       let dependencyPackageFile = new File(getDependencyLocation(dependency))
 
       if (!dependencyPackageFile.exists) {
-        return dependencies
+        continue
       }
 
       let airship = new Airship([
