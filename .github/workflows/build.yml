@@ -11,9 +11,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      FLAT_HOME: /home/runner/work/.flat
-
     steps:
       - uses: actions/checkout@v3
         with:
