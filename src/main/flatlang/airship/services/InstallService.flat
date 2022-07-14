@@ -4,6 +4,7 @@ import "flatlang/io/File"
 import "flatlang/airship/Airship"
 import "flatlang/airship/PackageSource"
 import "flatlang/airship/InvalidCommandException"
+import "flatlang/airship/InvalidFlatJsonException"
 
 class {
   public construct(private Airship airship) {}
@@ -123,7 +124,14 @@ class {
   }
 
   async installAndLink(String url) -> Int {
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+    let start = url.lastIndexOf('/') + 1
+    let end = url.lastIndexOf('.')
+
+    if (start > end) {
+      throw new InvalidFlatJsonException("Invalid repo url '#url'")
+    }
+
+    let packageName = url.substring(start, end)
     let flatPackageDir = new File("#{airship.flatHome}/packages/#{packageName}")
 
     await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{airship.linkArg.value}"))
