@@ -36,6 +36,11 @@ jobs:
         with:
           path: |
             ~/.m2/repository
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: Install Flat
         run: |
