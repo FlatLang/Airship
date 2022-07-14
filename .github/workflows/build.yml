@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: 14
 
-      - name: Build Airship
+      - name: Install Flat
         run: |
           node ./airship.js install https://github.com/FlatLang/Flat.git
 
