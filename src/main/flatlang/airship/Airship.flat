@@ -296,7 +296,13 @@ class {
     let response = await System.execute("git config --get remote.origin.url", silent: true)
 
     if (response.exitCode == 0) {
-      return response.stdout.first?.trim()
+      let url = response.stdout.first?.trim()
+
+      if (!url.endsWith(".git")) {
+        return "#{url}.git"
+      } else {
+        return url
+      }
     }
   }
 }
