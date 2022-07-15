@@ -33,7 +33,7 @@ class {
   async reinstallGitPackage(String url) -> Int[] {
     return [
       await airship.uninstallService.uninstallGitPackage(url),
-      await airship.installService.installGitPackage(url)
+      await airship.installService.installGitPackage(url, "master")
     ]
   }
 }
