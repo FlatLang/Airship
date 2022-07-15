@@ -8,6 +8,7 @@ import "flatlang/io/File"
 import "flatlang/io/FileReader"
 import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
+import "flatlang/git/Git"
 
 import "flatlang/airship/services/InstallService"
 import "flatlang/airship/services/UninstallService"
@@ -355,16 +356,12 @@ class {
   }
 
   public async getGitOriginUrl() -> String => null {
-    let response = await System.execute("git config --get remote.origin.url", silent: true)
+    let url = await Git.getOriginUrl(silent: true)
 
-    if (response.exitCode == 0) {
-      let url = response.stdout.first?.trim()
-
-      if (!url.endsWith(".git")) {
-        return "#{url}.git"
-      } else {
-        return url
-      }
+    if (!url.endsWith(".git")) {
+      return "#{url}.git"
+    } else {
+      return url
     }
   }
 

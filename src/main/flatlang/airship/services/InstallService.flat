@@ -1,6 +1,7 @@
 package "flatlang/airship/services"
 
 import "flatlang/io/File"
+import "flatlang/git/Git"
 import "flatlang/airship/Airship"
 import "flatlang/airship/PackageSource"
 import "flatlang/airship/InvalidCommandException"
@@ -35,7 +36,7 @@ class {
     if (airship.linkArg.enabled) {
       return await installAndLink(package)
     } else if (package.endsWith(".git")) {
-      return await installGitPackage(package, install, installDependencies)
+      return await installGitPackage(package, "master", install, installDependencies)
     } else {
       return await installLocalPackage(package)
     }
@@ -97,7 +98,7 @@ class {
     return response.exitCode
   }
 
-  public async installGitPackage(String url, Bool install = true, Bool installDependencies = true) -> Int {
+  public async installGitPackage(String url, String branch, Bool install = true, Bool installDependencies = true) -> Int {
     let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
     let flatPackageDir = await new File("#{airship.flatHome}/packages/#{packageName}"):mkdirs()
 
@@ -105,13 +106,17 @@ class {
       return 0
     }
 
-    let response = await System.execute([
-      "git",
-      "clone",
+    if (!airship.quietArg.enabled) {
+      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'")
+    }
+
+    let response = await Git.clone(
       url,
-      "--depth", "1",
-      flatPackageDir.normalizedLocation
-    ])
+      depth: 1,
+      branch: branch,
+      outputDirectory: flatPackageDir.normalizedLocation,
+      silent: true
+    )
 
     if (response.exitCode != 0) {
       return response.exitCode
@@ -146,7 +151,7 @@ class {
     let dependencies = await airship.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
-      exitCodes.add(await installGitPackage(airship.getDependencyGitUrl(dependency)))
+      exitCodes.add(await installGitPackage(airship.getDependencyGitUrl(dependency), dependency.value))
     }
 
     return exitCodes.filter({ _ != 0 }).first ?: 0
