@@ -31,11 +31,11 @@ class {
     return exitCodes
   }
 
-  async install(String package) -> Int {
+  public async install(String package, Bool install = true, Bool installDependencies = true) -> Int {
     if (airship.linkArg.enabled) {
       return await installAndLink(package)
     } else if (package.endsWith(".git")) {
-      return await installGitPackage(package)
+      return await installGitPackage(package, install, installDependencies)
     } else {
       return await installLocalPackage(package)
     }
@@ -97,14 +97,11 @@ class {
     return response.exitCode
   }
 
-  public async installGitPackage(String url) -> Int {
+  public async installGitPackage(String url, Bool install = true, Bool installDependencies = true) -> Int {
     let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
     let flatPackageDir = await new File("#{airship.flatHome}/packages/#{packageName}"):mkdirs()
 
     if (flatPackageDir.getChild(".git").isDirectory) {
-      if (!airship.quietArg.enabled) {
-        Console.writeLine("#packageName already installed. Skipping installation")
-      }
       return 0
     }
 
@@ -120,7 +117,11 @@ class {
       return response.exitCode
     }
 
-    return await postInstallPackage(flatPackageDir, install: false)
+    return await postInstallPackage(
+      flatPackageDir,
+      install: install,
+      installDependencies: installDependencies
+    )
   }
 
   async installAndLink(String url) -> Int {
@@ -176,19 +177,19 @@ class {
     }
 
     if (install && airship.package?.main) {
+      if (installDependencies) {
+        let dependenciesExitCode = await airship.installService.installDependencies(flatPackageDir.name, airship.package?.main)
+
+        if (dependenciesExitCode != 0) {
+          return dependenciesExitCode
+        }
+      }
+
       let installExitCodes = await airship.installService.install()
       let code = installExitCodes.filter({ _ != 0 }).first
 
       if (code) {
         return code
-      }
-    }
-
-    if (!install && installDependencies && airship.package?.main) {
-      let dependenciesExitCode = await airship.installService.installDependencies(flatPackageDir.name, airship.package?.main)
-
-      if (dependenciesExitCode != 0) {
-        return dependenciesExitCode
       }
     }
 
