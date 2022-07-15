@@ -1,6 +1,7 @@
 package "flatlang/airship"
 
 import "flatlang/datastruct/HashMap"
+import "flatlang/datastruct/HashSet"
 import "flatlang/datastruct/Pair"
 import "flatlang/json/JsonDeserializer"
 import "flatlang/io/File"
@@ -45,6 +46,8 @@ class {
   visible ReinstallService reinstallService = new ReinstallService(this)
   visible CleanService cleanService = new CleanService(this)
   visible RunScriptService runScriptService = new RunScriptService(this)
+
+  static HashMap<String, Airship> packageCache = new HashMap()
 
   public static async main(String[] args) {
     if (args.count < 2) {
@@ -112,34 +115,54 @@ class {
 
     flatHome = getFlatHome()
 
-    if (flatJsonFile.isFile) {
-      let map = new JsonDeserializer().parseObject(flatJsonFile)
+    if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
+      let airship = packageCache[flatJsonFile.normalizedLocation]
 
-      let String defaultTarget = (String)map["defaultTarget"]
-      target = target ?: defaultTarget
+      target = target ?: airship.target
+      package = airship.package
+      mainSource = airship.mainSource
+      testSource = airship.testSource
+    } else {
+      if (flatJsonFile.isFile) {
+        let map = new JsonDeserializer().parseObject(flatJsonFile)
 
-      if (target) {
-        let parent = packageLocation.normalizedLocation
-        let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
-        let targetFileLocation = parent + "/" + targetFileName
-        let targetFlatJsonFile = new File(targetFileLocation)
+        let String defaultTarget = (String)map["defaultTarget"]
+        target = target ?: defaultTarget
 
-        if (targetFlatJsonFile.isFile) {
-          let targetMap = new JsonDeserializer().parseObject(targetFlatJsonFile)
+        if (target) {
+          let parent = packageLocation.normalizedLocation
+          let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
+          let targetFileLocation = parent + "/" + targetFileName
+          let targetFlatJsonFile = new File(targetFileLocation)
 
-          merge(targetMap, map)
+          if (targetFlatJsonFile.isFile) {
+            let targetMap = new JsonDeserializer().parseObject(targetFlatJsonFile)
+
+            merge(targetMap, map)
+          }
+        }
+
+        package = new Package(map)
+
+        let sources = loadSources()
+        mainSource = sources[0]
+        testSource = sources[1]
+
+        if (mainSource?.dependencies && testSource?.dependencies) {
+          merge(mainSource.dependencies, testSource.dependencies)
+        }
+
+        if (!isStandardLibrary()) {
+          if (mainSource?.dependencies) {
+            mainSource.dependencies.add(new Pair("github:FlatLang/Standard-Library", "master"));
+          }
+          if (testSource?.dependencies) {
+            testSource.dependencies.add(new Pair("github:FlatLang/Standard-Library", "master"));
+          }
         }
       }
 
-      package = new Package(map)
-
-      let sources = loadSources()
-      mainSource = sources[0]
-      testSource = sources[1]
-
-      if (mainSource?.dependencies && testSource?.dependencies) {
-        merge(mainSource.dependencies, testSource.dependencies)
-      }
+      packageCache[flatJsonFile.normalizedLocation] = this
     }
   }
 
@@ -225,8 +248,32 @@ class {
     }
   }
 
-  public async getDependenciesForSource(PackageSource source) -> Array<Pair<String, String>> {
-    let dependencies = new Array<Pair<String, String>>()
+  public async getDependenciesForSource(
+    String package,
+    String installationTarget,
+    PackageSource source
+  ) -> Array<Pair<String, String>> {
+    return await getDependenciesForSource(
+      package,
+      installationTarget,
+      source,
+      new Array(),
+      new HashSet()
+    )
+  }
+
+  async getDependenciesForSource(
+    String package,
+    String installationTarget,
+    PackageSource source,
+    Pair<String, String>[] dependencies,
+    HashSet<String> dependenciesAdded
+  ) -> Array<Pair<String, String>> {
+    if (dependenciesAdded.contains(package)) {
+      return dependencies
+    }
+
+    dependenciesAdded.add(package)
 
     if (!source.dependencies) {
       return dependencies
@@ -249,18 +296,19 @@ class {
 
       var packageSource
 
-      match (source) {
-        mainSource => packageSource = airship.mainSource
-        testSource => packageSource = airship.testSource
+      match (installationTarget) {
+        "main" => packageSource = airship.mainSource
+        "test" => packageSource = airship.testSource ?: airship.mainSource
       }
 
       if (packageSource) {
-        let nestedDependencies = await airship.getDependenciesForSource(packageSource)
-        let newDependencies = nestedDependencies.filter(nested => {
-          dependencies.none({ getDependencyLocation(_) == getDependencyLocation(nested) })
-        })
-
-        dependencies.addAll(newDependencies)
+        await airship.getDependenciesForSource(
+          dependencyPackageFile.name,
+          installationTarget,
+          packageSource,
+          dependencies,
+          dependenciesAdded
+        )
       }
     }
 
@@ -305,4 +353,6 @@ class {
       }
     }
   }
+
+  isStandardLibrary() => packageLocation.name.equals("Standard-Library")
 }
