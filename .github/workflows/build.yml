@@ -54,6 +54,19 @@ jobs:
         working-directory: Airship
         run: |
           node ../airship.js install
+
+      - name: Delete Airship artifact
+        run: |
+          rm airship.js
+
+      - name: Build Airship with Airship
+        working-directory: Airship
+        run: |
+          node dist/airship.js install
+
+      - name: Link Airship
+        working-directory: Airship
+        run: |
           node dist/airship.js install --link
 
       - uses: actions/upload-artifact@v3
