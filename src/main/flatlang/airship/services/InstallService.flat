@@ -107,7 +107,7 @@ class {
     }
 
     if (!airship.quietArg.enabled) {
-      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'")
+      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
     }
 
     let response = await Git.clone(
