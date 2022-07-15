@@ -37,6 +37,8 @@ testable class {
       "\"-target\"", "\"js\"",
       "\"-l\"", "\"#{flatHome}/packages/FuCli\"",
       "\"-l\"", "\"#{flatHome}/packages/Standard-Library\"",
+      "\"-l\"", "\"#{flatHome}/packages/Flat\"",
+      "\"-l\"", "\"#{flatHome}/packages/Flat-JS\"",
       "\"-l\"", "\"#{flatHome}/packages/Json\"",
       "\"-l\"", "\"#{flatHome}/packages/Compiler-String-Extensions\"",
       "\"-l\"", "\"#{flatHome}/packages/IO\"",
