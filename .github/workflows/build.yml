@@ -46,10 +46,6 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Install Flat
-        run: |
-          node ./airship.js install https://github.com/FlatLang/Flat.git
-
       - name: Build Airship
         working-directory: Airship
         run: |
