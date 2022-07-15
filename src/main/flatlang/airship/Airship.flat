@@ -251,12 +251,14 @@ class {
   public async getDependenciesForSource(
     String package,
     String installationTarget,
-    PackageSource source
+    PackageSource source,
+    Bool: download = true
   ) -> Array<Pair<String, String>> {
     return await getDependenciesForSource(
       package,
       installationTarget,
       source,
+      download,
       new Array(),
       new HashSet()
     )
@@ -266,6 +268,7 @@ class {
     String package,
     String installationTarget,
     PackageSource source,
+    Bool download = true,
     Pair<String, String>[] dependencies,
     HashSet<String> dependenciesAdded
   ) -> Array<Pair<String, String>> {
@@ -287,7 +290,17 @@ class {
       let dependencyPackageFile = new File(getDependencyLocation(dependency))
 
       if (!dependencyPackageFile.exists) {
-        continue
+        if (download) {
+          await installService.install(
+            getDependencyGitUrl(dependency),
+            install: false,
+            installDependencies: false
+          );
+        }
+
+        if (!dependencyPackageFile.exists) {
+          continue
+        }
       }
 
       let airship = new Airship([
@@ -306,6 +319,7 @@ class {
           dependencyPackageFile.name,
           installationTarget,
           packageSource,
+          download,
           dependencies,
           dependenciesAdded
         )
