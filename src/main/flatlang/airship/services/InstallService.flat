@@ -41,7 +41,7 @@ class {
     }
   }
 
-  public async getInstallCommand(PackageSource source) -> String[] {
+  public async getInstallCommand(String package, PackageSource source) -> String[] {
     if (!source) {
       throw new InvalidCommandException("No source found for installation")
     }
@@ -59,7 +59,7 @@ class {
       cmd.addAll(["-target", airship.target])
     }
 
-    let allDependencies = await airship.getDependenciesForSource(source)
+    let allDependencies = await airship.getDependenciesForSource(package, package, source)
 
     allDependencies.forEach({ cmd.addAll(["-l", airship.getDependencyLocation(_)]) })
 
@@ -79,13 +79,13 @@ class {
       throw new InvalidCommandException("No source found for installation package '#package'")
     }
 
-    let dependenciesCode = await installDependencies(source)
+    let dependenciesCode = await installDependencies(package, source)
 
     if (dependenciesCode != 0) {
       return dependenciesCode
     }
 
-    let cmd = await getInstallCommand(source)
+    let cmd = await getInstallCommand(package, source)
 
     if (airship.debug) {
       Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
@@ -139,10 +139,10 @@ class {
     return await postInstallPackage(flatPackageDir, install: false)
   }
 
-  async installDependencies(PackageSource source) -> Int {
+  async installDependencies(String package, PackageSource source) -> Int {
     let exitCodes = new Array<Int>()
 
-    let dependencies = await airship.getDependenciesForSource(source)
+    let dependencies = await airship.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
       exitCodes.add(await installGitPackage(airship.getDependencyGitUrl(dependency)))
@@ -185,7 +185,7 @@ class {
     }
 
     if (!install && installDependencies && airship.package?.main) {
-      let dependenciesExitCode = await airship.installService.installDependencies(airship.package?.main)
+      let dependenciesExitCode = await airship.installService.installDependencies(flatPackageDir.name, airship.package?.main)
 
       if (dependenciesExitCode != 0) {
         return dependenciesExitCode
