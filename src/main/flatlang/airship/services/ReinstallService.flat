@@ -7,33 +7,28 @@ import "flatlang/airship/InvalidCommandException"
 class {
   public construct(private Airship airship) {}
 
-  public async reinstall() -> Int[] {
-    let exitCodes = new Array<Int>()
-
+  public async reinstall() {
     if (airship.reinstallCommand.values.isEmpty) {
-      let uninstallCodes = await airship.uninstallService.uninstall()
-      return uninstallCodes.plus(await airship.installService.install())
+      await airship.uninstallService.uninstall()
+      await airship.installService.install()
+      return
     }
 
     for (package in airship.reinstallCommand.values) {
-      exitCodes.addAll(await reinstall(package))
+      await reinstall(package)
     }
-
-    return exitCodes
   }
 
-  async reinstall(String package) -> Int[] {
+  async reinstall(String package) {
     if (package.endsWith(".git")) {
-      return await reinstallGitPackage(package)
+      await reinstallGitPackage(package)
     } else {
       throw new InvalidCommandException("Cannot reinstall package '#package'")
     }
   }
 
-  async reinstallGitPackage(String url) -> Int[] {
-    return [
-      await airship.uninstallService.uninstallGitPackage(url),
-      await airship.installService.installGitPackage(url, "master")
-    ]
+  async reinstallGitPackage(String url) {
+    await airship.uninstallService.uninstallGitPackage(url)
+    await airship.installService.installGitPackage(url, "master")
   }
 }

@@ -29,7 +29,6 @@ class {
   visible File flatJsonFile
   visible File packageLocation
   visible String target
-  visible Int[] exitCodes = new Array<Int>()
 
   visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
@@ -56,13 +55,6 @@ class {
     }
 
     let airship = await new Airship(args.skip(1)):run()
-
-    let errorCodes = airship.exitCodes.filter({ _ != 0 })
-
-    if (errorCodes.isNotEmpty) {
-      Console.log("Encountered error code#{errorCodes.count == 1 ? "" : 's'}: #{errorCodes.join(", ")}")
-      System.exit(1)
-    }
   }
 
   public construct(String[] args) {
@@ -213,17 +205,16 @@ class {
 
   async run() {
     if (!await checkFlatHome()) {
-      exitCodes.add(1)
       return
     }
 
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
-        installCommand => exitCodes.addAll(await installService.install())
-        uninstallCommand => exitCodes.addAll(await uninstallService.uninstall())
-        reinstallCommand => exitCodes.addAll(await reinstallService.reinstall())
-        cleanCommand => exitCodes.add(await cleanService.clean())
-        runCommand => exitCodes.add(await runScriptService.runScript(command.value))
+        installCommand => await installService.install()
+        uninstallCommand => await uninstallService.uninstall()
+        reinstallCommand => await reinstallService.reinstall()
+        cleanCommand => await cleanService.clean()
+        runCommand => await runScriptService.runScript(command.value)
       }
     }
   }
