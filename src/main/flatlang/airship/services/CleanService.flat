@@ -6,14 +6,12 @@ import "flatlang/airship/Airship"
 class {
   public construct(private Airship airship) {}
 
-  public async clean() -> Int {
+  public async clean() {
     let location = "#{airship.packageLocation.normalizedLocation}/#{airship.outDirectory}"
     let outDirectory = new File(location)
 
     if (!await outDirectory.delete(recursive: true)) {
       throw new Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
     }
-
-    return 0
   }
 }

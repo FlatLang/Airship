@@ -7,14 +7,13 @@ import "flatlang/airship/InvalidCommandException"
 class {
   public construct(private Airship airship) {}
 
-  public async uninstall() -> Int[] {
-    let exitCodes = new Array<Int>()
-
+  public async uninstall() {
     if (airship.uninstallCommand.values.isEmpty) {
       if (airship.linkArg.enabled) {
         if (let gitUrl = await airship.getGitOriginUrl()) {
           airship.linkArg.value = "."
-          return [await uninstallGitPackage(gitUrl)]
+          await uninstallGitPackage(gitUrl)
+          return
         } else {
           throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
         }
@@ -24,21 +23,19 @@ class {
     }
 
     for (package in airship.uninstallCommand.values) {
-      exitCodes.add(await uninstall(package))
+      await uninstall(package)
     }
-
-    return exitCodes
   }
 
-  public async uninstall(String package) -> Int {
+  public async uninstall(String package) {
     if (package.endsWith(".git")) {
-      return await uninstallGitPackage(package)
+      await uninstallGitPackage(package)
     } else {
       throw new InvalidCommandException("Cannot uninstall package '#package'")
     }
   }
 
-  public async uninstallGitPackage(String url) -> Int {
+  public async uninstallGitPackage(String url) {
     let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
     let flatPackageDir = new File("#{airship.flatHome}/packages/#{packageName}")
 
@@ -46,10 +43,6 @@ class {
       throw new InvalidCommandException("Package '#packageName' is not installed")
     }
 
-    if (await flatPackageDir.delete(recursive: true)) {
-      return 0
-    } else {
-      return 1
-    }
+    await flatPackageDir.delete(recursive: true)
   }
 }
