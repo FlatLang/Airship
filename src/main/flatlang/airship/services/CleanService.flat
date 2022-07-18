@@ -10,7 +10,7 @@ class {
     let location = "#{airship.packageLocation.normalizedLocation}/#{airship.outDirectory}"
     let outDirectory = new File(location)
 
-    if (!await outDirectory.delete(recursive: true)) {
+    if (!outDirectory.delete(recursive: true)) {
       throw new Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
     }
   }

@@ -50,7 +50,7 @@ class {
     PackageSource source,
     Bool: download = true
   ) -> Array<Pair<String, String>> {
-    return await getDependenciesForSource(
+    return getDependenciesForSource(
       package,
       installationTarget,
       source,
@@ -87,7 +87,7 @@ class {
 
       if (!dependencyPackageFile.exists) {
         if (download) {
-          await downloadDependency(
+          downloadDependency(
             getDependencyGitUrl(dependency),
             dependency.value
           )
@@ -110,7 +110,7 @@ class {
       }
 
       if (packageSource) {
-        await getDependenciesForSource(
+        getDependenciesForSource(
           dependencyPackageFile.name,
           installationTarget,
           packageSource,
@@ -128,7 +128,7 @@ class {
     getDependencyPackageLocation(url).getChild(".git").isDirectory
 
   public async downloadDependency(String url, String branch) {
-    let flatPackageDir = await getDependencyPackageLocation(url):mkdirs()
+    let flatPackageDir = getDependencyPackageLocation(url):mkdirs()
 
     if (flatPackageDir.getChild(".git").isDirectory) {
       return
@@ -138,7 +138,7 @@ class {
       Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
     }
 
-    let response = await Git.clone(
+    let response = Git.clone(
       url,
       depth: 1,
       branch: branch,

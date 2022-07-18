@@ -59,7 +59,7 @@ class {
       throw new Exception("Missing command")
     }
 
-    let airship = await new Airship(args.skip(1)):run()
+    let airship = new Airship(args.skip(1)):run()
   }
 
   public construct(String[] args) {
@@ -210,18 +210,18 @@ class {
   }
 
   async run() {
-    if (!await checkFlatHome()) {
+    if (!checkFlatHome()) {
       return
     }
 
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
-        installCommand => await installService.install()
-        uninstallCommand => await uninstallService.uninstall()
-        reinstallCommand => await reinstallService.reinstall()
-        updateCommand => await updateService.update()
-        cleanCommand => await cleanService.clean()
-        runCommand => await runScriptService.runScript(command.value)
+        installCommand => installService.install()
+        uninstallCommand => uninstallService.uninstall()
+        reinstallCommand => reinstallService.reinstall()
+        updateCommand => updateService.update()
+        cleanCommand => cleanService.clean()
+        runCommand => runScriptService.runScript(command.value)
       }
     }
   }
@@ -252,7 +252,7 @@ class {
   }
 
   public async getGitOriginUrl() -> String => null {
-    let response = await Git.getOriginUrl(silent: true)
+    let response = Git.getOriginUrl(silent: true)
 
     if (response.success) {
       let url = response.value

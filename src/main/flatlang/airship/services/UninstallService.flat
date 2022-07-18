@@ -10,9 +10,9 @@ class {
   public async uninstall() {
     if (airship.uninstallCommand.values.isEmpty) {
       if (airship.linkArg.enabled) {
-        if (let gitUrl = await airship.getGitOriginUrl()) {
+        if (let gitUrl = airship.getGitOriginUrl()) {
           airship.linkArg.value = "."
-          await uninstallGitPackage(gitUrl)
+          uninstallGitPackage(gitUrl)
           return
         } else {
           throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
@@ -23,13 +23,13 @@ class {
     }
 
     for (package in airship.uninstallCommand.values) {
-      await uninstall(package)
+      uninstall(package)
     }
   }
 
   public async uninstall(String package) {
     if (package.endsWith(".git")) {
-      await uninstallGitPackage(package)
+      uninstallGitPackage(package)
     } else {
       throw new InvalidCommandException("Cannot uninstall package '#package'")
     }
@@ -43,6 +43,6 @@ class {
       throw new InvalidCommandException("Package '#packageName' is not installed")
     }
 
-    await flatPackageDir.delete(recursive: true)
+    flatPackageDir.delete(recursive: true)
   }
 }

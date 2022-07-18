@@ -9,26 +9,26 @@ class {
 
   public async reinstall() {
     if (airship.reinstallCommand.values.isEmpty) {
-      await airship.uninstallService.uninstall()
-      await airship.installService.install()
+      airship.uninstallService.uninstall()
+      airship.installService.install()
       return
     }
 
     for (package in airship.reinstallCommand.values) {
-      await reinstall(package)
+      reinstall(package)
     }
   }
 
   async reinstall(String package) {
     if (package.endsWith(".git")) {
-      await reinstallGitPackage(package)
+      reinstallGitPackage(package)
     } else {
       throw new InvalidCommandException("Cannot reinstall package '#package'")
     }
   }
 
   async reinstallGitPackage(String url) {
-    await airship.uninstallService.uninstallGitPackage(url)
-    await airship.installService.installGitPackage(url, "master")
+    airship.uninstallService.uninstallGitPackage(url)
+    airship.installService.installGitPackage(url, "master")
   }
 }

@@ -17,30 +17,30 @@ class {
   public async install() {
     if (airship.installCommand.values.isEmpty) {
       if (airship.linkArg.enabled) {
-        if (let gitUrl = await airship.getGitOriginUrl()) {
+        if (let gitUrl = airship.getGitOriginUrl()) {
           airship.linkArg.value = "."
-          await installAndLink(gitUrl)
+          installAndLink(gitUrl)
           return
         } else {
           throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
         }
       }
-      await install("main")
+      install("main")
       return
     }
 
     for (package in airship.installCommand.values) {
-      await install(package)
+      install(package)
     }
   }
 
   public async install(String package, Bool install = false, Bool installDependencies = true) {
     if (airship.linkArg.enabled) {
-      await installAndLink(package)
+      installAndLink(package)
     } else if (package.endsWith(".git")) {
-      await installGitPackage(package, "master", install, installDependencies)
+      installGitPackage(package, "master", install, installDependencies)
     } else {
-      await installLocalPackage(package)
+      installLocalPackage(package)
     }
   }
 
@@ -62,7 +62,7 @@ class {
       cmd.addAll(["-target", airship.target])
     }
 
-    let allDependencies = await dependencyService.getDependenciesForSource(package, package, source)
+    let allDependencies = dependencyService.getDependenciesForSource(package, package, source)
 
     allDependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencyLocation(_)]) })
 
@@ -82,15 +82,15 @@ class {
       throw new InvalidCommandException("No source found for installation package '#package'")
     }
 
-    await installDependencies(package, source)
-    let cmd = await getInstallCommand(package, source)
+    installDependencies(package, source)
+    let cmd = getInstallCommand(package, source)
 
     if (airship.debug) {
       Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ "\"#{_}\"" }).join(" "))
       return
     }
 
-    let response = await System.execute(cmd)
+    let response = System.execute(cmd)
 
     if (response.exitCode != 0) {
       throw new ExecutionFailureException("Compilation failed")
@@ -102,9 +102,9 @@ class {
       return
     }
 
-    await dependencyService.downloadDependency(url, branch)
+    dependencyService.downloadDependency(url, branch)
 
-    await postInstallPackage(
+    postInstallPackage(
       dependencyService.getDependencyPackageLocation(url),
       install: install,
       installDependencies: installDependencies
@@ -122,16 +122,16 @@ class {
     let packageName = url.substring(start, end)
     let flatPackageDir = new File("#{airship.flatHome}/packages/#{packageName}")
 
-    await flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{airship.linkArg.value}"))
+    flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{airship.linkArg.value}"))
 
-    await postInstallPackage(flatPackageDir, install: false)
+    postInstallPackage(flatPackageDir, install: false)
   }
 
   async installDependencies(String package, PackageSource source) {
-    let dependencies = await dependencyService.getDependenciesForSource(package, package, source)
+    let dependencies = dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
-      await installGitPackage(dependencyService.getDependencyGitUrl(dependency), dependency.value)
+      installGitPackage(dependencyService.getDependencyGitUrl(dependency), dependency.value)
     }
   }
 
@@ -149,18 +149,18 @@ class {
       args.addAll(["-t", airship.target])
     }
 
-    let airship = await new Airship(args)
+    let airship = new Airship(args)
 
     if (build && airship.package?.scripts.containsKey("build")) {
-      await airship.runScriptService.runScript("build")
+      airship.runScriptService.runScript("build")
     }
 
     if (airship.package?.main) {
       if (installDependencies) {
-        await airship.installService.installDependencies(flatPackageDir.name, airship.package.main)
+        airship.installService.installDependencies(flatPackageDir.name, airship.package.main)
       }
       if (install) {
-        await airship.installService.install()
+        airship.installService.install()
       }
     }
   }

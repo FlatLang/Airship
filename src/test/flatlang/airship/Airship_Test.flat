@@ -21,7 +21,7 @@ testable class {
 
     expect(airship.debug).toBe(true, "Expected debug flag to be true")
 
-    let allOutput = await Console.out.captureOutput(async { await airship.installService.install() })
+    let allOutput = Console.out.captureOutput(async { airship.installService.install() })
 
     expect(allOutput.count).toBe(1)
 
