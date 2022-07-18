@@ -18,7 +18,7 @@ class {
 
     let suites = args.skip(2)
 
-    await test.runTests({
+    test.runTests({
       results.add(_)
     })
 

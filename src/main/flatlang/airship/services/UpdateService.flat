@@ -15,13 +15,13 @@ class {
 
   public async update() {
     if (airship.updateCommand.values.isEmpty) {
-      await updateLocalPackage("main")
+      updateLocalPackage("main")
     } else {
       for (package in airship.updateCommand.values) {
         match (package) {
           "main" => fallthrough
-          "test" => await updateLocalPackage(package)
-          default => await updateGitPackage(package)
+          "test" => updateLocalPackage(package)
+          default => updateGitPackage(package)
         }
       }
     }
@@ -33,10 +33,10 @@ class {
     }
 
     let source = airship.getSourceForPackage(package)
-    let dependencies = await dependencyService.getDependenciesForSource(package, package, source)
+    let dependencies = dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
-      await updateGitPackage(dependencyService.getDependencyGitUrl(dependency), branch: dependency.value)
+      updateGitPackage(dependencyService.getDependencyGitUrl(dependency), branch: dependency.value)
     }
   }
 
@@ -54,11 +54,11 @@ class {
     let git = new Git(packageLocation.location)
 
     if (branch) {
-      git:checkout(branch, silent: true)$
-        :pull(silent: true)$
+      git:checkout(branch, silent: true)
+        :pull(silent: true)
     }
 
-    let pullResponse = git.pull(silent: true)$
+    let pullResponse = git.pull(silent: true)
 
     if (pullResponse.upToDate) {
       if (!airship.quietArg.enabled) {

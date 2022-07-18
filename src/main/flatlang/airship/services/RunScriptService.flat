@@ -29,7 +29,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
           } else {
-            let response = await System.execute(c, workingDirectory)
+            let response = System.execute(c, workingDirectory)
 
             if (response.exitCode != 0) {
               return response.exitCode
@@ -41,7 +41,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c)
           } else {
-            let response = await System.execute(c, workingDirectory)
+            let response = System.execute(c, workingDirectory)
 
             if (response.exitCode != 0) {
               return response.exitCode
@@ -58,7 +58,7 @@ class {
       return 0
     }
 
-    let response = await System.execute(cmd.toString(), workingDirectory)
+    let response = System.execute(cmd.toString(), workingDirectory)
 
     return response.exitCode
   }
