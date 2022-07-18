@@ -9,7 +9,10 @@ import "flatlang/airship/InvalidFlatJsonException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private DependencyService dependencyService
+  ) {}
 
   public async install() {
     if (airship.installCommand.values.isEmpty) {
@@ -59,9 +62,9 @@ class {
       cmd.addAll(["-target", airship.target])
     }
 
-    let allDependencies = await airship.getDependenciesForSource(package, package, source)
+    let allDependencies = await dependencyService.getDependenciesForSource(package, package, source)
 
-    allDependencies.forEach({ cmd.addAll(["-l", airship.getDependencyLocation(_)]) })
+    allDependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencyLocation(_)]) })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
@@ -95,31 +98,14 @@ class {
   }
 
   public async installGitPackage(String url, String branch, Bool install = true, Bool installDependencies = true) {
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = await new File("#{airship.flatHome}/packages/#{packageName}"):mkdirs()
-
-    if (flatPackageDir.getChild(".git").isDirectory) {
+    if (dependencyService.isDependencyInstalled(url, branch)) {
       return
     }
 
-    if (!airship.quietArg.enabled) {
-      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
-    }
-
-    let response = await Git.clone(
-      url,
-      depth: 1,
-      branch: branch,
-      outputDirectory: flatPackageDir.normalizedLocation,
-      silent: true
-    )
-
-    if (response.exitCode != 0) {
-      throw new ExecutionFailureException("Failed to install git repo")
-    }
+    await dependencyService.downloadDependency(url, branch)
 
     await postInstallPackage(
-      flatPackageDir,
+      dependencyService.getDependencyPackageLocation(url),
       install: install,
       installDependencies: installDependencies
     )
@@ -142,10 +128,10 @@ class {
   }
 
   async installDependencies(String package, PackageSource source) {
-    let dependencies = await airship.getDependenciesForSource(package, package, source)
+    let dependencies = await dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
-      await installGitPackage(airship.getDependencyGitUrl(dependency), dependency.value)
+      await installGitPackage(dependencyService.getDependencyGitUrl(dependency), dependency.value)
     }
   }
 

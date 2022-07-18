@@ -1,0 +1,69 @@
+package "flatlang/airship/services"
+
+import "flatlang/io/File"
+import "flatlang/git/Git"
+import "flatlang/airship/Airship"
+import "flatlang/airship/ExecutionFailureException"
+
+class {
+  public construct(
+    private Airship airship,
+    private DependencyService dependencyService
+  ) {}
+
+  getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+
+  public async update() {
+    if (airship.updateCommand.values.isEmpty) {
+      await updateLocalPackage("main")
+    } else {
+      for (package in airship.updateCommand.values) {
+        match (package) {
+          "main" => fallthrough
+          "test" => await updateLocalPackage(package)
+          default => await updateGitPackage(package)
+        }
+      }
+    }
+  }
+
+  public async updateLocalPackage(String package) {
+    if (!airship.quietArg.enabled) {
+      Console.writeLine("Updating dependencies for #{package}...")
+    }
+
+    let source = airship.getSourceForPackage(package)
+    let dependencies = await dependencyService.getDependenciesForSource(package, package, source)
+
+    for (dependency in dependencies.filter({ _.value != "local" })) {
+      await updateGitPackage(dependencyService.getDependencyGitUrl(dependency), branch: dependency.value)
+    }
+  }
+
+  public async updateGitPackage(String url, String: branch = null) {
+    if (!airship.quietArg.enabled) {
+      Console.write("Updating dependency #url (#branch)... ")
+    }
+
+    let packageLocation = dependencyService.getDependencyPackageLocation(url)
+
+    if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
+      throw new ExecutionFailureException("Dependency #url (#branch) is not installed")
+    }
+
+    let git = new Git(packageLocation.location)
+
+    if (branch) {
+      git:checkout(branch, silent: true)$
+        :pull(silent: true)$
+    }
+
+    let pullResponse = git.pull(silent: true)$
+
+    if (pullResponse.upToDate) {
+      if (!airship.quietArg.enabled) {
+        Console.writeLine("Already up to date")
+      }
+    }
+  }
+}
