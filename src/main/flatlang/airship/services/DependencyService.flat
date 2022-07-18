@@ -1,0 +1,153 @@
+package "flatlang/airship/services"
+
+import "flatlang/airship/Airship"
+import "flatlang/airship/PackageSource"
+import "flatlang/datastruct/HashSet"
+import "flatlang/datastruct/Pair"
+import "flatlang/io/File"
+import "flatlang/git/Git"
+import "flatlang/airship/InvalidFlatJsonException"
+import "flatlang/airship/ExecutionFailureException"
+
+class {
+  public construct(
+    private Airship airship
+  ) {}
+
+  getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+
+  public getDependencyPackageLocation(String url) -> File {
+    let packageName = getPackageNameFromGitUrl(url)
+    return new File("#{airship.flatHome}/packages/#{packageName}")
+  }
+
+  public getDependencyLocation(Pair<String, String> dependency) -> String {
+    if (dependency.value == "local") {
+      return dependency.key
+    } else if (dependency.key.toLowerCase().startsWith("github:")) {
+      let fullRepoName = dependency.key.substring("github:".count).trim()
+      let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
+      return "#{airship.flatHome}/packages/#{repoName}"
+    } else {
+      throw InvalidFlatJsonException("Invalid dependency #dependency")
+    }
+  }
+
+  public getDependencyGitUrl(Pair<String, String> dependency) -> String {
+    if (dependency.key.toLowerCase().startsWith("github:")) {
+      let repoName = dependency.key.substring("github:".count).trim()
+      return getGitHubUrlFromRepoName(repoName)
+    } else {
+      throw InvalidFlatJsonException("Invalid dependency #dependency")
+    }
+  }
+
+  public getGitHubUrlFromRepoName(String repoName) => "https://GitHub.com/#{repoName}.git"
+
+  public async getDependenciesForSource(
+    String package,
+    String installationTarget,
+    PackageSource source,
+    Bool: download = true
+  ) -> Array<Pair<String, String>> {
+    return await getDependenciesForSource(
+      package,
+      installationTarget,
+      source,
+      download,
+      new Array(),
+      new HashSet()
+    )
+  }
+
+  async getDependenciesForSource(
+    String package,
+    String installationTarget,
+    PackageSource source,
+    Bool download = true,
+    Pair<String, String>[] dependencies,
+    HashSet<String> dependenciesAdded
+  ) -> Array<Pair<String, String>> {
+    if (dependenciesAdded.contains(package)) {
+      return dependencies
+    }
+
+    dependenciesAdded.add(package)
+
+    if (!source.dependencies) {
+      return dependencies
+    }
+
+    for (dependency in source.dependencies) {
+      if (dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
+        dependencies.add(dependency)
+      }
+
+      let dependencyPackageFile = new File(getDependencyLocation(dependency))
+
+      if (!dependencyPackageFile.exists) {
+        if (download) {
+          await downloadDependency(
+            getDependencyGitUrl(dependency),
+            dependency.value
+          )
+        }
+
+        if (!dependencyPackageFile.exists) {
+          continue
+        }
+      }
+
+      let airship = new Airship([
+        "-f", dependencyPackageFile.normalizedLocation
+      ])
+
+      var packageSource
+
+      match (installationTarget) {
+        "main" => packageSource = airship.mainSource
+        "test" => packageSource = airship.testSource ?: airship.mainSource
+      }
+
+      if (packageSource) {
+        await getDependenciesForSource(
+          dependencyPackageFile.name,
+          installationTarget,
+          packageSource,
+          download,
+          dependencies,
+          dependenciesAdded
+        )
+      }
+    }
+
+    return dependencies
+  }
+
+  public isDependencyInstalled(String url, String branch) =>
+    getDependencyPackageLocation(url).getChild(".git").isDirectory
+
+  public async downloadDependency(String url, String branch) {
+    let flatPackageDir = await getDependencyPackageLocation(url):mkdirs()
+
+    if (flatPackageDir.getChild(".git").isDirectory) {
+      return
+    }
+
+    if (!airship.quietArg.enabled) {
+      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
+    }
+
+    let response = await Git.clone(
+      url,
+      depth: 1,
+      branch: branch,
+      outputDirectory: flatPackageDir.normalizedLocation,
+      silent: true
+    )
+
+    if (response.exitCode != 0) {
+      throw new ExecutionFailureException("Failed to install git repo")
+    }
+  }
+}

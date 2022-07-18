@@ -10,9 +10,11 @@ import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
 import "flatlang/git/Git"
 
+import "flatlang/airship/services/DependencyService"
 import "flatlang/airship/services/InstallService"
 import "flatlang/airship/services/UninstallService"
 import "flatlang/airship/services/ReinstallService"
+import "flatlang/airship/services/UpdateService"
 import "flatlang/airship/services/CleanService"
 import "flatlang/airship/services/RunScriptService"
 
@@ -38,12 +40,15 @@ class {
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
   visible CliArg uninstallCommand = new CliArg("uninstall", new Array<String>(), minCount: 1)
   visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 0)
+  visible CliArg updateCommand = new CliArg("update", ["u"], minCount: 0)
   visible CliArg cleanCommand = new CliArg("clean", ["c"])
   visible CliArg runCommand = new CliArg("run", ["r"], minCount: 1)
 
-  visible InstallService installService = new InstallService(this)
+  visible DependencyService dependencyService = new DependencyService(this)
+  visible InstallService installService = new InstallService(this, dependencyService)
   visible UninstallService uninstallService = new UninstallService(this)
   visible ReinstallService reinstallService = new ReinstallService(this)
+  visible UpdateService updateService = new UpdateService(this, dependencyService)
   visible CleanService cleanService = new CleanService(this)
   visible RunScriptService runScriptService = new RunScriptService(this)
 
@@ -63,6 +68,7 @@ class {
         installCommand,
         uninstallCommand,
         reinstallCommand,
+        updateCommand,
         cleanCommand,
         runCommand,
         targetArg,
@@ -213,112 +219,11 @@ class {
         installCommand => await installService.install()
         uninstallCommand => await uninstallService.uninstall()
         reinstallCommand => await reinstallService.reinstall()
+        updateCommand => await updateService.update()
         cleanCommand => await cleanService.clean()
         runCommand => await runScriptService.runScript(command.value)
       }
     }
-  }
-
-  public getDependencyLocation(Pair<String, String> dependency) -> String {
-    if (dependency.value == "local") {
-      return dependency.key
-    } else if (dependency.key.toLowerCase().startsWith("github:")) {
-      let fullRepoName = dependency.key.substring("github:".count).trim()
-      let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
-      return "#{flatHome}/packages/#{repoName}"
-    } else {
-      throw InvalidFlatJsonException("Invalid dependency #dependency")
-    }
-  }
-
-  public getDependencyGitUrl(Pair<String, String> dependency) -> String {
-    if (dependency.key.toLowerCase().startsWith("github:")) {
-      let repoName = dependency.key.substring("github:".count).trim()
-      return "https://GitHub.com/#{repoName}.git"
-    } else {
-      throw InvalidFlatJsonException("Invalid dependency #dependency")
-    }
-  }
-
-  public async getDependenciesForSource(
-    String package,
-    String installationTarget,
-    PackageSource source,
-    Bool: download = true
-  ) -> Array<Pair<String, String>> {
-    return await getDependenciesForSource(
-      package,
-      installationTarget,
-      source,
-      download,
-      new Array(),
-      new HashSet()
-    )
-  }
-
-  async getDependenciesForSource(
-    String package,
-    String installationTarget,
-    PackageSource source,
-    Bool download = true,
-    Pair<String, String>[] dependencies,
-    HashSet<String> dependenciesAdded
-  ) -> Array<Pair<String, String>> {
-    if (dependenciesAdded.contains(package)) {
-      return dependencies
-    }
-
-    dependenciesAdded.add(package)
-
-    if (!source.dependencies) {
-      return dependencies
-    }
-
-    for (dependency in source.dependencies) {
-      if (dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
-        dependencies.add(dependency)
-      }
-
-      let dependencyPackageFile = new File(getDependencyLocation(dependency))
-
-      if (!dependencyPackageFile.exists) {
-        if (download) {
-          await installService.install(
-            getDependencyGitUrl(dependency),
-            install: false,
-            installDependencies: false
-          );
-        }
-
-        if (!dependencyPackageFile.exists) {
-          continue
-        }
-      }
-
-      let airship = new Airship([
-        "-f", dependencyPackageFile.normalizedLocation
-      ])
-
-      var packageSource
-
-      match (installationTarget) {
-        "main" => packageSource = airship.mainSource
-        "test" => packageSource = airship.testSource ?: airship.mainSource
-      }
-
-      if (packageSource) {
-        await airship.getDependenciesForSource(
-          dependencyPackageFile.name,
-          installationTarget,
-          packageSource,
-          download,
-          dependencies,
-          dependenciesAdded
-        )
-      }
-    }
-
-    return dependencies
   }
 
   public getSourceForPackage(String package) -> PackageSource {
@@ -347,12 +252,16 @@ class {
   }
 
   public async getGitOriginUrl() -> String => null {
-    let url = await Git.getOriginUrl(silent: true)
+    let response = await Git.getOriginUrl(silent: true)
 
-    if (!url.endsWith(".git")) {
-      return "#{url}.git"
-    } else {
-      return url
+    if (response.success) {
+      let url = response.value
+
+      if (!url.endsWith(".git")) {
+        return "#{url}.git"
+      } else {
+        return url
+      }
     }
   }
 
