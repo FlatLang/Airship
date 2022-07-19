@@ -44,18 +44,25 @@ class {
 
   public getGitHubUrlFromRepoName(String repoName) => "https://GitHub.com/#{repoName}.git"
 
+  public class DependenciesResponse {
+    construct(
+      visible Array<Pair<String, String>> dependencies = new Array(),
+      visible Array<Pair<String, String>> dependenciesDownloaded = new Array()
+    ) {}
+  }
+
   public async getDependenciesForSource(
     String package,
     String installationTarget,
     PackageSource source,
     Bool: download = true
-  ) -> Array<Pair<String, String>> {
+  ) -> DependenciesResponse {
     return getDependenciesForSource(
       package,
       installationTarget,
       source,
       download,
-      new Array(),
+      new DependenciesResponse(),
       new HashSet()
     )
   }
@@ -65,22 +72,22 @@ class {
     String installationTarget,
     PackageSource source,
     Bool download = true,
-    Pair<String, String>[] dependencies,
+    DependenciesResponse response,
     HashSet<String> dependenciesAdded
-  ) -> Array<Pair<String, String>> {
+  ) -> DependenciesResponse {
     if (dependenciesAdded.contains(package)) {
-      return dependencies
+      return response
     }
 
     dependenciesAdded.add(package)
 
     if (!source.dependencies) {
-      return dependencies
+      return response
     }
 
     for (dependency in source.dependencies) {
-      if (dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
-        dependencies.add(dependency)
+      if (response.dependencies.none({ getDependencyLocation(_) == getDependencyLocation(dependency) })) {
+        response.dependencies.add(dependency)
       }
 
       let dependencyPackageFile = new File(getDependencyLocation(dependency))
@@ -91,6 +98,7 @@ class {
             getDependencyGitUrl(dependency),
             dependency.value
           )
+          response.dependenciesDownloaded.add(dependency)
         }
 
         if (!dependencyPackageFile.exists) {
@@ -115,13 +123,13 @@ class {
           installationTarget,
           packageSource,
           download,
-          dependencies,
+          response,
           dependenciesAdded
         )
       }
     }
 
-    return dependencies
+    return response
   }
 
   public isDependencyInstalled(String url, String branch) =>
