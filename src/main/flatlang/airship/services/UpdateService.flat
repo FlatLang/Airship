@@ -54,8 +54,7 @@ class {
     let git = new Git(packageLocation.location)
 
     if (branch) {
-      git:checkout(branch, silent: true)
-        :pull(silent: true)
+      git.checkout(branch, silent: true)
     }
 
     let pullResponse = git.pull(silent: true)
