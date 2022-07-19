@@ -25,16 +25,15 @@ class {
           throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
         }
       }
-      install("main")
-      return
-    }
-
-    for (package in airship.installCommand.values) {
-      install(package)
+      install("main", install: true)
+    } else {
+      for (package in airship.installCommand.values) {
+        install(package, install: true)
+      }
     }
   }
 
-  public async install(String package, Bool install = false, Bool installDependencies = true) {
+  public async install(String package, Bool: install = false, Bool: installDependencies = true) {
     if (airship.linkArg.enabled) {
       installAndLink(package)
     } else if (package.endsWith(".git")) {
@@ -97,12 +96,15 @@ class {
     }
   }
 
-  public async installGitPackage(String url, String branch, Bool install = true, Bool installDependencies = true) {
-    if (dependencyService.isDependencyInstalled(url, branch)) {
-      return
+  public async installGitPackage(
+    String url,
+    String branch,
+    Bool: install = true,
+    Bool: installDependencies = true
+  ) {
+    if (!dependencyService.isDependencyInstalled(url, branch)) {
+      dependencyService.downloadDependency(url, branch)
     }
-
-    dependencyService.downloadDependency(url, branch)
 
     postInstallPackage(
       dependencyService.getDependencyPackageLocation(url),
@@ -127,11 +129,16 @@ class {
     postInstallPackage(flatPackageDir, install: false)
   }
 
-  async installDependencies(String package, PackageSource source) {
+  async installDependencies(String package, PackageSource source, Bool install = false) {
     let dependencies = dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in dependencies.filter({ _.value != "local" })) {
-      installGitPackage(dependencyService.getDependencyGitUrl(dependency), dependency.value)
+      installGitPackage(
+        dependencyService.getDependencyGitUrl(dependency),
+        dependency.value,
+        install,
+        installDependencies: false
+      )
     }
   }
 
