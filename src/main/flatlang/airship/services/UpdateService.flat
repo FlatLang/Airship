@@ -33,9 +33,9 @@ class {
     }
 
     let source = airship.getSourceForPackage(package)
-    let dependencies = dependencyService.getDependenciesForSource(package, package, source)
+    let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    for (dependency in dependencies.filter({ _.value != "local" })) {
+    for (dependency in response.dependencies.filter({ _.value != "local" })) {
       updateGitPackage(dependencyService.getDependencyGitUrl(dependency), branch: dependency.value)
     }
   }

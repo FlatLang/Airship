@@ -61,9 +61,9 @@ class {
       cmd.addAll(["-target", airship.target])
     }
 
-    let allDependencies = dependencyService.getDependenciesForSource(package, package, source)
+    let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    allDependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencyLocation(_)]) })
+    response.dependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencyLocation(_)]) })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
@@ -99,17 +99,19 @@ class {
   public async installGitPackage(
     String url,
     String branch,
+    Bool: build = true,
     Bool: install = true,
     Bool: installDependencies = true
   ) {
-    if (!dependencyService.isDependencyInstalled(url, branch)) {
+    if (dependencyService.isDependencyInstalled(url, branch)) {
       dependencyService.downloadDependency(url, branch)
     }
 
     postInstallPackage(
       dependencyService.getDependencyPackageLocation(url),
-      install: install,
-      installDependencies: installDependencies
+      build,
+      install,
+      installDependencies
     )
   }
 
@@ -130,13 +132,14 @@ class {
   }
 
   async installDependencies(String package, PackageSource source, Bool install = false) {
-    let dependencies = dependencyService.getDependenciesForSource(package, package, source)
+    let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    for (dependency in dependencies.filter({ _.value != "local" })) {
+    for (dependency in response.dependencies.filter({ _.value != "local" })) {
       installGitPackage(
         dependencyService.getDependencyGitUrl(dependency),
         dependency.value,
-        install,
+        build: response.dependenciesDownloaded.contains(dependency),
+        install: false,
         installDependencies: false
       )
     }
