@@ -29,25 +29,28 @@ testable class {
     let cmdOutput = output.splitOnTopLevel(' ')
     let flatHome = airship.flatHome
 
+    let package = "main"
+    let source = airship.getSourceForPackage(package)
+    let response = airship.dependencyService.getDependenciesForSource(package, package, source)
+
     let expected = [
       "java", "\"-jar\"", "\"#{flatHome}/packages/Flat/target/flatc.jar\"",
       "\"#{airship.packageLocation.normalizedLocation}/src/main\"",
       "\"-install-dir\"", "\"#{flatHome}/packages\"",
       "\"-o\"", "\"#{airship.packageLocation.normalizedLocation}/dist/airship.js\"",
-      "\"-target\"", "\"js\"",
-      "\"-l\"", "\"#{flatHome}/packages/Standard-Library\"",
-      "\"-l\"", "\"#{flatHome}/packages/Flat-Core\"",
-      "\"-l\"", "\"#{flatHome}/packages/Flat\"",
-      "\"-l\"", "\"#{flatHome}/packages/Flat-JS\"",
-      "\"-l\"", "\"#{flatHome}/packages/FuCli\"",
-      "\"-l\"", "\"#{flatHome}/packages/Json\"",
-      "\"-l\"", "\"#{flatHome}/packages/Compiler-String-Extensions\"",
-      "\"-l\"", "\"#{flatHome}/packages/IO\"",
-      "\"-l\"", "\"#{flatHome}/packages/Time\"",
-      "\"-l\"", "\"#{flatHome}/packages/System\"",
-      "\"-l\"", "\"#{flatHome}/packages/Git\"",
-      "\"-main\"", "\"flatlang/airship/Airship\""
+      "\"-target\"", "\"js\""
     ]
+
+    response.dependencies.forEach({
+      expected.addAll([
+        "\"-l\"",
+        '"' + airship.dependencyService.getDependencyLocation(_) + '"'
+      ])
+    })
+
+    expected.addAll([
+      "\"-main\"", "\"flatlang/airship/Airship\""
+    ])
 
     expect(cmdOutput).toBe(expected)
   }
