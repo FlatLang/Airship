@@ -89,7 +89,7 @@ class {
       return
     }
 
-    let response = System.execute(cmd)
+    let response = System.execute(cmd, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
       throw new ExecutionFailureException("Compilation failed")
