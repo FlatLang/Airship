@@ -3,11 +3,12 @@ package "flatlang/airship/services"
 import "flatlang/io/File"
 import "flatlang/airship/Airship"
 import "flatlang/airship/InvalidScriptException"
+import "flatlang/airship/ExecutionFailureException"
 
 class {
   public construct(private Airship airship) {}
 
-  public async runScript(String script) -> Int {
+  public async runScript(String script) {
     if (!airship.package.scripts.containsKey(script)) {
       throw new InvalidScriptException("Script command '#script' is not defined")
     }
@@ -19,7 +20,7 @@ class {
       let Object[] array = (Object[])cmd
 
       if (array.isEmpty) {
-        return 0
+        return
       }
 
       for (obj in array) {
@@ -32,7 +33,7 @@ class {
             let response = System.execute(c, workingDirectory)
 
             if (response.exitCode != 0) {
-              return response.exitCode
+              throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
             }
           }
         } else if (obj.class.isOfType(String.class)) {
@@ -44,22 +45,24 @@ class {
             let response = System.execute(c, workingDirectory)
 
             if (response.exitCode != 0) {
-              return response.exitCode
+              throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
             }
           }
         }
       }
 
-      return 0
+      return
     }
 
     if (airship.debug) {
       Console.writeLine(cmd)
-      return 0
+      return
     }
 
     let response = System.execute(cmd.toString(), workingDirectory)
 
-    return response.exitCode
+    if (response.exitCode != 0) {
+      throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
+    }
   }
 }
