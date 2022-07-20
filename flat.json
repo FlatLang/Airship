@@ -12,6 +12,7 @@
     "mainClass": "flatlang/airship/Airship",
     "source": "src/main",
     "dependencies": {
+      "github:FlatLang/Standard-Library": "master",
       "github:FlatLang/FuCli": "master",
       "github:FlatLang/Json": "master",
       "github:FlatLang/System": "master",

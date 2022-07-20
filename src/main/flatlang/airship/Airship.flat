@@ -3,6 +3,7 @@ package "flatlang/airship"
 import "flatlang/datastruct/HashMap"
 import "flatlang/datastruct/HashSet"
 import "flatlang/datastruct/Pair"
+import "flatlang/regex/Pattern"
 import "flatlang/json/JsonDeserializer"
 import "flatlang/io/File"
 import "flatlang/io/FileReader"
@@ -17,6 +18,8 @@ import "flatlang/airship/services/ReinstallService"
 import "flatlang/airship/services/UpdateService"
 import "flatlang/airship/services/CleanService"
 import "flatlang/airship/services/RunScriptService"
+
+import "flatlang/regex/RegexStringExtensions"
 
 class {
   visible Package package
@@ -151,12 +154,12 @@ class {
           merge(mainSource.dependencies, testSource.dependencies)
         }
 
-        if (!isStandardLibrary()) {
+        if (!isCoreLibrary()) {
           if (mainSource?.dependencies) {
-            mainSource.dependencies.add(new Pair("github:FlatLang/Standard-Library", "master"));
+            mainSource.dependencies.add(new Pair("github:FlatLang/Flat-Core", "master"));
           }
           if (testSource?.dependencies) {
-            testSource.dependencies.add(new Pair("github:FlatLang/Standard-Library", "master"));
+            testSource.dependencies.add(new Pair("github:FlatLang/Flat-Core", "master"));
           }
         }
       }
@@ -265,5 +268,5 @@ class {
     }
   }
 
-  isStandardLibrary() => packageLocation.name.equals("Standard-Library")
+  isCoreLibrary() => packageLocation.name.equals("Flat-Core")
 }
