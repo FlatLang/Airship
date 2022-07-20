@@ -59,9 +59,11 @@ class {
 
     let pullResponse = git.pull(silent: true)
 
-    if (pullResponse.upToDate) {
-      if (!airship.quietArg.enabled) {
+    if (!airship.quietArg.enabled) {
+      if (pullResponse.upToDate) {
         Console.writeLine("Already up to date")
+      } else {
+        Console.writeLine("Updated")
       }
     }
   }
