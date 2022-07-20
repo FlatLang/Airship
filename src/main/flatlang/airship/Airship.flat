@@ -62,7 +62,11 @@ class {
       throw new Exception("Missing command")
     }
 
-    let airship = new Airship(args.skip(1)):run()
+    try {
+      new Airship(args.skip(1)):run()
+    } catch (ExecutionFailureException e) {
+      System.exit(1)
+    }
   }
 
   public construct(String[] args) {
