@@ -40,7 +40,11 @@ class {
     }
   }
 
-  public async updateGitPackage(String url, String: branch = null) {
+  public async updateGitPackage(
+    String url,
+    String: branch = null,
+    Bool: build = true
+  ) {
     if (!airship.quietArg.enabled) {
       Console.write("Updating dependency #url (#branch)... ")
     }
@@ -61,9 +65,29 @@ class {
 
     if (!airship.quietArg.enabled) {
       if (pullResponse.upToDate) {
-        Console.writeLine("Already up to date")
+        Console.writeLine("already up to date")
       } else {
-        Console.writeLine("Updated")
+        let args = [
+          "-f", packageLocation.normalizedLocation
+        ]
+
+        if (airship.target) {
+          args.addAll(["-t", airship.target])
+        }
+
+        let airship = new Airship(args)
+
+        if (build && airship.package?.scripts.containsKey("build")) {
+          Console.writeLine("updated. Building...")
+          
+          if (airship.package.scripts.containsKey("clean")) {
+            airship.runScriptService.runScript("clean")
+          }
+          
+          airship.runScriptService.runScript("build")
+        } else {
+          Console.writeLine("updated")
+        }
       }
     }
   }
