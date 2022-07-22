@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        target: [js, es6]
 
     steps:
       - uses: actions/checkout@v3
@@ -46,19 +47,19 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Build Airship
+      - name: Build Airship ${{ matrix.target }}
         working-directory: Airship
         run: |
-          node ../airship.js install
+          node ../airship.js install -t ${{ matrix.target }}
 
       - name: Delete Airship artifact
         run: |
           rm airship.js
 
-      - name: Build Airship with Airship
+      - name: Build Airship with Airship ${{ matrix.target }}
         working-directory: Airship
         run: |
-          node dist/airship.js install
+          node dist/airship.js install -t ${{ matrix.target }}
 
       - name: Link Airship
         working-directory: Airship
@@ -71,10 +72,10 @@ jobs:
           name: airship.js
           path: Airship/dist/airship.js
 
-      - name: Build Airship Tests with Airship
+      - name: Build Airship Tests with Airship ${{ matrix.target }}
         working-directory: Airship
         run: |
-          node dist/airship.js install test
+          node dist/airship.js install test -t ${{ matrix.target }}
 
       - name: Run Airship Tests
         working-directory: Airship
@@ -87,11 +88,11 @@ jobs:
           repository: FlatLang/Stability-Test
           path: Stability-Test
 
-      - name: Build Stability-Test with Airship
+      - name: Build Stability-Test with Airship ${{ matrix.target }}
         working-directory: Stability-Test
         run: |
           node ../Airship/dist/airship.js install --link
-          node ../Airship/dist/airship.js install test
+          node ../Airship/dist/airship.js install test ${{ matrix.target }}
 
       - name: Run Stability-Test
         working-directory: Stability-Test
