@@ -106,9 +106,15 @@ class {
         }
       }
 
-      let airship = new Airship([
+      let args = [
         "-f", dependencyPackageFile.normalizedLocation
-      ])
+      ]
+
+      if (airship.target) {
+        args.addAll(["-t", airship.target])
+      }
+
+      let airship = new Airship(args)
 
       var packageSource
 
