@@ -4,6 +4,7 @@ import "flat/log/Logger"
 
 import "flatlang/io/File"
 import "flatlang/airship/Airship"
+import "flatlang/airship/PackageSource"
 
 class {
   let static Logger log = new Logger(CleanService.class)
@@ -11,10 +12,24 @@ class {
   public construct(private Airship airship) {}
 
   public async clean() {
-    let location = "#{airship.packageLocation.normalizedLocation}/#{airship.outDirectory}"
+    let mainDirectory = airship.mainSource?.outDirectory
+    let testDirectory = airship.testSource?.outDirectory
+
+    if (mainDirectory) {
+      clean(airship.mainSource)
+    }
+    if (testDirectory && mainDirectory != testDirectory) {
+      clean(airship.testSource)
+    }
+  }
+
+  public async clean(PackageSource source) {
+    let location = "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}"
     let outDirectory = new File(location)
 
-    if (!outDirectory.delete(recursive: true)) {
+    try {
+      outDirectory.delete(recursive: true)
+    } catch (Exception e) {
       throw new Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
     }
   }

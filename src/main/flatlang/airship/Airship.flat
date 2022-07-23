@@ -27,7 +27,6 @@ import "flatlang/regex/RegexStringExtensions"
 class {
   visible Package package
   visible String flatHome
-  visible String outDirectory
   visible String outFile
   visible String source
   visible Bool debug
