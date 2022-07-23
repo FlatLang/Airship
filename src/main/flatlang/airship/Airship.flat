@@ -145,6 +145,10 @@ class {
 
   public construct(visible FuCli cli) {
     if (debugArg.enabled) {
+      quietArg.enabled = true
+    }
+
+    if (quietArg.enabled) {
       Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
     }
 
