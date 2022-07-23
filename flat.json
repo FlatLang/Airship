@@ -18,7 +18,8 @@
       "github:FlatLang/Json": "master",
       "github:FlatLang/System": "master",
       "github:FlatLang/IO": "master",
-      "github:FlatLang/Git": "master"
+      "github:FlatLang/Git": "master",
+      "github:FlatLang/Logger": "master"
     }
   },
   "test": {
