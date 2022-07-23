@@ -144,6 +144,10 @@ class {
   }
 
   public construct(visible FuCli cli) {
+    if (debugArg.enabled) {
+      Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
+    }
+
     flatJsonLocation = getFlatJsonLocation(fileArg.value) ?: "#{System.workingDirectory}/flat.json"
     debug = debugArg.enabled
     target = targetArg.value
