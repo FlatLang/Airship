@@ -13,6 +13,7 @@ import "flatlang/fucli/FuCli"
 import "flatlang/fucli/CliArg"
 import "flatlang/git/Git"
 
+import "flatlang/airship/services/SetupService"
 import "flatlang/airship/services/DependencyService"
 import "flatlang/airship/services/InstallService"
 import "flatlang/airship/services/UninstallService"
@@ -42,6 +43,7 @@ class {
   visible CliArg linkArg = new CliArg("--link", new Array<String>(), minCount: 0, maxCount: 1)
   visible CliArg debugArg = new CliArg("--debug", ["-d"])
   visible CliArg quietArg = new CliArg("--quiet", ["-q"])
+  visible CliArg setupCommand = new CliArg("setup")
   visible CliArg installCommand = new CliArg("install", ["i"], minCount: 0)
   visible CliArg uninstallCommand = new CliArg("uninstall", new Array<String>(), minCount: 1)
   visible CliArg reinstallCommand = new CliArg("reinstall", new Array<String>(), minCount: 0)
@@ -56,6 +58,7 @@ class {
   visible UpdateService updateService = new UpdateService(this, dependencyService)
   visible CleanService cleanService = new CleanService(this)
   visible RunScriptService runScriptService = new RunScriptService(this)
+  visible SetupService setupService = new SetupService(this, dependencyService, updateService)
 
   let static HashMap<String, Airship> packageCache = new HashMap()
 
@@ -77,6 +80,7 @@ class {
   public construct(String[] args) {
     this(
       new FuCli([
+        setupCommand,
         installCommand,
         uninstallCommand,
         reinstallCommand,
@@ -244,6 +248,7 @@ class {
 
     for (command in cli.args.filter({ _.enabled })) {
       match (command) {
+        setupCommand => setupService.setup()
         installCommand => installService.install()
         uninstallCommand => uninstallService.uninstall()
         reinstallCommand => reinstallService.reinstall()

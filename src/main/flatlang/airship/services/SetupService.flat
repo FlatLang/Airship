@@ -1,0 +1,37 @@
+package "flatlang/airship/services"
+
+import "flat/log/Logger"
+
+import "flatlang/airship/Airship"
+import "flatlang/airship/PackageSource"
+import "flatlang/datastruct/HashSet"
+import "flatlang/datastruct/Pair"
+import "flatlang/io/File"
+import "flatlang/git/Git"
+import "flatlang/airship/InvalidFlatJsonException"
+import "flatlang/airship/ExecutionFailureException"
+
+class {
+  let static Logger log = new Logger(SetupService.class)
+  
+  public construct(
+    private Airship airship,
+    private DependencyService dependencyService,
+    private UpdateService updateService
+  ) {}
+
+  public async setup() {
+    let airshipUrl = "https://github.com/FlatLang/Airship.git"
+    let branch = "master"
+
+    if (dependencyService.isDependencyInstalled(airshipUrl, branch)) {
+      log.info("Airship already installed. Checking for updates")
+      updateService.updateGitPackage(airshipUrl, branch, build: true)
+    } else {
+      log.info("Installing Airship")
+      airship.installService.installGitPackage(airshipUrl, branch)
+    }
+
+    log.info("Finished setup!")
+  }
+}
