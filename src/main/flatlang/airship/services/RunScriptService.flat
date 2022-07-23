@@ -34,7 +34,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
           } else {
-            let response = System.execute(c, workingDirectory)
+            let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
 
             if (response.exitCode != 0) {
               throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
@@ -46,7 +46,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c)
           } else {
-            let response = System.execute(c, workingDirectory)
+            let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
 
             if (response.exitCode != 0) {
               throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
@@ -63,7 +63,7 @@ class {
       return
     }
 
-    let response = System.execute(cmd.toString(), workingDirectory)
+    let response = System.execute(cmd.toString(), workingDirectory, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
       throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
