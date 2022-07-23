@@ -315,8 +315,5 @@ class {
     if (quietArg.enabled) {
       args.add("-q")
     }
-    if (debugArg.enabled) {
-      args.add("-d")
-    }
   }
 }
