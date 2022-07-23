@@ -1,5 +1,7 @@
 package "flatlang/airship/services"
 
+import "flat/log/Logger"
+
 import "flatlang/airship/Airship"
 import "flatlang/airship/PackageSource"
 import "flatlang/datastruct/HashSet"
@@ -10,6 +12,8 @@ import "flatlang/airship/InvalidFlatJsonException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
+  let static Logger log = new Logger(DependencyService.class)
+  
   public construct(
     private Airship airship
   ) {}
@@ -148,9 +152,7 @@ class {
       return
     }
 
-    if (!airship.quietArg.enabled) {
-      Console.writeLine("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
-    }
+    log.info("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
 
     let response = Git.clone(
       url,

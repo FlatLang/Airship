@@ -1,9 +1,13 @@
 package "flatlang/airship/services"
 
+import "flat/log/Logger"
+
 import "flatlang/io/File"
 import "flatlang/airship/Airship"
 
 class {
+  let static Logger log = new Logger(CleanService.class)
+
   public construct(private Airship airship) {}
 
   public async clean() {

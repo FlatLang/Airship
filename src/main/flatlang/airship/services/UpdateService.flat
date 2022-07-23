@@ -1,11 +1,15 @@
 package "flatlang/airship/services"
 
+import "flat/log/Logger"
+
 import "flatlang/io/File"
 import "flatlang/git/Git"
 import "flatlang/airship/Airship"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
+  let static Logger log = new Logger(UpdateService.class)
+  
   public construct(
     private Airship airship,
     private DependencyService dependencyService
@@ -28,9 +32,7 @@ class {
   }
 
   public async updateLocalPackage(String package) {
-    if (!airship.quietArg.enabled) {
-      Console.writeLine("Updating dependencies for #{package}...")
-    }
+    log.info("Updating dependencies for #{package}...")
 
     let source = airship.getSourceForPackage(package)
     let response = dependencyService.getDependenciesForSource(package, package, source)
@@ -46,7 +48,7 @@ class {
     Bool: build = true
   ) {
     if (!airship.quietArg.enabled) {
-      Console.write("Updating dependency #url (#branch)... ")
+      log.info("Updating dependency #url (#branch)... ", newLine: false)
     }
 
     let packageLocation = dependencyService.getDependencyPackageLocation(url)
@@ -65,7 +67,7 @@ class {
 
     if (!airship.quietArg.enabled) {
       if (pullResponse.upToDate) {
-        Console.writeLine("already up to date")
+        log.info("already up to date")
       } else {
         let args = [
           "-f", packageLocation.normalizedLocation
@@ -78,7 +80,7 @@ class {
         let airship = new Airship(args)
 
         if (build && airship.package?.scripts.containsKey("build")) {
-          Console.writeLine("updated. Building...")
+          log.info("updated. Building...")
           
           if (airship.package.scripts.containsKey("clean")) {
             airship.runScriptService.runScript("clean")
@@ -86,7 +88,7 @@ class {
           
           airship.runScriptService.runScript("build")
         } else {
-          Console.writeLine("updated")
+          log.info("updated")
         }
       }
     }
