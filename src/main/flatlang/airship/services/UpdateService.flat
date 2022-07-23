@@ -65,31 +65,29 @@ class {
 
     let pullResponse = git.pull(silent: true)
 
-    if (!airship.quietArg.enabled) {
-      if (pullResponse.upToDate) {
-        log.info("already up to date")
+    if (pullResponse.upToDate) {
+      log.info("already up to date")
+    } else {
+      let args = [
+        "-f", packageLocation.normalizedLocation
+      ]
+
+      if (airship.target) {
+        args.addAll(["-t", airship.target])
+      }
+
+      let airship = new Airship(args)
+
+      if (build && airship.package?.scripts.containsKey("build")) {
+        log.info("updated. Building...")
+
+        if (airship.package.scripts.containsKey("clean")) {
+          airship.runScriptService.runScript("clean")
+        }
+
+        airship.runScriptService.runScript("build")
       } else {
-        let args = [
-          "-f", packageLocation.normalizedLocation
-        ]
-
-        if (airship.target) {
-          args.addAll(["-t", airship.target])
-        }
-
-        let airship = new Airship(args)
-
-        if (build && airship.package?.scripts.containsKey("build")) {
-          log.info("updated. Building...")
-          
-          if (airship.package.scripts.containsKey("clean")) {
-            airship.runScriptService.runScript("clean")
-          }
-          
-          airship.runScriptService.runScript("build")
-        } else {
-          log.info("updated")
-        }
+        log.info("updated")
       }
     }
   }
