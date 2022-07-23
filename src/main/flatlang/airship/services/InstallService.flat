@@ -12,7 +12,7 @@ import "flatlang/airship/ExecutionFailureException"
 
 class {
   let static Logger log = new Logger(InstallService.class)
-  
+
   public construct(
     private Airship airship,
     private DependencyService dependencyService
@@ -159,9 +159,7 @@ class {
       "-f", flatPackageDir.normalizedLocation
     ]
 
-    if (airship.target) {
-      args.addAll(["-t", airship.target])
-    }
+    airship.propagateArgs(args)
 
     let airship = new Airship(args)
 
