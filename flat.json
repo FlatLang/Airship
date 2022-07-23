@@ -4,7 +4,7 @@
   "description": "Flat package manager",
   "author": "Braden Steffaniak",
   "license": "ISC",
-  "defaultTarget": "js",
+  "defaultTarget": "es6",
   "scripts": {
     "test": "node dist/test.js"
   },
