@@ -307,4 +307,16 @@ class {
   }
 
   isCoreLibrary() => packageLocation.name.equals("Flat-Core")
+
+  public propagateArgs(String[] args) {
+    if (target) {
+      args.addAll(["-t", target])
+    }
+    if (quietArg.enabled) {
+      args.add("-q")
+    }
+    if (debugArg.enabled) {
+      args.add("-d")
+    }
+  }
 }
