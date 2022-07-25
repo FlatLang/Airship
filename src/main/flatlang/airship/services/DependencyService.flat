@@ -116,11 +116,11 @@ class {
 
       airship.propagateArgs(args)
 
-      let airship = new Airship(args)
+      let childship = new Airship(args, airship)
 
       let packageSource = match (installationTarget) {
-        "main" => airship.mainSource
-        "test" => airship.testSource ?: airship.mainSource
+        "main" => childship.mainSource
+        "test" => childship.testSource ?: childship.mainSource
       }
 
       if (packageSource) {
