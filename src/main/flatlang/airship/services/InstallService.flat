@@ -161,18 +161,18 @@ class {
 
     airship.propagateArgs(args)
 
-    let airship = new Airship(args)
+    let childship = new Airship(args, airship)
 
-    if (build && airship.package?.scripts.containsKey("build")) {
-      airship.runScriptService.runScript("build")
+    if (build && childship.package?.scripts.containsKey("build")) {
+      childship.runScriptService.runScript("build")
     }
 
-    if (airship.package?.main) {
+    if (childship.package?.main) {
       if (installDependencies) {
-        airship.installService.installDependencies(flatPackageDir.name, airship.package.main)
+        childship.installService.installDependencies(flatPackageDir.name, childship.package.main)
       }
       if (install) {
-        airship.installService.install()
+        childship.installService.install()
       }
     }
   }

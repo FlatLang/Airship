@@ -74,16 +74,16 @@ class {
 
       airship.propagateArgs(args)
 
-      let airship = new Airship(args)
+      let childship = new Airship(args, airship)
 
-      if (build && airship.package?.scripts.containsKey("build")) {
+      if (build && childship.package?.scripts.containsKey("build")) {
         log.info("updated. Building...")
 
-        if (airship.package.scripts.containsKey("clean")) {
-          airship.runScriptService.runScript("clean")
+        if (childship.package.scripts.containsKey("clean")) {
+          childship.runScriptService.runScript("clean")
         }
 
-        airship.runScriptService.runScript("build")
+        childship.runScriptService.runScript("build")
       } else {
         log.info("updated")
       }
