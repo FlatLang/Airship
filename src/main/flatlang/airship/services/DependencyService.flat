@@ -118,11 +118,9 @@ class {
 
       let airship = new Airship(args)
 
-      var packageSource
-
-      match (installationTarget) {
-        "main" => packageSource = airship.mainSource
-        "test" => packageSource = airship.testSource ?: airship.mainSource
+      let packageSource = match (installationTarget) {
+        "main" => airship.mainSource
+        "test" => airship.testSource ?: airship.mainSource
       }
 
       if (packageSource) {

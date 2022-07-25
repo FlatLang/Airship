@@ -102,20 +102,20 @@ class {
 
     let file = new File(location)
 
-    if (file.isDirectory || file.isSymbolicLink) {
-      return location + "/flat.json"
+    return if (file.isDirectory || file.isSymbolicLink) {
+      location + "/flat.json"
     } else if (file.isFile) {
-      return file.location
+      file.location
     } else {
       throw new InvalidFlatJsonException("Invalid flat.json location '#file.location'")
     }
   }
 
   public getFlatHome() -> String {
-    if (System.getEnv("FLAT_HOME")) {
-      return new File(System.getEnv("FLAT_HOME")).normalizedLocation
+    return if (System.getEnv("FLAT_HOME")) {
+      new File(System.getEnv("FLAT_HOME")).normalizedLocation
     } else {
-      return new File("#{System.homeDirectory}/.flat").normalizedLocation
+      new File("#{System.homeDirectory}/.flat").normalizedLocation
     }
   }
 
@@ -123,10 +123,10 @@ class {
     if (target) {
       let override = getFlatJsonOverrideForTarget(packageLocation, target)
 
-      if (override) {
-        return override
+      return if (override) {
+        override
       } else if (target == "es6") {
-        return getFlatJsonOverrideForTarget(packageLocation, "js")
+        getFlatJsonOverrideForTarget(packageLocation, "js")
       }
     }
   }
@@ -267,15 +267,11 @@ class {
   }
 
   public getSourceForPackage(String package) -> PackageSource {
-    var source
-
-    match (package) {
-      "main" => source = mainSource
-      "test" => source = testSource
+    return match (package) {
+      "main" => mainSource
+      "test" => testSource
       default => throw new InvalidCommandException("Invalid installation package '#package'")
     }
-
-    return source
   }
 
   async checkFlatHome() => true {
@@ -297,10 +293,10 @@ class {
     if (response.success) {
       let url = response.value
 
-      if (!url.endsWith(".git")) {
-        return "#{url}.git"
+      return if (!url.endsWith(".git")) {
+        "#{url}.git"
       } else {
-        return url
+        url
       }
     }
   }
