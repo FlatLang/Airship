@@ -64,6 +64,9 @@ class {
     if (airship.target) {
       cmd.addAll(["-target", airship.target])
     }
+    if (airship.targetRuntimeArg.enabled) {
+      cmd.addAll(["-target-runtime", airship.targetRuntimeArg.value])
+    }
 
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
