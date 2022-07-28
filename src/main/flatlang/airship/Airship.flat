@@ -38,6 +38,7 @@ class {
   visible String target
 
   visible CliArg targetArg = new CliArg("--target", ["-t"], count: 1)
+  visible CliArg targetRuntimeArg = new CliArg("--target-runtime", ["--runtime", "-r"], count: 1)
   visible CliArg fileArg = new CliArg("--file", ["-f"], count: 1)
   visible CliArg linkArg = new CliArg("--link", new Array<String>(), minCount: 0, maxCount: 1)
   visible CliArg debugArg = new CliArg("--debug", ["-d"])
@@ -90,6 +91,7 @@ class {
         cleanCommand,
         runCommand,
         targetArg,
+        targetRuntimeArg,
         fileArg,
         linkArg,
         debugArg,
@@ -319,6 +321,9 @@ class {
   public propagateArgs(String[] args) {
     if (target) {
       args.addAll(["-t", target])
+    }
+    if (targetRuntimeArg.enabled) {
+      args.addAll(["-r", targetRuntimeArg.value])
     }
     if (quietArg.enabled) {
       args.add("-q")
