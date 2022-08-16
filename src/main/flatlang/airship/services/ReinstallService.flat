@@ -7,8 +7,8 @@ import "flatlang/airship/Airship"
 import "flatlang/airship/InvalidCommandException"
 
 class {
-  let static Logger log = new Logger(ReinstallService.class)
-  
+  let static Logger log = Logger(ReinstallService.class)
+
   public construct(private Airship airship) {}
 
   public async reinstall() {
@@ -27,7 +27,7 @@ class {
     if (package.endsWith(".git")) {
       reinstallGitPackage(package)
     } else {
-      throw new InvalidCommandException("Cannot reinstall package '#package'")
+      throw InvalidCommandException("Cannot reinstall package '#package'")
     }
   }
 

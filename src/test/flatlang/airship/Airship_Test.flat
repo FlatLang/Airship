@@ -11,13 +11,13 @@ import static "novex/nest/Nest"
 
 testable class {
   test `can create`() {
-    let airship = new Airship(new Array<String>())
+    let airship = Airship(Array<String>())
 
     expect(airship).toNotBe(null)
   }
 
   test async `can debug basic install`() {
-    let airship = new Airship(["install", "--debug", "-q", "-t", "js"])
+    let airship = Airship(["install", "--debug", "-q", "-t", "js"])
 
     expect(airship.debug).toBe(true, "Expected debug flag to be true")
 
@@ -63,70 +63,70 @@ testable class {
   }
 
   test `fails on invalid -f arg (only arg given, with no value)`() {
-    expect({ new Airship(["-f"]) }).toThrow(InvalidCliArgumentException.class)
+    expect({ Airship(["-f"]) }).toThrow(InvalidCliArgumentException.class)
   }
 
   test `fails on invalid -f arg (last arg given, with no value)`() {
-    expect({ new Airship(["--debug", "-f"]) }).toThrow(InvalidCliArgumentException.class)
+    expect({ Airship(["--debug", "-f"]) }).toThrow(InvalidCliArgumentException.class)
   }
 
   test `fails on absolute backslash outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-absolute-backslash-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-absolute-backslash-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot be absolute")
   }
 
   test `fails on absolute double forward-slash outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-absolute-double-forward-slash-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-absolute-double-forward-slash-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot be absolute")
   }
 
   test `fails on backslash start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-backslash-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-backslash-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with \\")
   }
 
   test `fails on dot backslash start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-dot-backslash-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-dot-backslash-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
 
   test `fails on dot forward slash start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-dot-forward-slash-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-dot-forward-slash-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
 
   test `fails on double dot start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-double-dot-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-double-dot-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
 
   test `fails on empty outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-empty-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-empty-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot be empty")
   }
 
   test `fails on forward slash start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-forward-slash-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-forward-slash-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with /")
   }
 
   test `fails on single dot start outDirectory path`() {
-    expect({ new Airship(["-f", "res/test/flat-single-dot-start-outDirectory-path.json"]) })
+    expect({ Airship(["-f", "res/test/flat-single-dot-start-outDirectory-path.json"]) })
       .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
   }
 
   test async `can set target compile language`() {
-    var airship = new Airship(["--target", "js"])
+    var airship = Airship(["--target", "js"])
 
     expect(airship.target).toBe("js")
 
-    airship = new Airship(["-t", "c"])
+    airship = Airship(["-t", "c"])
 
     expect(airship.target).toBe("c")
   }
 
   test async `can override flat.json location`() {
-    let airship = new Airship(["--file", "res/test/valid-flat.json"])
+    let airship = Airship(["--file", "res/test/valid-flat.json"])
 
     expect(airship.flatJsonLocation).toBe("res/test/valid-flat.json")
   }

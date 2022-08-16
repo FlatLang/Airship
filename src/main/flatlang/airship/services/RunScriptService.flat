@@ -8,13 +8,13 @@ import "flatlang/airship/InvalidScriptException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  let static Logger log = new Logger(RunScriptService.class)
+  let static Logger log = Logger(RunScriptService.class)
 
   public construct(private Airship airship) {}
 
   public async runScript(String script) {
     if (!airship.package.scripts.containsKey(script)) {
-      throw new InvalidScriptException("Script command '#script' is not defined")
+      throw InvalidScriptException("Script command '#script' is not defined")
     }
 
     let workingDirectory = airship.flatJsonFile.getParent().location
@@ -37,7 +37,7 @@ class {
             let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
 
             if (response.exitCode != 0) {
-              throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
+              throw ExecutionFailureException("Script exited with exit code #response.exitCode")
             }
           }
         } else if (obj.class.isOfType(String.class)) {
@@ -49,7 +49,7 @@ class {
             let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
 
             if (response.exitCode != 0) {
-              throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
+              throw ExecutionFailureException("Script exited with exit code #response.exitCode")
             }
           }
         }
@@ -66,7 +66,7 @@ class {
     let response = System.execute(cmd.toString(), workingDirectory, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
-      throw new ExecutionFailureException("Script exited with exit code #response.exitCode")
+      throw ExecutionFailureException("Script exited with exit code #response.exitCode")
     }
   }
 }

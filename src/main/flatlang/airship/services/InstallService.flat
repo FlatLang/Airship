@@ -11,7 +11,7 @@ import "flatlang/airship/InvalidFlatJsonException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  let static Logger log = new Logger(InstallService.class)
+  let static Logger log = Logger(InstallService.class)
 
   public construct(
     private Airship airship,
@@ -26,7 +26,7 @@ class {
           installAndLink(gitUrl)
           return
         } else {
-          throw new InvalidCommandException("#{System.workingDirectory} is not a git repository")
+          throw InvalidCommandException("#{System.workingDirectory} is not a git repository")
         }
       }
       install("main", install: true)
@@ -49,7 +49,7 @@ class {
 
   public async getInstallCommand(String package, PackageSource source) -> String[] {
     if (!source) {
-      throw new InvalidCommandException("No source found for installation")
+      throw InvalidCommandException("No source found for installation")
     }
 
     let cmd = [
@@ -85,7 +85,7 @@ class {
     let source = airship.getSourceForPackage(package)
 
     if (!source) {
-      throw new InvalidCommandException("No source found for installation package '#package'")
+      throw InvalidCommandException("No source found for installation package '#package'")
     }
 
     installDependencies(package, source)
@@ -99,7 +99,7 @@ class {
     let response = System.execute(cmd, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
-      throw new ExecutionFailureException("Compilation failed")
+      throw ExecutionFailureException("Compilation failed")
     }
   }
 
@@ -127,13 +127,13 @@ class {
     let end = url.lastIndexOf('.')
 
     if (start > end) {
-      throw new InvalidFlatJsonException("Invalid repo url '#url'")
+      throw InvalidFlatJsonException("Invalid repo url '#url'")
     }
 
     let packageName = url.substring(start, end)
-    let flatPackageDir = new File("#{airship.flatHome}/packages/#{packageName}")
+    let flatPackageDir = File("#{airship.flatHome}/packages/#{packageName}")
 
-    flatPackageDir.symbolicLinkTo(new File("#{System.workingDirectory}/#{airship.linkArg.value}"))
+    flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{airship.linkArg.value}"))
 
     postInstallPackage(flatPackageDir, install: false)
   }
@@ -164,7 +164,7 @@ class {
 
     airship.propagateArgs(args)
 
-    let childship = new Airship(args, airship)
+    let childship = Airship(args, airship)
 
     if (build && childship.package?.scripts.containsKey("build")) {
       childship.runScriptService.runScript("build")

@@ -37,7 +37,7 @@ class {
     String outFile = outFile,
     String source = source,
     HashMap<String, String> dependencies = dependencies
-  ) => new PackageSource(
+  ) => PackageSource(
     mainClass,
     outDirectory,
     outFile,
