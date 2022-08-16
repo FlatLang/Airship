@@ -8,7 +8,7 @@ import "flatlang/airship/Airship"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  let static Logger log = new Logger(UpdateService.class)
+  let static Logger log = Logger(UpdateService.class)
 
   public construct(
     private Airship airship,
@@ -54,10 +54,10 @@ class {
     let packageLocation = dependencyService.getDependencyPackageLocation(url)
 
     if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
-      throw new ExecutionFailureException("Dependency #url (#branch) is not installed")
+      throw ExecutionFailureException("Dependency #url (#branch) is not installed")
     }
 
-    let git = new Git(packageLocation.location)
+    let git = Git(packageLocation.location)
 
     if (branch) {
       git.checkout(branch, silent: true)
@@ -74,7 +74,7 @@ class {
 
       airship.propagateArgs(args)
 
-      let childship = new Airship(args, airship)
+      let childship = Airship(args, airship)
 
       if (build && childship.package?.scripts.containsKey("build")) {
         log.info("updated. Building...")

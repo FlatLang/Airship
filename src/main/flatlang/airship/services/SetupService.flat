@@ -12,8 +12,8 @@ import "flatlang/airship/InvalidFlatJsonException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  let static Logger log = new Logger(SetupService.class)
-  
+  let static Logger log = Logger(SetupService.class)
+
   public construct(
     private Airship airship,
     private DependencyService dependencyService,

@@ -7,7 +7,7 @@ import "flatlang/airship/Airship"
 import "flatlang/airship/PackageSource"
 
 class {
-  let static Logger log = new Logger(CleanService.class)
+  let static Logger log = Logger(CleanService.class)
 
   public construct(private Airship airship) {}
 
@@ -25,12 +25,12 @@ class {
 
   public async clean(PackageSource source) {
     let location = "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}"
-    let outDirectory = new File(location)
+    let outDirectory = File(location)
 
     try {
       outDirectory.delete(recursive: true)
     } catch (Exception e) {
-      throw new Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
+      throw Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
     }
   }
 }

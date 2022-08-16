@@ -12,7 +12,7 @@ import "flatlang/airship/InvalidFlatJsonException"
 import "flatlang/airship/ExecutionFailureException"
 
 class {
-  let static Logger log = new Logger(DependencyService.class)
+  let static Logger log = Logger(DependencyService.class)
 
   public construct(
     private Airship airship
@@ -22,7 +22,7 @@ class {
 
   public getDependencyPackageLocation(String url) -> File {
     let packageName = getPackageNameFromGitUrl(url)
-    return new File("#{airship.flatHome}/packages/#{packageName}")
+    return File("#{airship.flatHome}/packages/#{packageName}")
   }
 
   public getDependencyLocation(Pair<String, String> dependency) -> String {
@@ -50,8 +50,8 @@ class {
 
   public class DependenciesResponse {
     construct(
-      visible Array<Pair<String, String>> dependencies = new Array(),
-      visible Array<Pair<String, String>> dependenciesDownloaded = new Array()
+      visible Array<Pair<String, String>> dependencies = Array(),
+      visible Array<Pair<String, String>> dependenciesDownloaded = Array()
     ) {}
   }
 
@@ -66,8 +66,8 @@ class {
       installationTarget,
       source,
       download,
-      new DependenciesResponse(),
-      new HashSet()
+      DependenciesResponse(),
+      HashSet()
     )
   }
 
@@ -94,7 +94,7 @@ class {
         response.dependencies.add(dependency)
       }
 
-      let dependencyPackageFile = new File(getDependencyLocation(dependency))
+      let dependencyPackageFile = File(getDependencyLocation(dependency))
 
       if (!dependencyPackageFile.exists) {
         if (download) {
@@ -116,7 +116,7 @@ class {
 
       airship.propagateArgs(args)
 
-      let childship = new Airship(args, airship)
+      let childship = Airship(args, airship)
 
       let packageSource = match (installationTarget) {
         "main" => childship.mainSource
@@ -159,7 +159,7 @@ class {
     )
 
     if (response.exitCode != 0) {
-      throw new ExecutionFailureException("Failed to install git repo")
+      throw ExecutionFailureException("Failed to install git repo")
     }
   }
 }

@@ -10,9 +10,9 @@ import "novex/nest/TestResult"
 ]]
 class {
   public static async main(String args[]) {
-    let test = new Airship_TestSuite()
+    let test = Airship_TestSuite()
 
-    Timer timer = new Timer().start()
+    Timer timer = Timer().start()
 
     let results = new TestResult[]
 
@@ -22,7 +22,7 @@ class {
       results.add(_)
     })
 
-    let fancy = new FancyOutputStream(headerPattern: "/\\")
+    let fancy = FancyOutputStream(headerPattern: "/\\")
 
     let unsuccessful = results.filter({ !_.success })
 

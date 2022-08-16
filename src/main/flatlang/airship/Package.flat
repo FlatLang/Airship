@@ -21,8 +21,8 @@ class {
     license = (String)map["license"]
     defaultTarget = (String)map["defaultTarget"]
     scripts = (HashMap)map["scripts"]
-    main = map.containsKey("main") ? new PackageSource((HashMap)map["main"]) : null
-    test = map.containsKey("test") ? new PackageSource((HashMap)map["test"]) : null
+    main = map.containsKey("main") ? PackageSource((HashMap)map["main"]) : null
+    test = map.containsKey("test") ? PackageSource((HashMap)map["test"]) : null
   }
 
   override public toString() => "{\n
