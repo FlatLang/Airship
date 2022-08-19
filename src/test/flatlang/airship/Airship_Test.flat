@@ -7,7 +7,7 @@ import flatlang/io/File
 
 import flatlang/extensions/SyntaxStringFunctions
 
-import static "novex/nest/Nest"
+import static novex/nest/Nest
 
 testable class {
   test `can create`() {
