@@ -1,15 +1,15 @@
-package "flatlang/airship/services"
+package flatlang/airship/services
 
-import "flat/log/Logger"
+import flat/log/Logger
 
-import "flatlang/airship/Airship"
-import "flatlang/airship/PackageSource"
-import "flatlang/datastruct/HashSet"
-import "flatlang/datastruct/Pair"
-import "flatlang/io/File"
-import "flatlang/git/Git"
-import "flatlang/airship/InvalidFlatJsonException"
-import "flatlang/airship/ExecutionFailureException"
+import flatlang/airship/Airship
+import flatlang/airship/PackageSource
+import flatlang/datastruct/HashSet
+import flatlang/datastruct/Pair
+import flatlang/io/File
+import flatlang/git/Git
+import flatlang/airship/InvalidFlatJsonException
+import flatlang/airship/ExecutionFailureException
 
 class {
   let static Logger log = Logger(DependencyService.class)

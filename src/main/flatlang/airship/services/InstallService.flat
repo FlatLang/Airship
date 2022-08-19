@@ -1,14 +1,14 @@
-package "flatlang/airship/services"
+package flatlang/airship/services
 
-import "flat/log/Logger"
+import flat/log/Logger
 
-import "flatlang/io/File"
-import "flatlang/git/Git"
-import "flatlang/airship/Airship"
-import "flatlang/airship/PackageSource"
-import "flatlang/airship/InvalidCommandException"
-import "flatlang/airship/InvalidFlatJsonException"
-import "flatlang/airship/ExecutionFailureException"
+import flatlang/io/File
+import flatlang/git/Git
+import flatlang/airship/Airship
+import flatlang/airship/PackageSource
+import flatlang/airship/InvalidCommandException
+import flatlang/airship/InvalidFlatJsonException
+import flatlang/airship/ExecutionFailureException
 
 class {
   let static Logger log = Logger(InstallService.class)

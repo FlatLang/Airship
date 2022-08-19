@@ -1,11 +1,11 @@
-package "flatlang/airship/services"
+package flatlang/airship/services
 
-import "flat/log/Logger"
+import flat/log/Logger
 
-import "flatlang/io/File"
-import "flatlang/airship/Airship"
-import "flatlang/airship/InvalidScriptException"
-import "flatlang/airship/ExecutionFailureException"
+import flatlang/io/File
+import flatlang/airship/Airship
+import flatlang/airship/InvalidScriptException
+import flatlang/airship/ExecutionFailureException
 
 class {
   let static Logger log = Logger(RunScriptService.class)

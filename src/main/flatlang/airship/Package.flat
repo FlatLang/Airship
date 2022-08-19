@@ -1,6 +1,6 @@
-package "flatlang/airship"
+package flatlang/airship
 
-import "flatlang/datastruct/HashMap"
+import flatlang/datastruct/HashMap
 
 class {
   visible String name

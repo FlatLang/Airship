@@ -1,9 +1,9 @@
-package "flatlang/airship"
+package flatlang/airship
 
-import "flatlang/time/Timer"
-import "flatlang/io/FancyOutputStream"
+import flatlang/time/Timer
+import flatlang/io/FancyOutputStream
 
-import "novex/nest/TestResult"
+import novex/nest/TestResult
 
 [TestSuite [
   Airship_Test

@@ -1,4 +1,4 @@
-package "flatlang/airship"
+package flatlang/airship
 
 class extends Exception {
   public construct(String message) {
