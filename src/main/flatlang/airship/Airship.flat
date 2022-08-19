@@ -1,28 +1,28 @@
-package "flatlang/airship"
+package flatlang/airship
 
-import "flat/log/Logger"
+import flat/log/Logger
 
-import "flatlang/datastruct/HashMap"
-import "flatlang/datastruct/HashSet"
-import "flatlang/datastruct/Pair"
-import "flatlang/regex/Pattern"
-import "flatlang/json/JsonDeserializer"
-import "flatlang/io/File"
-import "flatlang/io/FileReader"
-import "flatlang/fucli/FuCli"
-import "flatlang/fucli/CliArg"
-import "flatlang/git/Git"
+import flatlang/datastruct/HashMap
+import flatlang/datastruct/HashSet
+import flatlang/datastruct/Pair
+import flatlang/regex/Pattern
+import flatlang/json/JsonDeserializer
+import flatlang/io/File
+import flatlang/io/FileReader
+import flatlang/fucli/FuCli
+import flatlang/fucli/CliArg
+import flatlang/git/Git
 
-import "flatlang/airship/services/SetupService"
-import "flatlang/airship/services/DependencyService"
-import "flatlang/airship/services/InstallService"
-import "flatlang/airship/services/UninstallService"
-import "flatlang/airship/services/ReinstallService"
-import "flatlang/airship/services/UpdateService"
-import "flatlang/airship/services/CleanService"
-import "flatlang/airship/services/RunScriptService"
+import flatlang/airship/services/SetupService
+import flatlang/airship/services/DependencyService
+import flatlang/airship/services/InstallService
+import flatlang/airship/services/UninstallService
+import flatlang/airship/services/ReinstallService
+import flatlang/airship/services/UpdateService
+import flatlang/airship/services/CleanService
+import flatlang/airship/services/RunScriptService
 
-import "flatlang/regex/RegexStringExtensions"
+import flatlang/regex/RegexStringExtensions
 
 class {
   visible Package package

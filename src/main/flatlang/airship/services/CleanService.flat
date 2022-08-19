@@ -1,10 +1,10 @@
-package "flatlang/airship/services"
+package flatlang/airship/services
 
-import "flat/log/Logger"
+import flat/log/Logger
 
-import "flatlang/io/File"
-import "flatlang/airship/Airship"
-import "flatlang/airship/PackageSource"
+import flatlang/io/File
+import flatlang/airship/Airship
+import flatlang/airship/PackageSource
 
 class {
   let static Logger log = Logger(CleanService.class)

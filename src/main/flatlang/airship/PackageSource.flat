@@ -1,6 +1,6 @@
-package "flatlang/airship"
+package flatlang/airship
 
-import "flatlang/datastruct/HashMap"
+import flatlang/datastruct/HashMap
 
 class {
   visible String[] localDependencies => dependencies.filter({ _.value == "local" }).map({ _.key })

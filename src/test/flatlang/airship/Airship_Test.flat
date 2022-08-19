@@ -1,11 +1,11 @@
-package "flatlang/airship"
+package flatlang/airship
 
-import "flatlang/airship/Airship"
-import "flatlang/fucli/FuCli.InvalidCliArgumentException"
-import "flatlang/airship/InvalidOutDirException"
-import "flatlang/io/File"
+import flatlang/airship/Airship
+import flatlang/fucli/FuCli.InvalidCliArgumentException
+import flatlang/airship/InvalidOutDirException
+import flatlang/io/File
 
-import "flatlang/extensions/SyntaxStringFunctions"
+import flatlang/extensions/SyntaxStringFunctions
 
 import static "novex/nest/Nest"
 
