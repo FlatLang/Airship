@@ -85,7 +85,7 @@ class {
 
     dependenciesAdded.add(package)
 
-    if (!source.dependencies) {
+    if (!source?.dependencies) {
       return response
     }
 
