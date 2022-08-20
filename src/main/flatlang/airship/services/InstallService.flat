@@ -110,7 +110,7 @@ class {
     Bool: install = true,
     Bool: installDependencies = true
   ) {
-    if (dependencyService.isDependencyInstalled(url, branch)) {
+    if (!dependencyService.isDependencyInstalled(url, branch)) {
       dependencyService.downloadDependency(url, branch)
     }
 
