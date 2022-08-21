@@ -76,7 +76,11 @@ class {
         "" :
         "package #{mainClass.substring(0, packageEndLocation)}\n\n"
 
-      let mainClassFileContents = "#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}"
+      let mainClassFileContents = "#{packageLocation}class {\n
+        \tpublic static main(String[] args) {\n
+        \t\t\n
+        \t}\n
+        }\n".replace("\t", "  ")
 
       FileWriter(mainClassFile)
         :write(mainClassFileContents)
@@ -119,7 +123,7 @@ class {
       \t\t}\n
       \t}\n
       }\n
-    "
+    ".replace("\t", "  ")
 
     FileWriter(flatJson)
       :write(jsonContents)
