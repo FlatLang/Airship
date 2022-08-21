@@ -29,11 +29,9 @@ class {
     let author = question("Project author: ").trim().orElse("")
     let license = question("Project license (ISC): ").trim().orElse("ISC")
     let defaultTarget = question("Default compilation target (es6): ").trim().orElse("es6")
-    let mainClass = question("Main class (example/ClassName): ").trim().orElse(null)
+    let mainClass = question("Main class (e.g.: example/ClassName, or enter to skip): ").trim().orElse(null)
 
-    if (mainClass) {
-      writeMainClassFile(mainClass)
-    }
+    writeSources(mainClass)
 
     writeFlatJson(
       flatJson,
@@ -45,6 +43,20 @@ class {
       defaultTarget,
       mainClass
     )
+  }
+
+  async writeSources(String mainClass) {
+    let sourceRoot = File("src")
+
+    if (!sourceRoot.exists) {
+      sourceRoot.mkdir()
+    } else if (!sourceRoot.isDirectory) {
+      throw ExecutionFailureException("Invalid 'src' directory at #sourceRoot.location")
+    }
+
+    if (mainClass) {
+      writeMainClassFile(mainClass)
+    }
   }
 
   async writeMainClassFile(String mainClass) {
