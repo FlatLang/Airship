@@ -15,6 +15,8 @@ class {
 
   public construct(private Airship airship) {}
 
+  requireValue(String value) => value.trim().count > 0
+
   public async init() {
     let directory = File(System.workingDirectory)
     let flatJson = File("#{directory.location}/flat.json")
@@ -23,13 +25,13 @@ class {
       throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
     }
 
-    let name = question("Project name: ").trim().orElse("")
-    let version = question("Project version (0.1.0): ").trim().orElse("0.1.0")
-    let description = question("Project description: ").trim().orElse("")
-    let author = question("Project author: ").trim().orElse("")
-    let license = question("Project license (ISC): ").trim().orElse("ISC")
+    let name = question("Package name: ", requireValue, "Package name is required").trim().orElse("")
+    let version = question("Package version (0.1.0): ").trim().orElse("0.1.0")
+    let description = question("Package description: ").trim().orElse("")
+    let author = question("Package author: ").trim().orElse("")
+    let license = question("Package license (ISC): ").trim().orElse("ISC")
     let defaultTarget = question("Default compilation target (es6): ").trim().orElse("es6")
-    let mainClass = question("Main class (e.g.: example/ClassName, or enter to skip): ").trim().orElse(null)
+    let mainClass = question("Main class (e.g.: example/ClassName) [optional - press enter to skip]: ").trim().orElse(null)
 
     writeSources(mainClass)
 
