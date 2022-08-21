@@ -70,6 +70,7 @@ class {
 
     if (mainClass) {
       writeMainClassFile(mainClass)
+      writeTestFiles(mainClass)
     }
   }
 
@@ -96,6 +97,88 @@ class {
 
       FileWriter(mainClassFile)
         :write(mainClassFileContents)
+        .close()
+    }
+  }
+
+  async writeTestFiles(String mainClass) {
+    let mainClassFile = File(mainClass)
+    let mainClassTestFile = File("src/#{mainClass}_Test.flat")
+    let testSuiteFile = File("src/#{mainClass}_TestSuite.flat")
+    let packageDirectory = testSuiteFile.getParent()
+    let packageEndLocation = mainClass.lastIndexOf("/")
+    let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
+    let packageStatement = packageLocation ? "package #packageLocation\n\n" : ""
+
+    if (!packageDirectory.exists) {
+      packageDirectory.mkdirs()
+    }
+
+    if (!mainClassTestFile.exists) {
+      let mainClassTestFileContents = "#{packageStatement}import #{mainClass}\n
+\n
+        import static novex/nest/Nest\n
+\n
+        testable class {\n
+        \ttest &tick;can create&tick;() {\n
+        \t\tlet value = #{mainClassFile.rootName}()\n
+\n
+        \t\texpect(value).toNotBe(null)\n
+        \t}\n
+        }\n".replace("\t", "  ").replace("&tick;", "`")
+
+      FileWriter(mainClassTestFile)
+        :write(mainClassTestFileContents)
+        .close()
+    }
+
+    if (!testSuiteFile.exists) {
+      let testSuiteFileContents = "#{packageStatement}import novex/nest/TestResult\n
+\n
+        import flatlang/time/Timer\n
+        import flatlang/io/FancyOutputStream\n
+\n
+        [TestSuite [\n
+        \t#{mainClassTestFile.rootName}\n
+        ]]\n
+        class {\n
+        \tpublic static async main(String args[]) {\n
+        \t\tlet test = #{testSuiteFile.rootName}()\n
+\n
+        \t\tTimer timer = Timer().start()\n
+\n
+        \t\tlet results = new TestResult[]\n
+\n
+        \t\ttest.runTests({\n
+        \t\t\tresults.add(_)\n
+        \t\t})\n
+\n
+        \t\tlet fancy = FancyOutputStream(headerPattern: &quote;/\\\\&quote;)\n
+\n
+        \t\tlet unsuccessful = results.filter({ !_.success })\n
+\n
+        \t\tif (unsuccessful.count > 0) {\n
+        \t\t\tfancy.writeHeader(&quote;&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? &quote;&quote; : &quote;s&quote;} out of &hash;results.count test&hash;{results.count == 1 ? &quote;&quote; : &quote;s&quote;}&quote;, pattern: &quote;:'( &quote;, symmetrical: true)\n
+\n
+        \t\t\tunsuccessful.forEach({\n
+        \t\t\t\tConsole.log(&quote;&hash;_&quote;)\n
+        \t\t\t})\n
+        \t\t} else {\n
+        \t\t\tfancy.writeHeader(&quote;All &hash;results.count Successful&quote;, pattern: &quote;:) &quote;, symmetrical: true)\n
+        \t\t}\n
+\n
+        \t\ttimer.stop()\n
+\n
+        \t\tConsole.writeLine(&quote;Took &quote; + timer.duration + &quote;ms&quote;)\n
+\n
+        \t\tif (unsuccessful.count > 0) {\n
+        \t\t\t\tSystem.exit(1)\n
+        \t\t}\n
+        \t}\n
+        }\n".replace("\t", "  ").replace("&quote;", "\"").replace("&hash;", '#'.toString())
+
+      FileWriter(testSuiteFile)
+        :write(testSuiteFileContents)
         .close()
     }
   }
