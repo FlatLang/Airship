@@ -71,13 +71,16 @@ class {
         packageDirectory.mkdirs()
       }
 
-      let writer = FileWriter(mainClassFile)
       let packageEndLocation = mainClass.lastIndexOf("/")
       let packageLocation = packageEndLocation == -1 ?
         "" :
         "package #{mainClass.substring(0, packageEndLocation)}\n\n"
 
-      writer:write("#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}").close()
+      let mainClassFileContents = "#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}"
+
+      FileWriter(mainClassFile)
+        :write(mainClassFileContents)
+        .close()
     }
   }
 
@@ -94,9 +97,7 @@ class {
     let mainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}\",\n" : ""
     let testMainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}_TestSuite\",\n" : ""
 
-    let writer = FileWriter(flatJson)
-
-    writer:write("{\n
+    let jsonContents = "{\n
       \t\"name\": \"#name\",\n
       \t\"version\": \"#version\",\n
       \t\"description\": \"#description\",\n
@@ -118,6 +119,10 @@ class {
       \t\t}\n
       \t}\n
       }\n
-    ").close()
+    "
+
+    FileWriter(flatJson)
+      :write(jsonContents)
+      .close()
   }
 }
