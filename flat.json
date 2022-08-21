@@ -19,7 +19,8 @@
       "github:FlatLang/System": "master",
       "github:FlatLang/IO": "master",
       "github:FlatLang/Git": "master",
-      "github:FlatLang/Logger": "master"
+      "github:FlatLang/Logger": "master",
+      "github:FlatLang/Read-Line": "master"
     }
   },
   "test": {

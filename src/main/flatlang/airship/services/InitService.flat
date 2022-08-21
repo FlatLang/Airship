@@ -1,0 +1,83 @@
+package flatlang/airship/services
+
+import flat/log/Logger
+
+import flatlang/io/File
+import flatlang/io/FileWriter
+import flatlang/airship/Airship
+import flatlang/airship/InvalidScriptException
+import flatlang/airship/ExecutionFailureException
+
+import static flat/readline/ReadLine
+
+class {
+  let static Logger log = Logger(InitService.class)
+
+  public construct(private Airship airship) {}
+
+  public async init() {
+    let directory = File(System.workingDirectory)
+    let flatJson = File("#{directory.location}/flat.json")
+
+    if (flatJson.exists) {
+      throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
+    }
+
+    let name = question("Project name: ").trim().orElse("")
+    let version = question("Project version (0.1.0): ").trim().orElse("0.1.0")
+    let description = question("Project description: ").trim().orElse("")
+    let author = question("Project author: ").trim().orElse("")
+    let license = question("Project license (ISC): ").trim().orElse("ISC")
+    let defaultTarget = question("Default compilation target (es6): ").trim().orElse("es6")
+    let mainClass = question("Main class (example/ClassName): ").trim().orElse(null)
+
+    let mainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}\",\n" : ""
+    let testMainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}_TestSuite\",\n" : ""
+
+    if (mainClass) {
+      let mainClassFile = File("src/#{mainClass}.flat")
+
+      if (!mainClassFile.exists) {
+        let packageDirectory = mainClassFile.getParent()
+
+        if (!packageDirectory.exists) {
+          packageDirectory.mkdirs()
+        }
+
+        let classWriter = FileWriter(mainClassFile)
+        let packageEndLocation = mainClass.lastIndexOf("/")
+        let packageLocation = packageEndLocation == -1 ?
+          "" :
+          "package #{mainClass.substring(0, packageEndLocation)}\n\n"
+
+        classWriter.write("#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}")
+      }
+    }
+
+    let writer = FileWriter(flatJson)
+
+    writer.write("{\n
+    \t\"name\": \"#name\",\n
+    \t\"version\": \"#version\",\n
+    \t\"description\": \"#description\",\n
+    \t\"author\": \"#author\",\n
+    \t\"license\": \"#license\",\n
+    \t\"defaultTarget\": \"#defaultTarget\",\n
+    \t\"scripts\": {\n
+    \t\t\"test\": \"node dist/test.js\"\n
+    \t},\n
+    \t\"main\": {\n#mainClassProperty
+    \t\t\"source\": \"src\",\n
+    \t\t\"dependencies\": {\n
+    \t\t}\n
+    \t},\n
+    \t\"test\": {\n#testMainClassProperty
+    \t\t\"source\": \"src\",\n
+    \t\t\"dependencies\": {\n
+    \t\t\t\"github:FlatLang/Nest\": \"master\"\n
+    \t\t}\n
+    \t}\n
+    }\n
+  ")
+  }
+}
