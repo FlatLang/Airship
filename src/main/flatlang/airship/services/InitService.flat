@@ -31,53 +31,79 @@ class {
     let defaultTarget = question("Default compilation target (es6): ").trim().orElse("es6")
     let mainClass = question("Main class (example/ClassName): ").trim().orElse(null)
 
+    if (mainClass) {
+      writeMainClassFile(mainClass)
+    }
+
+    writeFlatJson(
+      flatJson,
+      name,
+      version,
+      description,
+      author,
+      license,
+      defaultTarget,
+      mainClass
+    )
+  }
+
+  async writeMainClassFile(String mainClass) {
+    let mainClassFile = File("src/#{mainClass}.flat")
+
+    if (!mainClassFile.exists) {
+      let packageDirectory = mainClassFile.getParent()
+
+      if (!packageDirectory.exists) {
+        packageDirectory.mkdirs()
+      }
+
+      let writer = FileWriter(mainClassFile)
+      let packageEndLocation = mainClass.lastIndexOf("/")
+      let packageLocation = packageEndLocation == -1 ?
+        "" :
+        "package #{mainClass.substring(0, packageEndLocation)}\n\n"
+
+      writer:write("#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}").close()
+    }
+  }
+
+  async writeFlatJson(
+    File flatJson,
+    String: name,
+    String: version,
+    String: description,
+    String: author,
+    String: license,
+    String: defaultTarget,
+    String: mainClass
+  ) {
     let mainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}\",\n" : ""
     let testMainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}_TestSuite\",\n" : ""
 
-    if (mainClass) {
-      let mainClassFile = File("src/#{mainClass}.flat")
-
-      if (!mainClassFile.exists) {
-        let packageDirectory = mainClassFile.getParent()
-
-        if (!packageDirectory.exists) {
-          packageDirectory.mkdirs()
-        }
-
-        let classWriter = FileWriter(mainClassFile)
-        let packageEndLocation = mainClass.lastIndexOf("/")
-        let packageLocation = packageEndLocation == -1 ?
-          "" :
-          "package #{mainClass.substring(0, packageEndLocation)}\n\n"
-
-        classWriter.write("#{packageLocation}class {\n  public static main(String[] args) {\n    \n  }\n}")
-      }
-    }
-
     let writer = FileWriter(flatJson)
 
-    writer.write("{\n
-    \t\"name\": \"#name\",\n
-    \t\"version\": \"#version\",\n
-    \t\"description\": \"#description\",\n
-    \t\"author\": \"#author\",\n
-    \t\"license\": \"#license\",\n
-    \t\"defaultTarget\": \"#defaultTarget\",\n
-    \t\"scripts\": {\n
-    \t\t\"test\": \"node dist/test.js\"\n
-    \t},\n
-    \t\"main\": {\n#mainClassProperty
-    \t\t\"source\": \"src\",\n
-    \t\t\"dependencies\": {\n
-    \t\t}\n
-    \t},\n
-    \t\"test\": {\n#testMainClassProperty
-    \t\t\"source\": \"src\",\n
-    \t\t\"dependencies\": {\n
-    \t\t\t\"github:FlatLang/Nest\": \"master\"\n
-    \t\t}\n
-    \t}\n
-    }\n
-  ")
+    writer:write("{\n
+      \t\"name\": \"#name\",\n
+      \t\"version\": \"#version\",\n
+      \t\"description\": \"#description\",\n
+      \t\"author\": \"#author\",\n
+      \t\"license\": \"#license\",\n
+      \t\"defaultTarget\": \"#defaultTarget\",\n
+      \t\"scripts\": {\n
+      \t\t\"test\": \"node dist/test.js\"\n
+      \t},\n
+      \t\"main\": {\n#mainClassProperty
+      \t\t\"source\": \"src\",\n
+      \t\t\"dependencies\": {\n
+      \t\t}\n
+      \t},\n
+      \t\"test\": {\n#testMainClassProperty
+      \t\t\"source\": \"src\",\n
+      \t\t\"dependencies\": {\n
+      \t\t\t\"github:FlatLang/Nest\": \"master\"\n
+      \t\t}\n
+      \t}\n
+      }\n
+    ").close()
   }
 }
