@@ -25,12 +25,14 @@ class {
       throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
     }
 
-    let name = question("Package name: ", requireValue, "Package name is required").trim().orElse("")
-    let version = question("Package version (0.1.0): ").trim().orElse("0.1.0")
+    let defaultPackageName = directory.name
+
+    let name = question("Package name (default: #defaultPackageName): ").trim().orElse(defaultPackageName)
+    let version = question("Package version (default: 0.1.0): ").trim().orElse("0.1.0")
     let description = question("Package description: ").trim().orElse("")
     let author = question("Package author: ").trim().orElse("")
-    let license = question("Package license (ISC): ").trim().orElse("ISC")
-    let defaultTarget = question("Default compilation target (es6): ").trim().orElse("es6")
+    let license = question("Package license (default: ISC): ").trim().orElse("ISC")
+    let defaultTarget = question("Default compilation target (default: es6): ").trim().orElse("es6")
     let mainClass = question("Main class (e.g.: example/ClassName) [optional - press enter to skip]: ").trim().orElse(null)
 
     writeSources(mainClass)
