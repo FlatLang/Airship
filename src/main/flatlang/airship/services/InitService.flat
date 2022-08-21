@@ -25,15 +25,25 @@ class {
       throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
     }
 
-    let defaultPackageName = directory.name
+    let defaultName = directory.name
+    let defaultVersion = "0.1.0"
+    let defaultLicense = "ISC"
+    let defaultDefaultTarget = "es6"
 
-    let name = question("Package name (default: #defaultPackageName): ").trim().orElse(defaultPackageName)
-    let version = question("Package version (default: 0.1.0): ").trim().orElse("0.1.0")
-    let description = question("Package description: ").trim().orElse("")
-    let author = question("Package author: ").trim().orElse("")
-    let license = question("Package license (default: ISC): ").trim().orElse("ISC")
-    let defaultTarget = question("Default compilation target (default: es6): ").trim().orElse("es6")
-    let mainClass = question("Main class (e.g.: example/ClassName) [optional - press enter to skip]: ").trim().orElse(null)
+    let name = question("Package name (default: #defaultName): ")
+      .trim().orElse(defaultName)
+    let version = question("Package version (default: #defaultVersion): ")
+      .trim().orElse(defaultVersion)
+    let description = question("Package description: ")
+      .trim().orElse("")
+    let author = question("Package author: ")
+      .trim().orElse("")
+    let license = question("Package license (default: #defaultLicense): ")
+      .trim().orElse(defaultLicense)
+    let defaultTarget = question("Default compilation target (default: #defaultDefaultTarget): ")
+      .trim().orElse(defaultDefaultTarget)
+    let mainClass = question("Main class (e.g.: example/ClassName) [optional - press enter to skip]: ")
+      .trim().orElse(null)
 
     writeSources(mainClass)
 
