@@ -10,6 +10,7 @@ import flatlang/io/File
 import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
+import flatlang/airship/GitHubDependency
 
 class {
   let static Logger log = Logger(SetupService.class)
@@ -21,15 +22,14 @@ class {
   ) {}
 
   public async setup() {
-    let airshipUrl = "https://github.com/FlatLang/Airship.git"
-    let branch = "master"
+    let airshipDependency = GitHubDependency("https://github.com/FlatLang/Airship.git", "master")
 
-    if (dependencyService.isDependencyInstalled(airshipUrl, branch)) {
+    if (dependencyService.isDependencyInstalled(airshipDependency)) {
       log.info("Airship already installed. Checking for updates")
-      updateService.updateGitPackage(airshipUrl, branch, build: true)
+      updateService.updateGitPackage(airshipDependency, build: true)
     } else {
       log.info("Installing Airship")
-      airship.installService.installGitPackage(airshipUrl, branch)
+      airship.installService.installGitPackage(airshipDependency)
     }
 
     log.info("Finished setup!")

@@ -6,6 +6,9 @@ import flatlang/io/File
 import flatlang/git/Git
 import flatlang/airship/Airship
 import flatlang/airship/PackageSource
+import flatlang/airship/Dependency
+import flatlang/airship/GitHubDependency
+import flatlang/airship/LocalDependency
 import flatlang/airship/InvalidCommandException
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
@@ -41,7 +44,7 @@ class {
     if (airship.linkArg.enabled) {
       installAndLink(package)
     } else if (package.endsWith(".git")) {
-      installGitPackage(package, "master", install, installDependencies)
+      installGitPackage(GitHubDependency(package, "master"), install, installDependencies)
     } else {
       installLocalPackage(package)
     }
@@ -55,9 +58,9 @@ class {
     let cmd = [
       "java",
       "-jar",
-      "#{airship.flatHome}/packages/Flat/target/flatc.jar",
+      "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
       "#{airship.packageLocation.normalizedLocation}/#{source.source}",
-      "-install-dir", "#{airship.flatHome}/packages",
+      "-install-dir", "#{Airship.flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ]
 
@@ -70,7 +73,7 @@ class {
 
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    response.dependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencyLocation(_)]) })
+    response.dependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencySourceLocation(_)]) })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
@@ -104,18 +107,17 @@ class {
   }
 
   public async installGitPackage(
-    String url,
-    String branch,
+    GitHubDependency dependency,
     Bool: build = true,
     Bool: install = true,
     Bool: installDependencies = true
   ) {
-    if (!dependencyService.isDependencyInstalled(url, branch)) {
-      dependencyService.downloadDependency(url, branch)
+    if (!dependencyService.isDependencyInstalled(dependency)) {
+      dependencyService.downloadDependency(dependency)
     }
 
     postInstallPackage(
-      dependencyService.getDependencyPackageLocation(url),
+      dependencyService.getDependencyPackageLocation(dependency),
       build,
       install,
       installDependencies
@@ -131,7 +133,7 @@ class {
     }
 
     let packageName = url.substring(start, end)
-    let flatPackageDir = File("#{airship.flatHome}/packages/#{packageName}")
+    let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
 
     flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{airship.linkArg.value}"))
 
@@ -141,10 +143,9 @@ class {
   async installDependencies(String package, PackageSource source, Bool install = false) {
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    for (dependency in response.dependencies.filter({ _.value != "local" })) {
+    for (dependency in response.dependencies.filter({ _.class.isOfType(GitHubDependency.class) })) {
       installGitPackage(
-        dependencyService.getDependencyGitUrl(dependency),
-        dependency.value,
+        (GitHubDependency)dependency,
         build: response.dependenciesDownloaded.contains(dependency),
         install: false,
         installDependencies: false

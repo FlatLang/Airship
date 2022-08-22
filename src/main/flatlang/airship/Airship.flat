@@ -26,8 +26,9 @@ import flatlang/airship/services/InitService
 import flatlang/regex/RegexStringExtensions
 
 class {
+  visible static String flatHome = getFlatHome()
+
   visible Package package
-  visible String flatHome
   visible String outFile
   visible String source
   visible Bool debug
@@ -124,8 +125,6 @@ class {
     flatJsonFile = File(flatJsonLocation)
     packageLocation = flatJsonFile.getParent()
 
-    flatHome = getFlatHome()
-
     if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
       let airship = packageCache[flatJsonFile.normalizedLocation]
 
@@ -158,10 +157,10 @@ class {
 
         if (!isCoreLibrary()) {
           if (mainSource?.dependencies) {
-            mainSource.dependencies.add(Pair("github:FlatLang/Flat-Core", "master"));
+            mainSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
           if (testSource?.dependencies) {
-            testSource.dependencies.add(Pair("github:FlatLang/Flat-Core", "master"));
+            testSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
         }
       }
@@ -186,7 +185,7 @@ class {
     }
   }
 
-  public getFlatHome() -> String {
+  public static getFlatHome() -> String {
     return if (System.getEnv("FLAT_HOME")) {
       File(System.getEnv("FLAT_HOME")).normalizedLocation
     } else {
@@ -232,6 +231,17 @@ class {
         merge(hashmap, existingHashmap)
       } else {
         dest[pair.key] = pair.value
+      }
+    })
+  }
+
+  merge(
+    Dependency[] source,
+    Dependency[] dest
+  ) {
+    source.forEach((dependency) => {
+      if (!dest.contains(dependency)) {
+        dest.add(dependency)
       }
     })
   }
