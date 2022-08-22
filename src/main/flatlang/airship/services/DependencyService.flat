@@ -29,7 +29,13 @@ class {
   }
 
   public getDependencySourceLocation(Dependency dependency) -> String {
-    return getDependencyLocation(dependency) + "/src"
+    let src = if (let source = dependency.airship.mainSource) {
+      source.source
+    } else {
+      "src"
+    }
+
+    return getDependencyLocation(dependency) + "/" + src
   }
 
   public getDependencyGitUrl(Dependency dependency) -> String {
@@ -53,13 +59,15 @@ class {
     String package,
     String installationTarget,
     PackageSource source,
-    Bool: download = true
+    Bool: download = true,
+    Bool: recursive = true
   ) -> DependenciesResponse {
     return getDependenciesForSource(
       package,
       installationTarget,
       source,
       download,
+      recursive,
       DependenciesResponse(),
       HashSet()
     )
@@ -70,6 +78,7 @@ class {
     String installationTarget,
     PackageSource source,
     Bool download = true,
+    Bool recursive = true,
     DependenciesResponse response,
     HashSet<String> dependenciesAdded
   ) -> DependenciesResponse {
@@ -114,12 +123,13 @@ class {
         "test" => childship.testSource ?: childship.mainSource
       }
 
-      if (packageSource) {
+      if (packageSource && recursive) {
         getDependenciesForSource(
           dependencyPackageFile.name,
           installationTarget,
           packageSource,
           download,
+          recursive,
           response,
           dependenciesAdded
         )

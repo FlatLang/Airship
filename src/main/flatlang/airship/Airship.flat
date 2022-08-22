@@ -82,6 +82,13 @@ class {
   }
 
   public construct(
+    String packageLocation,
+    Airship parent = null
+  ) {
+    this(["-f", packageLocation], parent)
+  }
+
+  public construct(
     String[] args,
     Airship parent = null
   ) {
@@ -153,6 +160,10 @@ class {
 
         if (mainSource?.dependencies && testSource?.dependencies) {
           merge(mainSource.dependencies, testSource.dependencies)
+        }
+
+        if (mainSource && testSource) {
+          merge(mainSource.defaultExports, testSource.defaultExports)
         }
 
         if (!isCoreLibrary()) {
@@ -236,12 +247,12 @@ class {
   }
 
   merge(
-    Dependency[] source,
-    Dependency[] dest
+    Object[] source,
+    Object[] dest
   ) {
-    source.forEach((dependency) => {
-      if (!dest.contains(dependency)) {
-        dest.add(dependency)
+    source.forEach((value) => {
+      if (!dest.contains(value)) {
+        dest.add(value)
       }
     })
   }
