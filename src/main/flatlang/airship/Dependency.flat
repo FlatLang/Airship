@@ -3,6 +3,8 @@ package flatlang/airship
 import flatlang/datastruct/HashMap
 
 abstract class {
+  let Airship airship => Airship(getLocation())
+
   public construct(String package) {
     return if (package.toLowerCase().startsWith("github:")) {
       GitHubDependency(

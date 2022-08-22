@@ -72,8 +72,18 @@ class {
     }
 
     let response = dependencyService.getDependenciesForSource(package, package, source)
+    let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
     response.dependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencySourceLocation(_)]) })
+
+    topLevelDependencies.dependencies.forEach({
+      let childShip = _.airship
+      let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
+
+      dependencySource?.defaultExports.forEach({
+        cmd.addAll(["-default-import", _])
+      })
+    })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
