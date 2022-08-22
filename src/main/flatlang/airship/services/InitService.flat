@@ -85,15 +85,18 @@ class {
       }
 
       let packageEndLocation = mainClass.lastIndexOf("/")
-      let packageLocation = packageEndLocation == -1 ?
-        "" :
-        "package #{mainClass.substring(0, packageEndLocation)}\n\n"
+      let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
+      let packageStatement = packageLocation ? "package #packageLocation" : ""
 
-      let mainClassFileContents = "#{packageLocation}class {\n
-        \tpublic static main(String[] args) {\n
-        \t\t\n
-        \t}\n
-        }\n".replace("\t", "  ")
+      let mainClassFileContents = "
+        #{packageStatement}
+
+        class {
+          public static main(String[] args) {
+
+          }
+        }\n
+        |".trimStart()
 
       FileWriter(mainClassFile)
         :write(mainClassFileContents)
@@ -108,24 +111,28 @@ class {
     let packageDirectory = testSuiteFile.getParent()
     let packageEndLocation = mainClass.lastIndexOf("/")
     let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
-    let packageStatement = packageLocation ? "package #packageLocation\n\n" : ""
+    let packageStatement = packageLocation ? "package #packageLocation" : ""
 
     if (!packageDirectory.exists) {
       packageDirectory.mkdirs()
     }
 
     if (!mainClassTestFile.exists) {
-      let mainClassTestFileContents = "#{packageStatement}import #{mainClass}\n
-\n
-        import static novex/nest/Nest\n
-\n
-        testable class {\n
-        \ttest &tick;can create&tick;() {\n
-        \t\tlet value = #{mainClassFile.rootName}()\n
-\n
-        \t\texpect(value).toNotBe(null)\n
-        \t}\n
-        }\n".replace("\t", "  ").replace("&tick;", "`")
+      let mainClassTestFileContents = "
+        #{packageStatement}
+
+        import #{mainClass}
+
+        import static novex/nest/Nest
+
+        testable class {
+          test &tick;can create&tick;() {
+            let value = #{mainClassFile.rootName}()
+
+            expect(value).toNotBe(null)
+          }
+        }\n
+        |".replace("&tick;", "`").trimStart()
 
       FileWriter(mainClassTestFile)
         :write(mainClassTestFileContents)
@@ -133,49 +140,53 @@ class {
     }
 
     if (!testSuiteFile.exists) {
-      let testSuiteFileContents = "#{packageStatement}import novex/nest/TestResult\n
-\n
-        import flatlang/time/Timer\n
-        import flatlang/io/FancyOutputStream\n
-\n
-        [TestSuite [\n
-        \t#{mainClassTestFile.rootName}\n
-        ]]\n
-        class {\n
-        \tpublic static async main(String args[]) {\n
-        \t\tlet test = #{testSuiteFile.rootName}()\n
-\n
-        \t\tTimer timer = Timer().start()\n
-\n
-        \t\tlet results = new TestResult[]\n
-\n
-        \t\ttest.runTests({\n
-        \t\t\tresults.add(_)\n
-        \t\t})\n
-\n
-        \t\tlet fancy = FancyOutputStream(headerPattern: &quote;/\\\\&quote;)\n
-\n
-        \t\tlet unsuccessful = results.filter({ !_.success })\n
-\n
-        \t\tif (unsuccessful.count > 0) {\n
-        \t\t\tfancy.writeHeader(&quote;&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? &quote;&quote; : &quote;s&quote;} out of &hash;results.count test&hash;{results.count == 1 ? &quote;&quote; : &quote;s&quote;}&quote;, pattern: &quote;:'( &quote;, symmetrical: true)\n
-\n
-        \t\t\tunsuccessful.forEach({\n
-        \t\t\t\tConsole.log(&quote;&hash;_&quote;)\n
-        \t\t\t})\n
-        \t\t} else {\n
-        \t\t\tfancy.writeHeader(&quote;All &hash;results.count Successful&quote;, pattern: &quote;:) &quote;, symmetrical: true)\n
-        \t\t}\n
-\n
-        \t\ttimer.stop()\n
-\n
-        \t\tConsole.writeLine(&quote;Took &quote; + timer.duration + &quote;ms&quote;)\n
-\n
-        \t\tif (unsuccessful.count > 0) {\n
-        \t\t\t\tSystem.exit(1)\n
-        \t\t}\n
-        \t}\n
-        }\n".replace("\t", "  ").replace("&quote;", "\"").replace("&hash;", '#'.toString())
+      let testSuiteFileContents = "
+        #{packageStatement}
+
+        import novex/nest/TestResult
+
+        import flatlang/time/Timer
+        import flatlang/io/FancyOutputStream
+
+        [TestSuite [
+          #{mainClassTestFile.rootName}
+        ]]
+        class {
+          public static async main(String args[]) {
+            let test = #{testSuiteFile.rootName}()
+
+            Timer timer = Timer().start()
+
+            let results = new TestResult[]
+
+            test.runTests({
+              results.add(_)
+            })
+
+            let fancy = FancyOutputStream(headerPattern: &quote;/\\\\&quote;)
+
+            let unsuccessful = results.filter({ !_.success })
+
+            if (unsuccessful.count > 0) {
+              fancy.writeHeader(&quote;&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? &quote;&quote; : &quote;s&quote;} out of &hash;results.count test&hash;{results.count == 1 ? &quote;&quote; : &quote;s&quote;}&quote;, pattern: &quote;:'( &quote;, symmetrical: true)
+
+              unsuccessful.forEach({
+                Console.log(&quote;&hash;_&quote;)
+              })
+            } else {
+              fancy.writeHeader(&quote;All &hash;results.count Successful&quote;, pattern: &quote;:) &quote;, symmetrical: true)
+            }
+
+            timer.stop()
+
+            Console.writeLine(&quote;Took &quote; + timer.duration + &quote;ms&quote;)
+
+            if (unsuccessful.count > 0) {
+                System.exit(1)
+            }
+          }
+        }\n
+        |".replace("&quote;", "\"").replace("&hash;", '#'.toString()).trimStart()
 
       FileWriter(testSuiteFile)
         :write(testSuiteFileContents)
@@ -193,32 +204,33 @@ class {
     String: defaultTarget,
     String: mainClass
   ) {
-    let mainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}\",\n" : ""
-    let testMainClassProperty = mainClass ? "\t\t\"mainClass\": \"#{mainClass}_TestSuite\",\n" : ""
+    let mainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}\",\n    " : ""
+    let testMainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}_TestSuite\",\n    " : ""
 
-    let jsonContents = "{\n
-      \t\"name\": \"#name\",\n
-      \t\"version\": \"#version\",\n
-      \t\"description\": \"#description\",\n
-      \t\"author\": \"#author\",\n
-      \t\"license\": \"#license\",\n
-      \t\"defaultTarget\": \"#defaultTarget\",\n
-      \t\"scripts\": {\n
-      \t\t\"test\": \"node dist/test.js\"\n
-      \t},\n
-      \t\"main\": {\n#mainClassProperty
-      \t\t\"source\": \"src\",\n
-      \t\t\"dependencies\": {\n
-      \t\t}\n
-      \t},\n
-      \t\"test\": {\n#testMainClassProperty
-      \t\t\"source\": \"src\",\n
-      \t\t\"dependencies\": {\n
-      \t\t\t\"github:FlatLang/Nest\": \"master\"\n
-      \t\t}\n
-      \t}\n
+    let jsonContents = "
+      {
+        \"name\": \"#name\",
+        \"version\": \"#version\",
+        \"description\": \"#description\",
+        \"author\": \"#author\",
+        \"license\": \"#license\",
+        \"defaultTarget\": \"#defaultTarget\",
+        \"scripts\": {
+          \"test\": \"node dist/test.js\"
+        },
+        \"main\": {
+          #mainClassProperty\"source\": \"src\",
+          \"dependencies\": {
+          }
+        },
+        \"test\": {
+          #testMainClassProperty\"source\": \"src\",
+          \"dependencies\": {
+            \"github:FlatLang/Nest\": \"master\"
+          }
+        }
       }\n
-    ".replace("\t", "  ")
+      |".trimStart()
 
     FileWriter(flatJson)
       :write(jsonContents)
