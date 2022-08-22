@@ -13,6 +13,8 @@ import flatlang/airship/Dependency
 import flatlang/airship/GitHubDependency
 import flatlang/airship/LocalDependency
 
+import static flat/colorizer/Colorizer
+
 class {
   let static Logger log = Logger(DependencyService.class)
 
@@ -170,7 +172,7 @@ class {
     )
 
     if (response.exitCode != 0) {
-      throw ExecutionFailureException("Failed to install git repo")
+      throw ExecutionFailureException("Failed to install git repo: #{red(response.stderr.join("\n"))}")
     }
   }
 }
