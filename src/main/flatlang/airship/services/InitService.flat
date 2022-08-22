@@ -88,7 +88,7 @@ class {
       let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
       let packageStatement = packageLocation ? "package #packageLocation" : ""
 
-      let mainClassFileContents = "
+      let mainClassFileContents = "|
         #{packageStatement}
 
         class {
@@ -118,7 +118,7 @@ class {
     }
 
     if (!mainClassTestFile.exists) {
-      let mainClassTestFileContents = "
+      let mainClassTestFileContents = "|
         #{packageStatement}
 
         import #{mainClass}
@@ -140,7 +140,7 @@ class {
     }
 
     if (!testSuiteFile.exists) {
-      let testSuiteFileContents = "
+      let testSuiteFileContents = "|
         #{packageStatement}
 
         import novex/nest/TestResult
@@ -207,7 +207,7 @@ class {
     let mainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}\",\n    " : ""
     let testMainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}_TestSuite\",\n    " : ""
 
-    let jsonContents = "
+    let jsonContents = "|
       {
         \"name\": \"#name\",
         \"version\": \"#version\",
@@ -230,7 +230,7 @@ class {
           }
         }
       }\n
-      |".trimStart()
+      |"
 
     FileWriter(flatJson)
       :write(jsonContents)
