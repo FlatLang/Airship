@@ -124,8 +124,6 @@ class {
 
         import #{mainClass}
 
-        import static novex/nest/Nest
-
         testable class {
           test `can create`() {
             let value = #{mainClassFile.rootName}()
