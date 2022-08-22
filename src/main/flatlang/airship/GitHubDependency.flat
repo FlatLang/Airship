@@ -40,4 +40,11 @@ class extends Dependency {
     other &&
     other.gitHubUrl == gitHubUrl &&
     other.branch == branch
+
+  public override toString() => "|
+    {
+      \"gitHubUrl\": \"#{gitHubUrl}\",
+      \"branch\": \"#{branch}\"
+    }
+    |"
 }
