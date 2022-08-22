@@ -169,17 +169,17 @@ class {
 
             if (unsuccessful.count > 0) {
               fancy.writeHeader(
-                \"&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? \"\" : \"s\"} out of &hash;results.count test&hash;{results.count == 1 ? \"\" : \"s\"}\",
+                \"\#unsuccessful.count Failure\#{unsuccessful.count == 1 ? \"\" : \"s\"} out of \#results.count test\#{results.count == 1 ? \"\" : \"s\"}\",
                 pattern: \":'( \",
                 symmetrical: true
               )
 
               unsuccessful.forEach({
-                Console.log(\"&hash;_\")
+                Console.log(\"\#_\")
               })
             } else {
               fancy.writeHeader(
-                \"All &hash;results.count Successful\",
+                \"All \#results.count Successful\",
                 pattern: \":) \",
                 symmetrical: true
               )
@@ -187,14 +187,14 @@ class {
 
             timer.stop()
 
-            Console.writeLine(\"Took&hash;{timer.duration}ms\")
+            Console.writeLine(\"Took\#{timer.duration}ms\")
 
             if (unsuccessful.count > 0) {
                 System.exit(1)
             }
           }
         }\n
-        |".replace("&hash;", '#'.toString()).trimStart()
+        |".trimStart()
 
       FileWriter(testSuiteFile)
         :write(testSuiteFileContents)
