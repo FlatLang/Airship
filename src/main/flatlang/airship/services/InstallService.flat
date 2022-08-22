@@ -80,9 +80,13 @@ class {
       let childShip = _.airship
       let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
 
-      dependencySource?.defaultExports.forEach({
-        cmd.addAll(["-default-import", _])
-      })
+      dependencySource?.defaultExports
+        .filter({ !_.staticImport })
+        .forEach({ cmd.addAll(["-default-import", _.location]) })
+
+      dependencySource?.defaultExports
+        .filter({ _.staticImport })
+        .forEach({ cmd.addAll(["-default-static-import", _.location]) })
     })
 
     if (source.mainClass) {

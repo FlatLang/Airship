@@ -10,13 +10,14 @@ class {
     visible String outDirectory,
     visible String outFile,
     visible String source,
-    visible String[] defaultExports,
+    visible DefaultExport[] defaultExports,
     visible Dependency[] dependencies
   ) {}
 
   public construct(HashMap<String, Object> map) {
     let exportsValue = (Object)(map["defaultExports"])
-    let defaultExports = (Array)exportsValue
+    let defaultExportsArray = (Array)exportsValue
+    let defaultExports = defaultExportsArray?.map({ DefaultExport(_) })
     let dependenciesValue = (Object)(map["dependencies"])
     let dependenciesMap = (HashMap)dependenciesValue
     let dependencies = dependenciesMap.map(pair => Dependency((String)pair.key, (String)pair.value))
@@ -25,7 +26,7 @@ class {
       outDirectory: (String)map["outDirectory"],
       outFile: (String)map["outFile"],
       source: (String)map["source"],
-      defaultExports: defaultExports ?: Array<String>(),
+      defaultExports: defaultExports ?: Array<DefaultExport>(),
       dependencies: dependencies ?: Array<Dependency>()
     )
   }
@@ -45,7 +46,7 @@ class {
     String outDirectory = outDirectory,
     String outFile = outFile,
     String source = source,
-    String[] defaultExports = defaultExports,
+    DefaultExport[] defaultExports = defaultExports,
     Dependency[] dependencies = dependencies
   ) => PackageSource(
     mainClass,
