@@ -163,30 +163,30 @@ class {
               results.add(_)
             })
 
-            let fancy = FancyOutputStream(headerPattern: &quote;/\\\\&quote;)
+            let fancy = FancyOutputStream(headerPattern: \"/\\\\\")
 
             let unsuccessful = results.filter({ !_.success })
 
             if (unsuccessful.count > 0) {
-              fancy.writeHeader(&quote;&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? &quote;&quote; : &quote;s&quote;} out of &hash;results.count test&hash;{results.count == 1 ? &quote;&quote; : &quote;s&quote;}&quote;, pattern: &quote;:'( &quote;, symmetrical: true)
+              fancy.writeHeader(\"&hash;unsuccessful.count Failure&hash;{unsuccessful.count == 1 ? \"\" : \"s\"} out of &hash;results.count test&hash;{results.count == 1 ? \"\" : \"s\"}\", pattern: \":'( \", symmetrical: true)
 
               unsuccessful.forEach({
-                Console.log(&quote;&hash;_&quote;)
+                Console.log(\"&hash;_\")
               })
             } else {
-              fancy.writeHeader(&quote;All &hash;results.count Successful&quote;, pattern: &quote;:) &quote;, symmetrical: true)
+              fancy.writeHeader(\"All &hash;results.count Successful\", pattern: \":) \", symmetrical: true)
             }
 
             timer.stop()
 
-            Console.writeLine(&quote;Took &quote; + timer.duration + &quote;ms&quote;)
+            Console.writeLine(\"Took \" + timer.duration + \"ms\")
 
             if (unsuccessful.count > 0) {
                 System.exit(1)
             }
           }
         }\n
-        |".replace("&quote;", "\"").replace("&hash;", '#'.toString()).trimStart()
+        |".replace("&hash;", '#'.toString()).trimStart()
 
       FileWriter(testSuiteFile)
         :write(testSuiteFileContents)
