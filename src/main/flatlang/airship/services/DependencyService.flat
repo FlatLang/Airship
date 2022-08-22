@@ -151,7 +151,7 @@ class {
   }
 
   public async downloadGitHubDependency(GitHubDependency dependency) {
-    let url = dependency.gitHubUrl
+    let url = dependency.getGitUrl()
     let branch = dependency.branch
     let flatPackageDir = getDependencyPackageLocation(dependency):mkdirs()
 
