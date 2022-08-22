@@ -23,13 +23,14 @@ class {
     )
   }
 
-  override public toString() => "{\n
-      mainClass: \"#mainClass\",\n
-      outDirectory: \"#outDirectory\",\n
-      outFile: \"#outFile\",\n
-      source: \"#source\",\n
-      dependencies: \"#dependencies\"\n
-    }"
+  override public toString() => "{
+      mainClass: \"#mainClass\",
+      outDirectory: \"#outDirectory\",
+      outFile: \"#outFile\",
+      source: \"#source\",
+      dependencies: \"#dependencies\"
+    }
+    |"
 
   public clone(
     String mainClass = mainClass,
