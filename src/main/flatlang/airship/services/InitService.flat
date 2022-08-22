@@ -9,6 +9,7 @@ import flatlang/airship/InvalidScriptException
 import flatlang/airship/ExecutionFailureException
 
 import static flat/readline/ReadLine
+import static flat/colorizer/Colorizer
 
 class {
   let static Logger log = Logger(InitService.class)
@@ -30,19 +31,19 @@ class {
     let defaultLicense = "ISC"
     let defaultDefaultTarget = "es6"
 
-    let name = question("Package name (default: #defaultName): ")
+    let name = question("#{cyan("Package name")} (default: #defaultName): ")
       .trim().orElse(defaultName)
-    let version = question("Package version (default: #defaultVersion): ")
+    let version = question("#{cyan("Package version")} (default: #defaultVersion): ")
       .trim().orElse(defaultVersion)
-    let description = question("Package description: ")
+    let description = question("#{cyan("Package description")}: ")
       .trim().orElse("")
-    let author = question("Package author: ")
+    let author = question("#{cyan("Package author")}: ")
       .trim().orElse("")
-    let license = question("Package license (default: #defaultLicense): ")
+    let license = question("#{cyan("Package license")} (default: #defaultLicense): ")
       .trim().orElse(defaultLicense)
-    let defaultTarget = question("Default compilation target (default: #defaultDefaultTarget): ")
+    let defaultTarget = question("#{cyan("Default compilation target")} (default: #defaultDefaultTarget): ")
       .trim().orElse(defaultDefaultTarget)
-    let mainClass = question("Main class (e.g.: example/ClassName) [optional - press enter to skip]: ")
+    let mainClass = question("#{cyan("Main class")} (e.g.: example/ClassName) [optional - press enter to skip]: ")
       .trim().orElse(null)
 
     writeSources(mainClass)

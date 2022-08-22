@@ -20,7 +20,8 @@
       "github:FlatLang/IO": "master",
       "github:FlatLang/Git": "master",
       "github:FlatLang/Logger": "master",
-      "github:FlatLang/Read-Line": "master"
+      "github:FlatLang/Read-Line": "master",
+      "github:FlatLang/CoLorIzer": "master"
     }
   },
   "test": {
