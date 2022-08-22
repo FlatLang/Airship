@@ -126,13 +126,13 @@ class {
         import static novex/nest/Nest
 
         testable class {
-          test &tick;can create&tick;() {
+          test `can create`() {
             let value = #{mainClassFile.rootName}()
 
             expect(value).toNotBe(null)
           }
         }\n
-        |".replace("&tick;", "`").trimStart()
+        |".trimStart()
 
       FileWriter(mainClassTestFile)
         :write(mainClassTestFileContents)
