@@ -41,7 +41,7 @@ class {
 
   public async uninstallGitPackage(String url) {
     let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = File("#{airship.flatHome}/packages/#{packageName}")
+    let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
 
     if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
       throw InvalidCommandException("Package '#packageName' is not installed")

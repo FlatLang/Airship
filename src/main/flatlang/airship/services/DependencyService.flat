@@ -5,11 +5,13 @@ import flat/log/Logger
 import flatlang/airship/Airship
 import flatlang/airship/PackageSource
 import flatlang/datastruct/HashSet
-import flatlang/datastruct/Pair
 import flatlang/io/File
 import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
+import flatlang/airship/Dependency
+import flatlang/airship/GitHubDependency
+import flatlang/airship/LocalDependency
 
 class {
   let static Logger log = Logger(DependencyService.class)
@@ -20,38 +22,30 @@ class {
 
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
-  public getDependencyPackageLocation(String url) -> File {
-    let packageName = getPackageNameFromGitUrl(url)
-    return File("#{airship.flatHome}/packages/#{packageName}")
+  public getDependencyPackageLocation(Dependency dependency) => File(dependency.getLocation())
+
+  public getDependencyLocation(Dependency dependency) -> String {
+    return dependency.getLocation()
   }
 
-  public getDependencyLocation(Pair<String, String> dependency) -> String {
-    if (dependency.value == "local") {
-      return dependency.key
-    } else if (dependency.key.toLowerCase().startsWith("github:")) {
-      let fullRepoName = dependency.key.substring("github:".count).trim()
-      let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
-      return "#{airship.flatHome}/packages/#{repoName}"
+  public getDependencySourceLocation(Dependency dependency) -> String {
+    return getDependencyLocation(dependency) + "/src"
+  }
+
+  public getDependencyGitUrl(Dependency dependency) -> String {
+    return if (dependency.class.isOfType(GitHubDependency.class)) {
+      let gitHubDependency = (GitHubDependency)dependency
+
+      gitHubDependency.getGitUrl()
     } else {
       throw InvalidFlatJsonException("Invalid dependency #dependency")
     }
   }
-
-  public getDependencyGitUrl(Pair<String, String> dependency) -> String {
-    if (dependency.key.toLowerCase().startsWith("github:")) {
-      let repoName = dependency.key.substring("github:".count).trim()
-      return getGitHubUrlFromRepoName(repoName)
-    } else {
-      throw InvalidFlatJsonException("Invalid dependency #dependency")
-    }
-  }
-
-  public getGitHubUrlFromRepoName(String repoName) => "https://GitHub.com/#{repoName}.git"
 
   public class DependenciesResponse {
     construct(
-      visible Array<Pair<String, String>> dependencies = Array(),
-      visible Array<Pair<String, String>> dependenciesDownloaded = Array()
+      visible Array<Dependency> dependencies = Array(),
+      visible Array<Dependency> dependenciesDownloaded = Array()
     ) {}
   }
 
@@ -98,10 +92,7 @@ class {
 
       if (!dependencyPackageFile.exists) {
         if (download) {
-          downloadDependency(
-            getDependencyGitUrl(dependency),
-            dependency.value
-          )
+          downloadDependency(dependency)
           response.dependenciesDownloaded.add(dependency)
         }
 
@@ -138,11 +129,21 @@ class {
     return response
   }
 
-  public isDependencyInstalled(String url, String branch) =>
-    getDependencyPackageLocation(url).getChild(".git").isDirectory
+  public isDependencyInstalled(Dependency dependency) =>
+    getDependencyPackageLocation(dependency).getChild(".git").isDirectory
 
-  public async downloadDependency(String url, String branch) {
-    let flatPackageDir = getDependencyPackageLocation(url):mkdirs()
+  public async downloadDependency(Dependency dependency) {
+    if (dependency.class.isOfType(GitHubDependency.class)) {
+      downloadGitHubDependency((GitHubDependency)dependency)
+    } else {
+      throw Exception("Cannot download dependency #dependency")
+    }
+  }
+
+  public async downloadGitHubDependency(GitHubDependency dependency) {
+    let url = dependency.gitHubUrl
+    let branch = dependency.branch
+    let flatPackageDir = getDependencyPackageLocation(dependency):mkdirs()
 
     if (flatPackageDir.getChild(".git").isDirectory) {
       return
@@ -153,7 +154,7 @@ class {
     let response = Git.clone(
       url,
       depth: 1,
-      branch: branch,
+      branch,
       outputDirectory: flatPackageDir.normalizedLocation,
       silent: true
     )

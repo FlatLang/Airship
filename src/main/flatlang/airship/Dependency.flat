@@ -1,0 +1,33 @@
+package flatlang/airship
+
+import flatlang/datastruct/HashMap
+
+abstract class {
+  public construct(String package) {
+    return if (package.toLowerCase().startsWith("github:")) {
+      GitHubDependency(
+        gitHubUrl: package,
+        branch: "master"
+      )
+    } else {
+      LocalDependency(package)
+    }
+
+    throw Exception("Invalid dependency \"#package\"")
+  }
+
+  public construct(String key, String value) {
+    return if (key.toLowerCase().startsWith("github:")) {
+      GitHubDependency(
+        gitHubUrl: key,
+        branch: value
+      )
+    } else if (value == "local") {
+      LocalDependency(key)
+    }
+
+    throw Exception("Invalid dependency {\"#key\": \"#value\"}")
+  }
+
+  public abstract getLocation() -> String
+}

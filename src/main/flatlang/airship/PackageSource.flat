@@ -3,23 +3,30 @@ package flatlang/airship
 import flatlang/datastruct/HashMap
 
 class {
-  visible String[] localDependencies => dependencies.filter({ _.value == "local" }).map({ _.key })
+  visible Dependency[] localDependencies => dependencies.filter({ _.class.isOfType(LocalDependency.class) })
 
   public construct(
     visible String mainClass,
     visible String outDirectory,
     visible String outFile,
     visible String source,
-    visible HashMap<String, String> dependencies
+    visible String[] defaultExports,
+    visible Dependency[] dependencies
   ) {}
 
   public construct(HashMap<String, Object> map) {
+    let exportsValue = (Object)(map["defaultExports"])
+    let defaultExports = (Array)exportsValue
+    let dependenciesValue = (Object)(map["dependencies"])
+    let dependenciesMap = (HashMap)dependenciesValue
+    let dependencies = dependenciesMap.map(pair => Dependency((String)pair.key, (String)pair.value))
     this(
       mainClass: (String)map["mainClass"],
       outDirectory: (String)map["outDirectory"],
       outFile: (String)map["outFile"],
       source: (String)map["source"],
-      dependencies: (HashMap)map["dependencies"]
+      defaultExports: defaultExports ?: Array<String>(),
+      dependencies: dependencies ?: Array<Dependency>()
     )
   }
 
@@ -28,6 +35,7 @@ class {
       outDirectory: \"#outDirectory\",
       outFile: \"#outFile\",
       source: \"#source\",
+      defaultExports: \"#defaultExports\",
       dependencies: \"#dependencies\"
     }
     |"
@@ -37,12 +45,14 @@ class {
     String outDirectory = outDirectory,
     String outFile = outFile,
     String source = source,
-    HashMap<String, String> dependencies = dependencies
+    String[] defaultExports = defaultExports,
+    Dependency[] dependencies = dependencies
   ) => PackageSource(
     mainClass,
     outDirectory,
     outFile,
     source,
+    defaultExports,
     dependencies
   )
 }

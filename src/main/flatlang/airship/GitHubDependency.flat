@@ -1,0 +1,43 @@
+package flatlang/airship
+
+class extends Dependency {
+  public construct(
+    visible String gitHubUrl,
+    visible String branch
+  ) {
+    super()
+
+    let prefix = "https://github.com/"
+    let suffix = ".git"
+
+    if (gitHubUrl.toLowerCase().startsWith(prefix)) {
+      gitHubUrl = "github:" + gitHubUrl.substring(prefix.count)
+    }
+    if (gitHubUrl.toLowerCase().endsWith(suffix)) {
+      gitHubUrl = gitHubUrl.substring(0, gitHubUrl.count - suffix.count)
+    }
+  }
+
+  public override getLocation() -> String {
+    let fullRepoName = gitHubUrl.substring("github:".count).trim()
+    let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
+    return "#{Airship.flatHome}/packages/#{repoName}"
+  }
+
+  public getGitUrl() -> String {
+    let repoName = gitHubUrl.substring("github:".count).trim()
+    return getGitHubUrlFromRepoName(repoName)
+  }
+
+  public getGitHubUrlFromRepoName(String repoName) => "https://GitHub.com/#{repoName}.git"
+
+  public equals(Object other) =>
+    other &&
+    other.class.isOfType(GitHubDependency.class) &&
+    equals((GitHubDependency)other)
+
+  public equals(GitHubDependency other) =>
+    other &&
+    other.gitHubUrl == gitHubUrl &&
+    other.branch == branch
+}

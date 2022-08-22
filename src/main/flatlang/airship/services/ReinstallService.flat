@@ -5,6 +5,7 @@ import flat/log/Logger
 import flatlang/io/File
 import flatlang/airship/Airship
 import flatlang/airship/InvalidCommandException
+import flatlang/airship/GitHubDependency
 
 class {
   let static Logger log = Logger(ReinstallService.class)
@@ -33,6 +34,6 @@ class {
 
   async reinstallGitPackage(String url) {
     airship.uninstallService.uninstallGitPackage(url)
-    airship.installService.installGitPackage(url, "master")
+    airship.installService.installGitPackage(GitHubDependency(url, "master"))
   }
 }

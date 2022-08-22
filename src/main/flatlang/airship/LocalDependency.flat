@@ -1,0 +1,20 @@
+package flatlang/airship
+
+class extends Dependency {
+  public construct(
+    visible String path
+  ) {
+    super()
+  }
+
+  public override getLocation() => path
+
+  public equals(Object other) =>
+    other &&
+    other.class.isOfType(LocalDependency.class) &&
+    equals((LocalDependency)other)
+
+  public equals(LocalDependency other) =>
+    other &&
+    other.path == path
+}

@@ -6,6 +6,9 @@ import flatlang/io/File
 import flatlang/git/Git
 import flatlang/airship/Airship
 import flatlang/airship/ExecutionFailureException
+import flatlang/airship/Dependency
+import flatlang/airship/GitHubDependency
+import flatlang/airship/LocalDependency
 
 class {
   let static Logger log = Logger(UpdateService.class)
@@ -25,7 +28,7 @@ class {
         match (package) {
           "main" => fallthrough
           "test" => updateLocalPackage(package)
-          default => updateGitPackage(package)
+          default => updatePackage(package)
         }
       }
     }
@@ -37,31 +40,46 @@ class {
     let source = airship.getSourceForPackage(package)
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    for (dependency in response.dependencies.filter({ _.value != "local" })) {
-      updateGitPackage(dependencyService.getDependencyGitUrl(dependency), branch: dependency.value)
+    for (dependency in response.dependencies) {
+      updatePackage(dependency)
+    }
+  }
+
+  public async updatePackage(
+    String package,
+    Bool: build = true
+  ) {
+    updatePackage(Dependency(package), build)
+  }
+
+  public async updatePackage(
+    Dependency dependency,
+    Bool: build = true
+  ) {
+    if (dependency.class.isOfType(GitHubDependency.class)) {
+      updateGitPackage((GitHubDependency)dependency, build)
+    } else {
+      throw Exception("Cannot update package: #dependency")
     }
   }
 
   public async updateGitPackage(
-    String url,
-    String: branch = null,
+    GitHubDependency dependency,
     Bool: build = true
   ) {
     if (!airship.quietArg.enabled) {
-      log.info("Updating dependency #url (#branch)... ", newLine: false)
+      log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})... ", newLine: false)
     }
 
-    let packageLocation = dependencyService.getDependencyPackageLocation(url)
+    let packageLocation = dependencyService.getDependencyPackageLocation(dependency)
 
     if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
-      throw ExecutionFailureException("Dependency #url (#branch) is not installed")
+      throw ExecutionFailureException("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) is not installed")
     }
 
     let git = Git(packageLocation.location)
 
-    if (branch) {
-      git.checkout(branch, silent: true)
-    }
+    git.checkout(dependency.branch, silent: true)
 
     let pullResponse = git.pull(silent: true)
 

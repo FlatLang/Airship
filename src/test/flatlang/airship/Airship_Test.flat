@@ -27,7 +27,7 @@ testable class {
 
     let output = allOutput[0]
     let cmdOutput = output.splitOnTopLevel(' ')
-    let flatHome = airship.flatHome
+    let flatHome = Airship.flatHome
 
     let package = "main"
     let source = airship.getSourceForPackage(package)
