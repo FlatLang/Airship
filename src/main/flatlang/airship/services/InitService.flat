@@ -31,19 +31,19 @@ class {
     let defaultLicense = "ISC"
     let defaultDefaultTarget = "es6"
 
-    let name = question("#{cyan("Package name")} (default: #defaultName): ")
+    let name = question("#{cyan("Package name")} (default: #{underscore(defaultName)}): ")
       .trim().orElse(defaultName)
-    let version = question("#{cyan("Package version")} (default: #defaultVersion): ")
+    let version = question("#{cyan("Package version")} (default: #{underscore(defaultVersion)}): ")
       .trim().orElse(defaultVersion)
     let description = question("#{cyan("Package description")}: ")
       .trim().orElse("")
     let author = question("#{cyan("Package author")}: ")
       .trim().orElse("")
-    let license = question("#{cyan("Package license")} (default: #defaultLicense): ")
+    let license = question("#{cyan("Package license")} (default: #{underscore(defaultLicense)}): ")
       .trim().orElse(defaultLicense)
-    let defaultTarget = question("#{cyan("Default compilation target")} (default: #defaultDefaultTarget): ")
+    let defaultTarget = question("#{cyan("Default compilation target")} (default: #{underscore(defaultDefaultTarget)}): ")
       .trim().orElse(defaultDefaultTarget)
-    let mainClass = question("#{cyan("Main class")} (e.g.: example/ClassName) [optional - press enter to skip]: ")
+    let mainClass = question("#{cyan("Main class")} (e.g.: #{underscore("example/ClassName")}) [optional - press enter to skip]: ")
       .trim().orElse(null)
 
     writeSources(mainClass)
