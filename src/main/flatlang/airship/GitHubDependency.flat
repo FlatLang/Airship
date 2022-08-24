@@ -29,7 +29,7 @@ class extends Dependency {
     return getGitHubUrlFromRepoName(repoName)
   }
 
-  getGitHubUrlFromRepoName(String repoName) => "https://GitHub.com/#{repoName}.git"
+  getGitHubUrlFromRepoName(String repoName) => "https://github.com/#{repoName}.git"
 
   public equals(Object other) =>
     other &&
