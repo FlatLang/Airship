@@ -41,9 +41,9 @@ testable class {
     ]
 
     response.dependencies.forEach({
-      cmd.addAll([
-        "-l", airship.dependencyService.getDependencySourceLocation(_)
-      ])
+      airship.dependencyService.getDependencySourceLocations(_).forEach({
+        cmd.addAll(["-l", _])
+      })
     })
 
     topLevelDependencies.dependencies.forEach({

@@ -71,7 +71,7 @@ class {
       log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})... ", newLine: false)
     }
 
-    let packageLocation = dependencyService.getDependencyPackageLocation(dependency)
+    let packageLocation = File(dependency.getLocation())
 
     if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
       throw ExecutionFailureException("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) is not installed")

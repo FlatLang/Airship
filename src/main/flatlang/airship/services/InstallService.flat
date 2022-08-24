@@ -56,17 +56,27 @@ class {
       throw InvalidCommandException("No source found for installation")
     }
 
-    let sourceLocation = "#{airship.packageLocation.normalizedLocation}/#{source.source}"
-    let canonicalSourceLocation = File(sourceLocation).getCanonicalPath()
+    let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
+
+    let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, package)
+    let canonicalSourceLocations = Array<String>()
+
+    for (location in sourceLocations) {
+      canonicalSourceLocations.add(File(location).getCanonicalPath())
+    }
 
     let cmd = [
       "java",
       "-jar",
       "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
-      sourceLocation,
+    ]
+
+    cmd.addAll(sourceLocations)
+
+    cmd.addAll([
       "-install-dir", "#{Airship.flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
-    ]
+    ])
 
     if (airship.target) {
       cmd.addAll(["-target", airship.target])
@@ -78,20 +88,30 @@ class {
     let response = dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
-    let dependencyLocations = HashMap<Dependency, String>()
+    let dependencyLocations = HashMap<Dependency, Array<String>>()
 
     for (dependency in response.dependencies) {
       if (!dependencyLocations.containsKey(dependency)) {
-        dependencyLocations[dependency] = File(dependencyService.getDependencySourceLocation(dependency)).getCanonicalPath()
+        let dependencySourceLocations = dependencyService.getDependencySourceLocations(dependency, package)
+
+        dependencyLocations[dependency] = Array()
+
+        for (src in dependencySourceLocations) {
+           dependencyLocations[dependency].add(File(src).getCanonicalPath())
+        }
       }
     }
 
     response.dependencies
-      .filter({ dependencyLocations[_] != sourceLocation })
-      .forEach({ cmd.addAll(["-l", dependencyService.getDependencySourceLocation(_)]) })
+      .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
+      .forEach({
+        dependencyService.getDependencySourceLocations(_).forEach({
+          cmd.addAll(["-l", _])
+        })
+      })
 
     topLevelDependencies.dependencies
-      .filter({ dependencyLocations[_] != sourceLocation })
+      .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
       .forEach({
         let childShip = _.airship
         let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
@@ -147,7 +167,7 @@ class {
     }
 
     postInstallPackage(
-      dependencyService.getDependencyPackageLocation(dependency),
+      File(dependency.getLocation()),
       build,
       install,
       installDependencies
