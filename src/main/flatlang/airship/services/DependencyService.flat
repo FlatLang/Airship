@@ -162,7 +162,10 @@ class {
     )
 
     if (response.exitCode != 0) {
-      throw ExecutionFailureException("Failed to install git repo")
+      throw ExecutionFailureException("|
+        Failed to install git repo:
+        #{response.stderr.join("\n")}
+        |")
     }
   }
 }
