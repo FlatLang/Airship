@@ -52,6 +52,11 @@ class {
           pull_request:
             branches: [ \"master\" ]
 
+        env:
+          LOGGING_DEFAULT_SHOW_PREFIX: true
+          LOGGING_DEFAULT_LOGGING_LEVEL: DEBUG
+          LOGGING_DEFAULT_SHOW_FORMATTING: true
+
         jobs:
           build:
 
