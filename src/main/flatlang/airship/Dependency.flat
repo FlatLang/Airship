@@ -2,6 +2,8 @@ package flatlang/airship
 
 import flatlang/datastruct/HashMap
 
+import flatlang/airship/PackageSource
+
 abstract class {
   let Airship airship => Airship(getLocation())
 
@@ -32,4 +34,37 @@ abstract class {
   }
 
   public abstract getLocation() -> String
+
+  public getSourcesForInstallation(
+    String installationTarget,
+    PackageSource defaultSource = null
+  ) -> PackageSource[] {
+    var Array<PackageSource> defaultSources = null
+
+    if (defaultSource) {
+      defaultSources = Array<PackageSource>():add(defaultSource)
+    }
+
+    return getSourcesForInstallation(
+      installationTarget,
+      defaultSources
+    )
+  }
+
+  public getSourcesForInstallation(
+    String installationTarget,
+    PackageSource[] defaultSources = null
+  ) -> PackageSource[] {
+    return match (installationTarget) {
+      "main" => Array<PackageSource>():add(airship.mainSource)
+      "test" => Array<PackageSource>():add(airship.mainSource):add(airship.testSource)
+      default => {
+        if (defaultSources) {
+          return defaultSources
+        }
+
+        throw ExecutionFailureException("Invalid installation target '#installationTarget'")
+      }
+    }
+  }
 }
