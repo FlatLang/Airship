@@ -31,7 +31,6 @@ class {
 
   visible Package package
   visible String outFile
-  visible String source
   visible Bool debug
   visible PackageSource mainSource
   visible PackageSource testSource
