@@ -25,15 +25,22 @@ class {
   }
 
   public async createPipeline(String[] args) {
-    let fileName = if (args.count == 1) {
+    if (!airship.testSource) {
+      throw ExecutionFailureException("No test source configuration exists in \"#{airship.flatJsonLocation}\"")
+    }
+
+    let defaultPipelineLocation = ".github/workflows/test.yml"
+
+    let pipelineLocation = if (args.count == 1) {
       args[0]
     } else if (args.count > 1) {
       throw ExecutionFailureException("Invalid arguments to pipeline command: #args")
     } else {
-      "test.yml"
+      question("#{cyan("Pipeline file")} (default: #{underscore(defaultPipelineLocation)}): ")
+        .trim().orElse(defaultPipelineLocation)
     }
 
-    let pipelineFile = File(airship.packageLocation.location + "/.github/workflows/#fileName")
+    let pipelineFile = File(airship.packageLocation.location + "/#{pipelineLocation}")
 
     let defaultTarget = "es6"
     let target = airship.target ?:
