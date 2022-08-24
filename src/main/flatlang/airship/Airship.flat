@@ -305,11 +305,17 @@ class {
     }
   }
 
-  public getSourceForPackage(String package) -> PackageSource {
+  public getSourceForPackage(String package, PackageSource defaultSource = null) -> PackageSource {
     return match (package) {
       "main" => mainSource
       "test" => testSource
-      default => throw InvalidCommandException("Invalid installation package '#package'")
+      default => {
+        if (defaultSource) {
+          return defaultSource
+        }
+
+        throw InvalidCommandException("Invalid installation package '#package'")
+      }
     }
   }
 
