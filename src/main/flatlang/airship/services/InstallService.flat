@@ -1,5 +1,6 @@
 package flatlang/airship/services
 
+import flatlang/datastruct/HashMap
 import flat/log/Logger
 
 import flatlang/io/File
@@ -55,11 +56,14 @@ class {
       throw InvalidCommandException("No source found for installation")
     }
 
+    let sourceLocation = "#{airship.packageLocation.normalizedLocation}/#{source.source}"
+    let canonicalSourceLocation = File(sourceLocation).getCanonicalPath()
+
     let cmd = [
       "java",
       "-jar",
       "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
-      "#{airship.packageLocation.normalizedLocation}/#{source.source}",
+      sourceLocation,
       "-install-dir", "#{Airship.flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ]
@@ -74,20 +78,32 @@ class {
     let response = dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
-    response.dependencies.forEach({ cmd.addAll(["-l", dependencyService.getDependencySourceLocation(_)]) })
+    let dependencyLocations = HashMap<Dependency, String>()
 
-    topLevelDependencies.dependencies.forEach({
-      let childShip = _.airship
-      let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
+    for (dependency in response.dependencies) {
+      if (!dependencyLocations.containsKey(dependency)) {
+        dependencyLocations[dependency] = File(dependencyService.getDependencySourceLocation(dependency)).getCanonicalPath()
+      }
+    }
 
-      dependencySource?.defaultExports
-        .filter({ !_.staticImport })
-        .forEach({ cmd.addAll(["-default-import", _.location]) })
+    response.dependencies
+      .filter({ dependencyLocations[_] != sourceLocation })
+      .forEach({ cmd.addAll(["-l", dependencyService.getDependencySourceLocation(_)]) })
 
-      dependencySource?.defaultExports
-        .filter({ _.staticImport })
-        .forEach({ cmd.addAll(["-default-static-import", _.location]) })
-    })
+    topLevelDependencies.dependencies
+      .filter({ dependencyLocations[_] != sourceLocation })
+      .forEach({
+        let childShip = _.airship
+        let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
+
+        dependencySource?.defaultExports
+          .filter({ !_.staticImport })
+          .forEach({ cmd.addAll(["-default-import", _.location]) })
+
+        dependencySource?.defaultExports
+          .filter({ _.staticImport })
+          .forEach({ cmd.addAll(["-default-static-import", _.location]) })
+      })
 
     if (source.mainClass) {
       cmd.addAll(["-main", source.mainClass])
