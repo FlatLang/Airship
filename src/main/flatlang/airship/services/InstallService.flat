@@ -149,6 +149,8 @@ class {
       return
     }
 
+    log.debug("Executing command: #cmd")
+
     let response = System.execute(cmd, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
