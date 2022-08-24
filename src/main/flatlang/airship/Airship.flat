@@ -22,6 +22,7 @@ import flatlang/airship/services/UpdateService
 import flatlang/airship/services/CleanService
 import flatlang/airship/services/RunScriptService
 import flatlang/airship/services/InitService
+import flatlang/airship/services/CreateService
 
 import flatlang/regex/RegexStringExtensions
 
@@ -53,6 +54,7 @@ class {
   visible CliArg cleanCommand = CliArg("clean", ["c"])
   visible CliArg runCommand = CliArg("run", ["r"], minCount: 1)
   visible CliArg initCommand = CliArg("init")
+  visible CliArg createCommand = CliArg("create", minCount: 1)
 
   visible DependencyService dependencyService = DependencyService(this)
   visible InstallService installService = InstallService(this, dependencyService)
@@ -63,6 +65,7 @@ class {
   visible RunScriptService runScriptService = RunScriptService(this)
   visible SetupService setupService = SetupService(this, dependencyService, updateService)
   visible InitService initService = InitService(this)
+  visible CreateService createService = CreateService(this)
 
   let static HashMap<String, Airship> packageCache = HashMap()
 
@@ -102,6 +105,7 @@ class {
         cleanCommand,
         runCommand,
         initCommand,
+        createCommand,
         targetArg,
         targetRuntimeArg,
         fileArg,
@@ -297,6 +301,7 @@ class {
         cleanCommand => cleanService.clean()
         runCommand => runScriptService.runScript(command.value)
         initCommand => initService.init()
+        createCommand => createService.create(command.value, command.values.skip(1))
       }
     }
   }

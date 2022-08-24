@@ -1,0 +1,107 @@
+package flatlang/airship/services
+
+import flat/log/Logger
+
+import flatlang/io/File
+import flatlang/io/FileWriter
+import flatlang/airship/Airship
+import flatlang/airship/InvalidScriptException
+import flatlang/airship/ExecutionFailureException
+
+import static flat/readline/ReadLine
+import static flat/colorizer/Colorizer
+
+class {
+  let static Logger log = Logger(CreateService.class)
+
+  public construct(private Airship airship) {}
+
+  requireValue(String value) => value.trim().count > 0
+
+  public async create(String value, String[] args) {
+    match (value) {
+      "pipeline" => createPipeline(args)
+    }
+  }
+
+  public async createPipeline(String[] args) {
+    let fileName = if (args.count == 1) {
+      args[0]
+    } else if (args.count > 1) {
+      throw ExecutionFailureException("Invalid arguments to pipeline command: #args")
+    } else {
+      "test.yml"
+    }
+
+    let pipelineFile = File(airship.packageLocation.location + "/.github/workflows/#fileName")
+
+    let defaultTarget = "es6"
+    let target = airship.target ?:
+      question("#{cyan("Compilation target")} (default: #{underscore(defaultTarget)}): ")
+        .trim().orElse(defaultTarget)
+
+    pipelineFile.getParent().mkdirs()
+
+    FileWriter(pipelineFile)
+      :write("|
+        name: Test #{airship.package.name}
+
+        on:
+          push:
+            branches: [ \"master\" ]
+          pull_request:
+            branches: [ \"master\" ]
+
+        jobs:
+          build:
+
+            runs-on: ubuntu-latest
+
+            steps:
+              - uses: actions/checkout@v3
+
+              - name: Download latest Airship
+                uses: dsaltares/fetch-gh-release-asset@master
+                with:
+                  repo: FlatLang/Airship
+                  file: airship.js
+
+              - uses: actions/setup-node@v3
+                with:
+                  node-version: 14
+
+              - name: Set up Maven
+                uses: stCarolas/setup-maven@v4.4
+                with:
+                  maven-version: 3.8.2
+
+              - name: Cache Maven dependencies
+                uses: actions/cache@v3
+                with:
+                  path: |
+                    ~/.m2/repository
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}
+                  restore-keys: |
+                    ${{ runner.os }}-build-${{ env.cache-name }}-
+                    ${{ runner.os }}-build-
+                    ${{ runner.os }}-
+
+              - name: Build #{airship.package.name} Test
+                run: |
+                  node airship.js install test#{target}
+
+              - uses: actions/upload-artifact@v3
+                if: failure()
+                with:
+                  name: #{airship.testSource.outFile}
+                  path: #{airship.testSource.outDirectory}/#{airship.testSource.outFile}
+
+              - name: Run #{airship.package.name} Test
+                run: |
+                  node airship.js run test
+        |")
+      :close()
+
+      log.info("Pipeline file created at \"#{pipelineFile.normalizedLocation}\"")
+  }
+}
