@@ -128,7 +128,7 @@ class {
       Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
     }
 
-    flatJsonLocation = getFlatJsonLocation(fileArg.value) ?: "#{System.workingDirectory}/flat.json"
+    flatJsonLocation = getFlatJsonLocation(fileArg.value)
     debug = debugArg.enabled
     target = targetArg.value
 
@@ -183,17 +183,17 @@ class {
     }
   }
 
-  getFlatJsonLocation(String location) -> String => null {
+  getFlatJsonLocation(String location) -> String {
     if (!location) {
-      return null
+      return File("#{System.workingDirectory}/flat.json").normalizedLocation
     }
 
     let file = File(location)
 
     return if (file.isDirectory || file.isSymbolicLink) {
-      location + "/flat.json"
+      file.normalizedLocation + "/flat.json"
     } else if (file.isFile) {
-      file.location
+      file.normalizedLocation
     } else {
       throw InvalidFlatJsonException("Invalid flat.json location '#file.location'")
     }
