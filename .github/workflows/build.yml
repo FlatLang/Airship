@@ -27,7 +27,7 @@ jobs:
           maven-version: 3.8.2
 
       - name: Download latest Airship
-        uses: dsaltares/fetch-gh-release-asset@master
+        uses: FlatLang/fetch-airship@master
         with:
           repo: FlatLang/Airship
           file: airship.js
