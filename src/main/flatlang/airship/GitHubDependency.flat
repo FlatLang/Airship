@@ -16,6 +16,8 @@ class extends Dependency {
     if (gitHubUrl.toLowerCase().endsWith(suffix)) {
       gitHubUrl = gitHubUrl.substring(0, gitHubUrl.count - suffix.count)
     }
+
+    this.gitHubUrl = gitHubUrl
   }
 
   public override getLocation() -> String {
