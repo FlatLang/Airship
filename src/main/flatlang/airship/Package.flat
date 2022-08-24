@@ -25,7 +25,8 @@ class {
     test = map.containsKey("test") ? PackageSource((HashMap)map["test"]) : null
   }
 
-  override public toString() => "{
+  override public toString() => "|
+    {
       name: \"#name\",
       version: \"#version\",
       description: \"#description\",
