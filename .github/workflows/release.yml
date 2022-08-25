@@ -30,6 +30,7 @@ jobs:
       - name: Delete airship-win.exe Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -48,6 +49,7 @@ jobs:
       - name: Delete airship-macos Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -66,6 +68,7 @@ jobs:
       - name: Delete airship-linux Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -159,6 +162,7 @@ jobs:
       - name: Delete ${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }} Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -186,6 +190,7 @@ jobs:
       - name: Delete ${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }} Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -213,6 +218,7 @@ jobs:
       - name: Delete airship-macos.${{ matrix.compression.extension }} Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
@@ -240,6 +246,7 @@ jobs:
       - name: Delete airship-linux.${{ matrix.compression.extension }} Asset
         uses: mknejp/delete-release-assets@v1
         with:
+          fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
           repository: FlatLang/Airship
