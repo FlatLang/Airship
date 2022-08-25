@@ -1,0 +1,92 @@
+name: Prepare Airship release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compression:
+          - algorithm: xz
+            extension: xz
+            replace_extension: false
+            compression_level: 9
+          - algorithm: 7z
+            extension: 7z
+            replace_extension: true
+            compression_level: 9
+          - algorithm: bzip2
+            extension: bz2
+            replace_extension: false
+            compression_level: 9
+          - algorithm: gzip2
+            extension: gz
+            replace_extension: false
+            compression_level: 9
+          - algorithm: zip
+            extension: zip
+            replace_extension: true
+            compression_level: 9
+
+    steps:
+      - name: Download Airship ${{ github.event.release.tag_name }}
+        uses: FlatLang/fetch-airship@master
+        with:
+          version: ${{ github.event.release.id }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install pkg
+        run: |
+          npm install -g pkg
+
+      - name: Package airship.js
+        run: |
+          pkg airship.js
+
+      - name: Install 7zip
+        run: |
+          sudo apt install p7zip-full p7zip-rar
+
+      - name: Compress airship.js
+        run: |
+          7z \
+            a \
+            -mx=${{ matrix.compression.compression_level }} \
+            -t${{ matrix.compression.algorithm }} \
+            ${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }} \
+            airship.js
+
+      - name: Compress airship-win.exe
+        run: |
+          7z \
+            a \
+            -mx=${{ matrix.compression.compression_level }} \
+            -t${{ matrix.compression.algorithm }} \
+            ${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }} \
+            airship-win.exe
+
+      - name: Compress airship-macos
+        run: |
+          7z \
+            a \
+            -mx=${{ matrix.compression.compression_level }} \
+            -t${{ matrix.compression.algorithm }} \
+            airship-macos.${{ matrix.compression.extension }} \
+            airship-macos
+
+      - name: Compress airship-linux
+        run: |
+          7z \
+            a \
+            -mx=${{ matrix.compression.compression_level }} \
+            -t${{ matrix.compression.algorithm }} \
+            airship-linux.${{ matrix.compression.extension }} \
+            airship-linux
