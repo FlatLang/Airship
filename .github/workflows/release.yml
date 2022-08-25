@@ -27,7 +27,7 @@ jobs:
             replace_extension: false
             compression_level: 9
             content_type: application/octet-stream
-          - algorithm: gzip2
+          - algorithm: gzip
             extension: gz
             replace_extension: false
             compression_level: 9
