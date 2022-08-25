@@ -19,12 +19,7 @@ class {
   requireValue(String value) => value.trim().count > 0
 
   public async init() {
-    let directory = File(System.workingDirectory)
-    let flatJson = File("#{directory.location}/flat.json")
-
-    if (flatJson.exists) {
-      throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
-    }
+    var directory = File(System.workingDirectory)
 
     let defaultName = directory.name
     let defaultVersion = "0.1.0"
@@ -33,6 +28,23 @@ class {
 
     let name = question("#{cyan("Package name")} (default: #{underscore(defaultName)}): ")
       .trim().orElse(defaultName)
+
+    let currentDirectory = underscore(directory.normalizedLocation)
+    let useCurrentFolder = boolQuestion(cyan("Initialize package in current folder") + ": \"#{currentDirectory}\"? (Y/n): ")
+
+    if (!useCurrentFolder) {
+      let folderName = question("#{cyan("Folder name")} (default: #{underscore(name)}): ")
+        .trim().orElse(name)
+
+      directory = File("#{directory.normalizedLocation}/#{folderName}"):mkdir()
+    }
+
+    let flatJson = File("#{directory.normalizedLocation}/flat.json")
+
+    if (flatJson.exists) {
+      throw ExecutionFailureException("#{flatJson.normalizedLocation} exists already")
+    }
+
     let version = question("#{cyan("Package version")} (default: #{underscore(defaultVersion)}): ")
       .trim().orElse(defaultVersion)
     let description = question("#{cyan("Package description")}: ")
@@ -46,7 +58,7 @@ class {
     let mainClass = question("#{cyan("Main class")} (e.g.: #{underscore("example/ClassName")}) [optional - press enter to skip]: ")
       .trim().orElse(null)
 
-    writeSources(mainClass)
+    writeSources(directory, mainClass)
 
     writeFlatJson(
       flatJson,
@@ -60,8 +72,8 @@ class {
     )
   }
 
-  async writeSources(String mainClass) {
-    let sourceRoot = File("src")
+  async writeSources(File directory, String mainClass) {
+    let sourceRoot = File("#{directory.normalizedLocation}/src")
 
     if (!sourceRoot.exists) {
       sourceRoot.mkdir()
@@ -70,13 +82,13 @@ class {
     }
 
     if (mainClass) {
-      writeMainClassFile(mainClass)
-      writeTestFiles(mainClass)
+      writeMainClassFile(directory, mainClass)
+      writeTestFiles(directory, mainClass)
     }
   }
 
-  async writeMainClassFile(String mainClass) {
-    let mainClassFile = File("src/#{mainClass}.flat")
+  async writeMainClassFile(File directory, String mainClass) {
+    let mainClassFile = File("#{directory.normalizedLocation}/src/#{mainClass}.flat")
 
     if (!mainClassFile.exists) {
       let packageDirectory = mainClassFile.getParent()
@@ -105,10 +117,10 @@ class {
     }
   }
 
-  async writeTestFiles(String mainClass) {
-    let mainClassFile = File(mainClass)
-    let mainClassTestFile = File("src/#{mainClass}_Test.flat")
-    let testSuiteFile = File("src/#{mainClass}_TestSuite.flat")
+  async writeTestFiles(File directory, String mainClass) {
+    let mainClassFile = File("#{directory.normalizedLocation}/#{mainClass}")
+    let mainClassTestFile = File("#{directory.normalizedLocation}/src/#{mainClass}_Test.flat")
+    let testSuiteFile = File("#{directory.normalizedLocation}/src/#{mainClass}_TestSuite.flat")
     let packageDirectory = testSuiteFile.getParent()
     let packageEndLocation = mainClass.lastIndexOf("/")
     let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
