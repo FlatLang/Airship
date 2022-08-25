@@ -85,6 +85,13 @@ class {
   }
 
   public construct(
+    File packageLocationFile,
+    Airship parent = null
+  ) {
+    this(packageLocationFile.normalizedLocation, parent)
+  }
+
+  public construct(
     String packageLocation,
     Airship parent = null
   ) {
