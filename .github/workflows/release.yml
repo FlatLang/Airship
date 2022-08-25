@@ -5,7 +5,60 @@ on:
     types: [published]
 
 jobs:
-  build:
+  package:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Airship ${{ github.event.release.tag_name }}
+        uses: FlatLang/fetch-airship@master
+        with:
+          version: ${{ github.event.release.id }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install pkg
+        run: |
+          npm install -g pkg
+
+      - name: Package airship.js
+        run: |
+          pkg airship.js
+
+      - name: Upload Windows Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./airship-win.exe
+          asset_name: airship-win.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Mac Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./airship-macos
+          asset_name: airship-macos
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./airship-linux
+          asset_name: airship-linux
+          asset_content_type: application/octet-stream
+
+jobs:
+  compress:
 
     runs-on: ubuntu-latest
 
@@ -39,22 +92,27 @@ jobs:
             content_type: application/x-zip-compressed
 
     steps:
-      - name: Download Airship ${{ github.event.release.tag_name }}
-        uses: FlatLang/fetch-airship@master
+
+      - name: Download Windows Asset
+        uses: dsaltares/fetch-gh-release-asset@master
         with:
+          repo: FlatLang/Airship
+          file: airship-win.exe
           version: ${{ github.event.release.id }}
 
-      - uses: actions/setup-node@v3
+      - name: Download Mac Asset
+        uses: dsaltares/fetch-gh-release-asset@master
         with:
-          node-version: 16
+          repo: FlatLang/Airship
+          file: airship-macos
+          version: ${{ github.event.release.id }}
 
-      - name: Install pkg
-        run: |
-          npm install -g pkg
-
-      - name: Package airship.js
-        run: |
-          pkg airship.js
+      - name: Download Linux Asset
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: FlatLang/Airship
+          file: airship-linux
+          version: ${{ github.event.release.id }}
 
       - name: Install 7zip
         run: |
