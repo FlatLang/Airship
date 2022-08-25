@@ -18,7 +18,7 @@ class {
 
   requireValue(String value) => value.trim().count > 0
 
-  public async create(String value, String[] args) {
+  public async create(String value, String[] args = Array<String>()) {
     match (value) {
       "pipeline" => createPipeline(args)
     }
