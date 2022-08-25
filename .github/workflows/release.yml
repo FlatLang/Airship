@@ -16,22 +16,27 @@ jobs:
             extension: xz
             replace_extension: false
             compression_level: 9
+            content_type: application/octet-stream
           - algorithm: 7z
             extension: 7z
             replace_extension: true
             compression_level: 9
+            content_type: application/octet-stream
           - algorithm: bzip2
             extension: bz2
             replace_extension: false
             compression_level: 9
+            content_type: application/octet-stream
           - algorithm: gzip2
             extension: gz
             replace_extension: false
             compression_level: 9
+            content_type: application/x-gzip
           - algorithm: zip
             extension: zip
             replace_extension: true
             compression_level: 9
+            content_type: application/x-zip-compressed
 
     steps:
       - name: Download Airship ${{ github.event.release.tag_name }}
@@ -64,6 +69,16 @@ jobs:
             ${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }} \
             airship.js
 
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }}
+          asset_name: ${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }}
+          asset_content_type: ${{ matrix.compression.content_type }}
+
       - name: Compress airship-win.exe
         run: |
           7z \
@@ -72,6 +87,16 @@ jobs:
             -t${{ matrix.compression.algorithm }} \
             ${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }} \
             airship-win.exe
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }}
+          asset_name: ${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }}
+          asset_content_type: ${{ matrix.compression.content_type }}
 
       - name: Compress airship-macos
         run: |
@@ -82,6 +107,16 @@ jobs:
             airship-macos.${{ matrix.compression.extension }} \
             airship-macos
 
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./$airship-macos.${{ matrix.compression.extension }}
+          asset_name: $airship-macos.${{ matrix.compression.extension }}
+          asset_content_type: ${{ matrix.compression.content_type }}
+
       - name: Compress airship-linux
         run: |
           7z \
@@ -90,3 +125,13 @@ jobs:
             -t${{ matrix.compression.algorithm }} \
             airship-linux.${{ matrix.compression.extension }} \
             airship-linux
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./airship-linux.${{ matrix.compression.extension }}
+          asset_name: airship-linux.${{ matrix.compression.extension }}
+          asset_content_type: ${{ matrix.compression.content_type }}
