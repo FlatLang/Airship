@@ -12,6 +12,7 @@ import flatlang/io/FileReader
 import flatlang/fucli/FuCli
 import flatlang/fucli/CliArg
 import flatlang/git/Git
+import flatlang/time/Timer
 
 import flatlang/airship/services/SetupService
 import flatlang/airship/services/DependencyService
@@ -144,7 +145,11 @@ class {
       testSource = airship.testSource
     } else {
       if (flatJsonFile.isFile) {
+        log.trace("Parsing \"#{flatJsonFile.normalizedLocation}\" ...")
+        let timer = Timer():start()
         let map = JsonDeserializer().parseObject(flatJsonFile)
+        timer.stop()
+        log.trace("Parsing \"#{flatJsonFile.normalizedLocation}\" took #{timer.duration}ms")
 
         let String defaultTarget = (String)map["defaultTarget"]
         target = target ?: defaultTarget
@@ -170,12 +175,16 @@ class {
         }
 
         if (!isCoreLibrary()) {
+          log.trace("Adding Flat-Core implicit dependency")
+
           if (mainSource?.dependencies) {
             mainSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
           if (testSource?.dependencies) {
             testSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
+        } else {
+          log.trace("Skipping Flat-Core implicit dependency")
         }
       }
 
