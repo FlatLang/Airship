@@ -22,7 +22,7 @@ class {
   ) {}
 
   public async setup() {
-    let airshipDependency = GitHubDependency("https://github.com/FlatLang/Airship.git", "master")
+    let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
 
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
       log.info("Airship already installed. Checking for updates")
