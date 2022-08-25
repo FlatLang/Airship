@@ -58,8 +58,6 @@ class {
     let mainClass = question("#{cyan("Main class")} (e.g.: #{underscore("example/ClassName")}) [optional - press enter to skip]: ")
       .trim().orElse(null)
 
-    writeSources(directory, mainClass)
-
     writeFlatJson(
       flatJson,
       name,
@@ -70,6 +68,14 @@ class {
       defaultTarget,
       mainClass
     )
+
+    let createService = CreateService(Airship(flatJson, airship))
+
+    writeSources(directory, mainClass)
+
+    if (mainClass && boolQuestion(cyan("Create a testing pipeline") + "? (Y/n): ")) {
+      createService.create("pipeline")
+    }
   }
 
   async writeSources(File directory, String mainClass) {
