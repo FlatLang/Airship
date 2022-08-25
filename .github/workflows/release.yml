@@ -1,4 +1,4 @@
-name: Prepare Airship release
+name: Prepare Airship Release
 
 on:
   release:
