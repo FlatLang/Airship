@@ -204,7 +204,7 @@ class {
 
             timer.stop()
 
-            Console.writeLine(\"Took\#{timer.duration}ms\")
+            Console.writeLine(\"Took \#{timer.duration}ms\")
 
             if (unsuccessful.count > 0) {
                 System.exit(1)
