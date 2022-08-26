@@ -199,6 +199,21 @@ class {
     }
   }
 
+  visible PackageSource[] sources {
+    get {
+      let value = Array<PackageSource>()
+
+      if (mainSource) {
+        value.add(mainSource)
+      }
+      if (testSource) {
+        value.add(testSource)
+      }
+
+      return value
+    }
+  }
+
   getFlatJsonLocation(String location) -> String {
     if (!location) {
       return File("#{System.workingDirectory}/flat.json").normalizedLocation
