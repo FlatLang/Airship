@@ -21,10 +21,11 @@ class {
   public async create(String value, String[] args = Array<String>()) {
     match (value) {
       "pipeline" => createPipeline(args)
+      "gitignore" => createGitignore(args)
     }
   }
 
-  public async createPipeline(String[] args) {
+  public async createPipeline(String[] args = Array<String>()) {
     if (!airship.testSource) {
       throw ExecutionFailureException("No test source configuration exists in \"#{airship.flatJsonLocation}\"")
     }
@@ -114,5 +115,28 @@ class {
       :close()
 
       log.info("Pipeline file created at \"#{pipelineFile.normalizedLocation}\"")
+  }
+
+  public async createGitignore(String[] args = Array<String>()) {
+    let gitignoreFile = File(".gitignore")
+
+    if (gitignoreFile.isFile) {
+      if (!boolQuestion(cyan("Overwrite existing .gitignore file? (Y/n): "))) {
+        return
+      }
+    }
+
+    let outDirectories = airship.sources
+      .map({ _.outDirectory })
+      .filterNull()
+      .unique()
+      .map({ "#{_}/" })
+
+    FileWriter(gitignoreFile)
+      :write("|
+        #{outDirectories.join("\n")}
+        |")
+
+    log.info(".gitignore file created at \"#{gitignoreFile.normalizedLocation}\"")
   }
 }
