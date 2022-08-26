@@ -104,7 +104,7 @@ class {
       }
 
       let packageEndLocation = mainClass.lastIndexOf("/")
-      let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
+      let packageLocation = packageEndLocation == -1 ? null : mainClass.substring(0, packageEndLocation)
       let packageStatement = packageLocation ? "package #packageLocation" : ""
 
       let mainClassFileContents = "|
@@ -129,7 +129,7 @@ class {
     let testSuiteFile = File("#{directory.normalizedLocation}/src/#{mainClass}_TestSuite.flat")
     let packageDirectory = testSuiteFile.getParent()
     let packageEndLocation = mainClass.lastIndexOf("/")
-    let packageLocation = packageEndLocation == -1 ? "" : mainClass.substring(0, packageEndLocation)
+    let packageLocation = packageEndLocation == -1 ? null : mainClass.substring(0, packageEndLocation)
     let packageStatement = packageLocation ? "package #packageLocation" : ""
 
     if (!packageDirectory.exists) {
