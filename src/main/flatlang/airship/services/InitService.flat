@@ -74,7 +74,7 @@ class {
     writeSources(directory, mainClass)
 
     if (mainClass && boolQuestion(cyan("Create a testing pipeline") + "? (Y/n): ")) {
-      createService.create("pipeline")
+      createService.createPipeline()
     }
   }
 
