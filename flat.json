@@ -11,7 +11,6 @@
   "main": {
     "mainClass": "flatlang/airship/Airship",
     "source": "src",
-    "excluded": ["src/**/*_Test*.flat"],
     "dependencies": {
       "github:FlatLang/Datastruct": "master",
       "github:FlatLang/Regex": "master",
@@ -27,7 +26,7 @@
   },
   "test": {
     "mainClass": "flatlang/airship/Airship_TestSuite",
-    "source": "src",
+    "source": "src/**/*_Test*.flat",
     "dependencies": {
       "github:FlatLang/Nest": "master"
     }

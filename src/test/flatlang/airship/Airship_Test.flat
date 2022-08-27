@@ -33,6 +33,7 @@ testable class {
     
     let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
     let excludeSources = airship.dependencyService.getDependencyExclusions(currentDependency, package)
+    let excludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
 
     let response = airship.dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = airship.dependencyService.getDependenciesForSource(package, package, source, recursive: false)
@@ -47,6 +48,10 @@ testable class {
 
     excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
+    if (excludeSource) {
+      cmd.addAll(["-x", excludeSource])
+    }
+
     response.dependencies.forEach((dependency) => {
       airship.dependencyService.getDependencySourceLocations(dependency).forEach({
         cmd.addAll(["-l", _])
@@ -54,6 +59,12 @@ testable class {
       airship.dependencyService.getDependencyExclusions(dependency, package).forEach({
         cmd.addAll(["-x", _])
       })
+
+      let dependencyExcludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
+
+      if (dependencyExcludeSource) {
+        cmd.addAll(["-x", dependencyExcludeSource])
+      }
     })
 
     topLevelDependencies.dependencies.forEach({
