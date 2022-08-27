@@ -3,10 +3,13 @@ package flatlang/airship/services
 import flat/log/Logger
 
 import flatlang/io/File
+import flatlang/io/FileReader
 import flatlang/io/FileWriter
 import flatlang/airship/Airship
 import flatlang/airship/InvalidScriptException
 import flatlang/airship/ExecutionFailureException
+
+import flatlang/extensions/SyntaxStringFunctions
 
 import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
@@ -22,6 +25,8 @@ class {
     match (value) {
       "pipeline" => createPipeline(args)
       "gitignore" => createGitignore(args)
+      "test" => createTest(args)
+      "testing-suite" => createTestingSuite(args)
     }
   }
 
@@ -138,5 +143,233 @@ class {
         |")
 
     log.info(".gitignore file created at \"#{gitignoreFile.normalizedLocation}\"")
+  }
+
+  fixupTestFileNameSuffix(String name) =>
+    fixupFileNameSuffix(name, "_Test")
+
+  fixupTestingSuiteFileNameSuffix(String name) =>
+    fixupFileNameSuffix(name, "_TestSuite")
+
+  fixupFileNameSuffix(var String name, String suffix) -> String {
+    name = name.trim()
+    var String previous = null
+
+    while (previous != name) {
+      previous = name
+      let lower = name.toLowerCase()
+
+      if (lower.endsWith(".flat")) {
+        name = name.trimEnd(".flat".count)
+      } else if (lower.endsWith(suffix)) {
+        name = name.trimEnd(suffix.count)
+      }
+
+      name = name.trim()
+    }
+
+    return name
+  }
+
+  public async createTestingSuite(String[] args = Array<String>()) {
+    let suiteName = if (args.count == 0) {
+      question(
+        value: cyan("Enter a suite name: (e.g. MyTestSuite)") + ": ",
+        responseMatcher: value => value.trim().count > 0,
+        responseMapper: fixupTestingSuiteFileNameSuffix,
+        invalidResponseMessage: "Invalid test suite name"
+      )
+    } else {
+      args[0]
+    }
+
+    createTestingSuite(airship.packageLocation, suiteName)
+  }
+
+  public async createTestingSuite(String suiteName) =>
+    createTestingSuite(airship.packageLocation, suiteName)
+
+  async createTestingSuite(File directory, String suiteName) {
+    let srcDirectory = File("#{directory.normalizedLocation}/src")
+    let testSuiteFile = File("#{srcDirectory.normalizedLocation}/#{suiteName}_TestSuite.flat")
+    let packageDirectory = testSuiteFile.getParent()
+    let packageEndLocation = suiteName.lastIndexOf("/")
+    let packageLocation = packageEndLocation == -1 ? null : suiteName.substring(0, packageEndLocation)
+    let packageStatement = packageLocation ? "package #packageLocation" : ""
+
+    if (!packageDirectory.exists) {
+      packageDirectory.mkdirs()
+    }
+
+    if (!testSuiteFile.exists) {
+      let testSuiteFileContents = "|
+        #{packageStatement}
+
+        import novex/nest/TestResult
+
+        import flatlang/time/Timer
+        import flatlang/io/FancyOutputStream
+
+        [TestSuite [
+        ]]
+        class {
+          public static async main(String args[]) {
+            let test = #{testSuiteFile.rootName}()
+
+            Timer timer = Timer().start()
+
+            let results = new TestResult[]
+
+            test.runTests({
+              results.add(_)
+            })
+
+            let fancy = FancyOutputStream(headerPattern: \"/\\\\\")
+
+            let unsuccessful = results.filter({ !_.success })
+
+            if (unsuccessful.count > 0) {
+              fancy.writeHeader(
+                \"\#unsuccessful.count Failure\#{unsuccessful.count == 1 ? \"\" : \"s\"} out of \#results.count test\#{results.count == 1 ? \"\" : \"s\"}\",
+                pattern: \":'( \",
+                symmetrical: true
+              )
+
+              unsuccessful.forEach({
+                Console.log(\"\#_\")
+              })
+            } else {
+              fancy.writeHeader(
+                \"All \#results.count Successful\",
+                pattern: \":) \",
+                symmetrical: true
+              )
+            }
+
+            timer.stop()
+
+            Console.writeLine(\"Took \#{timer.duration}ms\")
+
+            if (unsuccessful.count > 0) {
+                System.exit(1)
+            }
+          }
+        }\n
+        |".trimStart()
+
+      FileWriter(testSuiteFile)
+        :write(testSuiteFileContents)
+        .close()
+    }
+  }
+
+  public async createTest(String[] args = Array<String>()) {
+    let testClassName = if (args.count == 0) {
+      question(
+        value: cyan("Enter a test class name: (e.g. flat/io/services/MyClassName)") + ": ",
+        responseMatcher: value => value.trim().count > 0,
+        responseMapper: fixupTestFileNameSuffix,
+        invalidResponseMessage: "Invalid test class name"
+      )
+    } else {
+      args[0]
+    }
+
+    createTest(airship.packageLocation, testClassName)
+  }
+
+  public async createTest(String classLocation) =>
+    createTest(airship.packageLocation, classLocation)
+
+  async createTest(File directory, String classLocation) {
+    let srcDirectory = File("#{directory.normalizedLocation}/src")
+    let classFile = File("#{srcDirectory.normalizedLocation}/#{classLocation}")
+    let classTestFile = File("#{srcDirectory.normalizedLocation}/#{classLocation}_Test.flat")
+    let packageDirectory = classTestFile.getParent()
+    let packageEndLocation = classLocation.lastIndexOf("/")
+    let packageLocation = packageEndLocation == -1 ? null : classLocation.substring(0, packageEndLocation)
+    let packageStatement = packageLocation ? "package #packageLocation" : ""
+
+    if (!packageDirectory.exists) {
+      packageDirectory.mkdirs()
+    }
+
+    if (!classTestFile.exists) {
+      let classTestFileContents = "|
+        #{packageStatement}
+
+        import #{classLocation}
+
+        testable class {
+          test `can create`() {
+            let value = #{classFile.rootName}()
+
+            expect(value).toNotBe(null)
+          }
+        }\n
+        |".trimStart()
+
+      FileWriter(classTestFile)
+        :write(classTestFileContents)
+        .close()
+    }
+  }
+
+  public async addTestToTestSuite(
+    String testClassLocation,
+    String testSuiteClassLocation
+  ) =>
+    addTestToTestSuite(
+      airship.packageLocation,
+      testClassLocation,
+      testSuiteClassLocation
+    )
+
+  async addTestToTestSuite(
+    File directory,
+    String testClassLocation,
+    String testSuiteClassLocation
+  ) {
+    let srcDirectory = File("#{directory.normalizedLocation}/src")
+    let testSuiteFile = File("#{srcDirectory.normalizedLocation}/#{testSuiteClassLocation}_TestSuite.flat")
+    let testFile = File("#{srcDirectory.normalizedLocation}/#{testClassLocation}_Test.flat")
+
+    if (!testSuiteFile.isFile) {
+      throw ExecutionFailureException("Testing suite file \"#{testSuiteFile.normalizedLocation}\" does not exist")
+    }
+
+    var testSuiteContents = FileReader(testSuiteFile).readAllContents()
+
+    let annotationPrefix = "[TestSuite ["
+    let annotationIndex = testSuiteContents.findStringOnTopLevel(annotationPrefix)
+
+    if (annotationIndex == -1) {
+      throw ExecutionFailureException("Testing suite file \"#{testSuiteFile.normalizedLocation}\" does not contain a proper [TestSuite] annotation")
+    }
+
+    let annotationEndBracketIndex = testSuiteContents.indexOf(']', start: annotationIndex + annotationPrefix.count)
+    let annotationContents = testSuiteContents.substring(annotationIndex + annotationPrefix.count, annotationEndBracketIndex).trim()
+    let classInsertIndex = testSuiteContents.nextNonWhitespaceIndex(annotationEndBracketIndex - 1, direction: -1)
+
+    if (annotationContents.count > 0) {
+      testSuiteContents = "|
+        #{testSuiteContents.substring(0, classInsertIndex + 1)},
+          #{testFile.rootName}#{testSuiteContents.substring(classInsertIndex + 1)}
+        |"
+    } else {
+      testSuiteContents = "|
+        #{testSuiteContents.substring(0, classInsertIndex + 1)}
+          #{testFile.rootName}#{testSuiteContents.substring(classInsertIndex + 1)}
+        |"
+    }
+
+    let importEnd = testSuiteContents.nextNonWhitespaceIndex(annotationIndex - 1, direction: -1)
+
+    testSuiteContents = "|
+      #{testSuiteContents.substring(0, importEnd + 1)}
+      import #{testClassLocation}#{testSuiteContents.substring(importEnd + 1)}
+      |"
+
+    FileWriter(testSuiteFile).write(testSuiteContents).close()
   }
 }
