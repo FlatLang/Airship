@@ -1,6 +1,7 @@
 package flatlang/airship
 
 import flatlang/airship/Airship
+import flatlang/airship/Dependency
 import flatlang/fucli/FuCli.InvalidCliArgumentException
 import flatlang/airship/InvalidOutDirException
 import flatlang/io/File
@@ -29,20 +30,29 @@ testable class {
 
     let package = "main"
     let source = airship.getSourceForPackage(package)
+    
+    let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
+    let excludeSources = airship.dependencyService.getDependencyExclusions(currentDependency, package)
+
     let response = airship.dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = airship.dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
     let cmd = [
       "java", "-jar", "#{flatHome}/packages/Flat/target/flatc.jar",
-      "#{airship.packageLocation.normalizedLocation}/src/main",
+      "#{airship.packageLocation.normalizedLocation}/src",
       "-install-dir", "#{flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
       "-target", "js"
     ]
 
-    response.dependencies.forEach({
-      airship.dependencyService.getDependencySourceLocations(_).forEach({
+    excludeSources.forEach({ cmd.addAll(["-x", _]) })
+
+    response.dependencies.forEach((dependency) => {
+      airship.dependencyService.getDependencySourceLocations(dependency).forEach({
         cmd.addAll(["-l", _])
+      })
+      airship.dependencyService.getDependencyExclusions(dependency, package).forEach({
+        cmd.addAll(["-x", _])
       })
     })
 
