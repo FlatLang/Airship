@@ -18,7 +18,7 @@
   },
   "test": {
     "mainClass": "flatlang/airship/Airship_TestSuite",
-    "source": "src",
+    "source": "src/**/*_Test*.flat",
     "dependencies": {
       "github:FlatLang/Nest": "master"
     }
