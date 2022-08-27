@@ -59,6 +59,7 @@ class {
     let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
 
     let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, package)
+    let excludeSources = dependencyService.getDependencyExclusions(currentDependency, package)
     let canonicalSourceLocations = Array<String>()
 
     for (location in sourceLocations) {
@@ -78,6 +79,8 @@ class {
       "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ])
 
+    excludeSources.forEach({ cmd.addAll(["-x", _]) })
+
     if (airship.target) {
       cmd.addAll(["-target", airship.target])
     }
@@ -89,6 +92,7 @@ class {
     let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
     let dependencyLocations = HashMap<Dependency, Array<String>>()
+    let excludeLocations = HashMap<Dependency, Array<String>>()
 
     for (dependency in response.dependencies) {
       if (!dependencyLocations.containsKey(dependency)) {
@@ -104,9 +108,12 @@ class {
 
     response.dependencies
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
-      .forEach({
-        dependencyService.getDependencySourceLocations(_).forEach({
+      .forEach((dependency) => {
+        dependencyService.getDependencySourceLocations(dependency).forEach({
           cmd.addAll(["-l", _])
+        })
+        dependencyService.getDependencyExclusions(dependency, package).forEach({
+          cmd.addAll(["-x", _])
         })
       })
 

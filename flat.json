@@ -10,7 +10,8 @@
   },
   "main": {
     "mainClass": "flatlang/airship/Airship",
-    "source": "src/main",
+    "source": "src",
+    "excluded": ["src/**/*_Test*.flat"],
     "dependencies": {
       "github:FlatLang/Datastruct": "master",
       "github:FlatLang/Regex": "master",

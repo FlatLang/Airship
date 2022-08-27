@@ -10,11 +10,15 @@ class {
     visible String outDirectory,
     visible String outFile,
     visible String source,
+    visible ExcludedSource[] excludedSources,
     visible DefaultExport[] defaultExports,
     visible Dependency[] dependencies
   ) {}
 
   public construct(HashMap<String, Object> map) {
+    let excludesValue = (Object)(map["excluded"])
+    let excludedSourcesArray = (Array)excludesValue
+    let excludedSources = excludedSourcesArray?.map({ ExcludedSource(_) })
     let exportsValue = (Object)(map["defaultExports"])
     let defaultExportsArray = (Array)exportsValue
     let defaultExports = defaultExportsArray?.map({ DefaultExport(_) })
@@ -26,6 +30,7 @@ class {
       outDirectory: (String)map["outDirectory"],
       outFile: (String)map["outFile"],
       source: (String)map["source"],
+      excludedSources: excludedSources ?: Array<ExcludedSource>(),
       defaultExports: defaultExports ?: Array<DefaultExport>(),
       dependencies: dependencies ?: Array<Dependency>()
     )
@@ -36,6 +41,7 @@ class {
       outDirectory: \"#outDirectory\",
       outFile: \"#outFile\",
       source: \"#source\",
+      excludedSources: \"#excludedSources\",
       defaultExports: \"#defaultExports\",
       dependencies: \"#dependencies\"
     }
@@ -46,6 +52,7 @@ class {
     String outDirectory = outDirectory,
     String outFile = outFile,
     String source = source,
+    ExcludedSource[] excludedSources = excludedSources,
     DefaultExport[] defaultExports = defaultExports,
     Dependency[] dependencies = dependencies
   ) => PackageSource(
@@ -53,6 +60,7 @@ class {
     outDirectory,
     outFile,
     source,
+    excludedSources,
     defaultExports,
     dependencies
   )
