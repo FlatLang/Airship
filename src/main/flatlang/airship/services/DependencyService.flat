@@ -30,6 +30,18 @@ class {
       .map({ "#{baseLocation}/#{_}" })
   }
 
+  public getDependencyExclusions(Dependency dependency, String installationTarget = "main") -> String[] {
+    let baseLocation = dependency.getLocation()
+
+    let source = dependency.airship.getSourceForPackage(installationTarget)
+
+    if (!source) {
+      return Array<String>()
+    }
+    
+    return source.excludedSources.map({ "#{baseLocation}/#{_.location}" })
+  }
+
   public getDependencyGitUrl(Dependency dependency) -> String {
     return if (dependency.class.isOfType(GitHubDependency.class)) {
       let gitHubDependency = (GitHubDependency)dependency
