@@ -73,6 +73,12 @@ class {
 
     writeSources(directory, mainClass)
 
+    if (mainClass && boolQuestion(cyan("Create a testing suite") + " (#{mainClass}_TestSuite)? (Y/n): ")) {
+      createService.createTest(mainClass)
+      createService.createTestingSuite(mainClass)
+      createService.addTestToTestSuite(mainClass, mainClass)
+    }
+
     if (mainClass && boolQuestion(cyan("Create a testing pipeline") + "? (Y/n): ")) {
       createService.createPipeline()
     }
@@ -89,7 +95,6 @@ class {
 
     if (mainClass) {
       writeMainClassFile(directory, mainClass)
-      writeTestFiles(directory, mainClass)
     }
   }
 
@@ -123,102 +128,6 @@ class {
     }
   }
 
-  async writeTestFiles(File directory, String mainClass) {
-    let mainClassFile = File("#{directory.normalizedLocation}/#{mainClass}")
-    let mainClassTestFile = File("#{directory.normalizedLocation}/src/#{mainClass}_Test.flat")
-    let testSuiteFile = File("#{directory.normalizedLocation}/src/#{mainClass}_TestSuite.flat")
-    let packageDirectory = testSuiteFile.getParent()
-    let packageEndLocation = mainClass.lastIndexOf("/")
-    let packageLocation = packageEndLocation == -1 ? null : mainClass.substring(0, packageEndLocation)
-    let packageStatement = packageLocation ? "package #packageLocation" : ""
-
-    if (!packageDirectory.exists) {
-      packageDirectory.mkdirs()
-    }
-
-    if (!mainClassTestFile.exists) {
-      let mainClassTestFileContents = "|
-        #{packageStatement}
-
-        import #{mainClass}
-
-        testable class {
-          test `can create`() {
-            let value = #{mainClassFile.rootName}()
-
-            expect(value).toNotBe(null)
-          }
-        }\n
-        |".trimStart()
-
-      FileWriter(mainClassTestFile)
-        :write(mainClassTestFileContents)
-        .close()
-    }
-
-    if (!testSuiteFile.exists) {
-      let testSuiteFileContents = "|
-        #{packageStatement}
-
-        import novex/nest/TestResult
-
-        import flatlang/time/Timer
-        import flatlang/io/FancyOutputStream
-
-        [TestSuite [
-          #{mainClassTestFile.rootName}
-        ]]
-        class {
-          public static async main(String args[]) {
-            let test = #{testSuiteFile.rootName}()
-
-            Timer timer = Timer().start()
-
-            let results = new TestResult[]
-
-            test.runTests({
-              results.add(_)
-            })
-
-            let fancy = FancyOutputStream(headerPattern: \"/\\\\\")
-
-            let unsuccessful = results.filter({ !_.success })
-
-            if (unsuccessful.count > 0) {
-              fancy.writeHeader(
-                \"\#unsuccessful.count Failure\#{unsuccessful.count == 1 ? \"\" : \"s\"} out of \#results.count test\#{results.count == 1 ? \"\" : \"s\"}\",
-                pattern: \":'( \",
-                symmetrical: true
-              )
-
-              unsuccessful.forEach({
-                Console.log(\"\#_\")
-              })
-            } else {
-              fancy.writeHeader(
-                \"All \#results.count Successful\",
-                pattern: \":) \",
-                symmetrical: true
-              )
-            }
-
-            timer.stop()
-
-            Console.writeLine(\"Took \#{timer.duration}ms\")
-
-            if (unsuccessful.count > 0) {
-                System.exit(1)
-            }
-          }
-        }\n
-        |".trimStart()
-
-      FileWriter(testSuiteFile)
-        :write(testSuiteFileContents)
-        .close()
-    }
-  }
-
   async writeFlatJson(
     File flatJson,
     String: name,
@@ -246,10 +155,12 @@ class {
         \"main\": {
           #mainClassProperty\"source\": \"src\",
           \"dependencies\": {
+            \"github:FlatLang/System\": \"master\",
+            \"github:FlatLang/IO\": \"master\"
           }
         },
         \"test\": {
-          #testMainClassProperty\"source\": \"src\",
+          #testMainClassProperty\"source\": \"src/**/*_Test*.flat\",
           \"dependencies\": {
             \"github:FlatLang/Nest\": \"master\"
           }
