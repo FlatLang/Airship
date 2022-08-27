@@ -79,14 +79,14 @@ class {
       "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ])
 
-    excludeSources.forEach({ cmd.addAll(["-x", _]) })
-
     if (airship.target) {
       cmd.addAll(["-target", airship.target])
     }
     if (airship.targetRuntimeArg.enabled) {
       cmd.addAll(["-target-runtime", airship.targetRuntimeArg.value])
     }
+
+    excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
     let response = dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
