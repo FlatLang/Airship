@@ -383,7 +383,7 @@ class {
     }
   }
 
-  isCoreLibrary() => getRootParent().packageLocation.normalizedLocation.endsWith(".flat/packages/Flat-Core")
+  isCoreLibrary() => getRootParent().packageLocation.normalizedLocation.endsWith("/Flat-Core")
 
   public propagateArgs(String[] args) {
     if (target) {
