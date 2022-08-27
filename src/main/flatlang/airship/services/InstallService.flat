@@ -60,6 +60,7 @@ class {
 
     let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, package)
     let excludeSources = dependencyService.getDependencyExclusions(currentDependency, package)
+    let excludeSource = package == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
     let canonicalSourceLocations = Array<String>()
 
     for (location in sourceLocations) {
@@ -88,6 +89,10 @@ class {
 
     excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
+    if (excludeSource) {
+      cmd.addAll(["-x", excludeSource])
+    }
+
     let response = dependencyService.getDependenciesForSource(package, package, source)
     let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
 
@@ -115,6 +120,12 @@ class {
         dependencyService.getDependencyExclusions(dependency, package).forEach({
           cmd.addAll(["-x", _])
         })
+
+        let dependencyExcludeSource = package == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
+
+        if (dependencyExcludeSource) {
+          cmd.addAll(["-x", dependencyExcludeSource])
+        }
       })
 
     topLevelDependencies.dependencies

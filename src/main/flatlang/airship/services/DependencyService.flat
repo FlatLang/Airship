@@ -30,6 +30,30 @@ class {
       .map({ "#{baseLocation}/#{_}" })
   }
 
+  public getDependencySourceLocation(Dependency dependency, String installationTarget = "main") -> String {
+    let baseLocation = dependency.getLocation()
+
+    let source = dependency.airship.getSourceForPackage(installationTarget)
+
+    if (source?.source) {
+      return "#{baseLocation}/#{source.source}"
+    } else {
+      return null
+    }
+  }
+
+  public getDependencySourceGlobLocation(Dependency dependency, String installationTarget = "main") -> String {
+    if (let location = getDependencySourceLocation(dependency, installationTarget)) {
+      let glob = location.contains("*")
+      log.trace("Checking location for glob: #{location}: #{glob}")
+      if (glob) {
+        return location
+      }
+    }
+
+    return null
+  }
+
   public getDependencyExclusions(Dependency dependency, String installationTarget = "main") -> String[] {
     let baseLocation = dependency.getLocation()
 
