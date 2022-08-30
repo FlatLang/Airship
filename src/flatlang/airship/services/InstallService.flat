@@ -94,7 +94,10 @@ class {
     }
 
     let response = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source)
+    log.trace("All dependencies for \"#installationTarget\": #response.dependencies")
+
     let topLevelDependencies = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source, recursive: false)
+    log.trace("Tep-level dependencies for \"#installationTarget\": #topLevelDependencies.dependencies")
 
     let dependencyLocations = HashMap<Dependency, Array<String>>()
     let excludeLocations = HashMap<Dependency, Array<String>>()
@@ -214,7 +217,11 @@ class {
     postInstallPackage(flatPackageDir, install: false)
   }
 
-  async installDependencies(String package, PackageSource source, Bool install = false) {
+  async installDependencies(
+    String package,
+    PackageSource source,
+    Bool install = false
+  ) {
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in response.dependencies.filter({ _.class.isOfType(GitHubDependency.class) })) {
