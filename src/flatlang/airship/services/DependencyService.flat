@@ -25,7 +25,7 @@ class {
   public getDependencySourceLocations(Dependency dependency, String installationTarget = "main") -> String[] {
     let baseLocation = dependency.getLocation()
 
-    return dependency.getSourcesForInstallation(installationTarget, dependency.airship.mainSource)
+    return dependency.getSourcesForInstallation(installationTarget)
       .map({ _?.source ?: "src" })
       .map({ "#{baseLocation}/#{_}" })
   }
@@ -33,7 +33,7 @@ class {
   public getDependencySourceLocation(Dependency dependency, String installationTarget = "main") -> String {
     let baseLocation = dependency.getLocation()
 
-    let source = dependency.airship.getSourceForPackage(installationTarget)
+    let source = dependency.airship.getSourceForPackage(installationTarget, dependency.airship.package.defaultSource)
 
     if (source?.source) {
       return "#{baseLocation}/#{source.source}"
@@ -57,12 +57,12 @@ class {
   public getDependencyExclusions(Dependency dependency, String installationTarget = "main") -> String[] {
     let baseLocation = dependency.getLocation()
 
-    let source = dependency.airship.getSourceForPackage(installationTarget)
+    let source = dependency.airship.getSourceForPackage(installationTarget, dependency.airship.package.defaultSource)
 
     if (!source) {
       return Array<String>()
     }
-    
+
     return source.excludedSources.map({ "#{baseLocation}/#{_.location}" })
   }
 
@@ -146,10 +146,7 @@ class {
 
       let childship = Airship(args, airship)
 
-      let packageSource = match (installationTarget) {
-        "main" => childship.mainSource
-        "test" => childship.testSource ?: childship.mainSource
-      }
+      let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
 
       if (packageSource && recursive) {
         getDependenciesForSource(
