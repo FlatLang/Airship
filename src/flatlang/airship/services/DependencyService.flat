@@ -147,6 +147,7 @@ class {
       let childship = Airship(args, airship)
 
       let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
+      log.trace("Found source for #{childship.packageLocation.normalizedLocation} with installation target \"#{installationTarget}\": #packageSource")
 
       if (packageSource && recursive) {
         getDependenciesForSource(
