@@ -136,6 +136,12 @@ class {
       Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
     }
 
+    if (parent) {
+      log.trace("Creating Airship with CLI args: #cli")
+    } else {
+      log.debug("Creating Airship with CLI args: #cli")
+    }
+
     flatJsonLocation = getFlatJsonLocation(fileArg.value)
     debug = debugArg.enabled
     target = targetArg.value
@@ -144,6 +150,8 @@ class {
     packageLocation = flatJsonFile.getParent()
 
     if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
+      log.trace("Airship has already been created for #{flatJsonFile.normalizedLocation}. Using sources from existing package")
+
       let airship = packageCache[flatJsonFile.normalizedLocation]
 
       target = target ?: airship.target
@@ -321,7 +329,11 @@ class {
       return
     }
 
-    for (command in cli.args.filter({ _.enabled })) {
+    let commands = cli.args.filter({ _.enabled })
+
+    for (command in commands) {
+      log.debug("Running command \"#command\"")
+
       match (command) {
         setupCommand => setupService.setup()
         installCommand => installService.install()
