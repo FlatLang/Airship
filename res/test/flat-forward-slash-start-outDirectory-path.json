@@ -2,14 +2,16 @@
   "name": "Airship",
   "version": "0.1.0",
   "description": "Flat package manager",
-  "main": {
-    "mainClass": "flatlang/airship/Airship",
-    "outDirectory": "/test",
-    "outFile": "airship.js",
-    "source": "src/main",
-    "dependencies": {
-      "github:FlatLang/Json": "master",
-      "github:FlatLang/Compiler-String-Extensions": "master"
+  "sources": {
+    "main": {
+      "mainClass": "flatlang/airship/Airship",
+      "outDirectory": "/test",
+      "outFile": "airship.js",
+      "source": "src/main",
+      "dependencies": {
+        "github:FlatLang/Json": "master",
+        "github:FlatLang/Compiler-String-Extensions": "master"
+      }
     }
   },
   "scripts": {

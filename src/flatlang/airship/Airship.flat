@@ -33,8 +33,6 @@ class {
   visible Package package
   visible String outFile
   visible Bool debug
-  visible PackageSource mainSource
-  visible PackageSource testSource
   visible String flatJsonLocation
   visible File flatJsonFile
   visible File packageLocation
@@ -156,8 +154,6 @@ class {
 
       target = target ?: airship.target
       package = airship.package
-      mainSource = airship.mainSource
-      testSource = airship.testSource
     } else {
       if (flatJsonFile.isFile) {
         log.trace("Parsing \"#{flatJsonFile.normalizedLocation}\" ...")
@@ -177,30 +173,7 @@ class {
 
         package = Package(map)
 
-        let sources = loadSources()
-        mainSource = sources[0]
-        testSource = sources[1]
-
-        if (mainSource?.dependencies && testSource?.dependencies) {
-          merge(mainSource.dependencies, testSource.dependencies)
-        }
-
-        if (mainSource && testSource) {
-          merge(mainSource.defaultExports, testSource.defaultExports)
-        }
-
-        if (!isCoreLibrary()) {
-          log.trace("Adding Flat-Core implicit dependency")
-
-          if (mainSource?.dependencies) {
-            mainSource.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master"));
-          }
-          if (testSource?.dependencies) {
-            testSource.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master"));
-          }
-        } else {
-          log.trace("Skipping Flat-Core implicit dependency")
-        }
+        loadSources()
       }
 
       packageCache[flatJsonFile.normalizedLocation] = this
@@ -211,11 +184,11 @@ class {
     get {
       let value = Array<PackageSource>()
 
-      if (mainSource) {
-        value.add(mainSource)
+      if (package.mainSource) {
+        value.add(package.mainSource)
       }
-      if (testSource) {
-        value.add(testSource)
+      if (package.testSource) {
+        value.add(package.testSource)
       }
 
       return value
@@ -292,6 +265,10 @@ class {
     Object[] source,
     Object[] dest
   ) {
+    if (!source || !dest) {
+      return
+    }
+
     source.forEach((value) => {
       if (!dest.contains(value)) {
         dest.add(value)
@@ -299,19 +276,45 @@ class {
     })
   }
 
-  loadSources() -> PackageSource[] {
-    let main = package.main?.clone(
-      outDirectory: validateOutDirectory(package.main.outDirectory ?: "dist"),
-      outFile: package.main.outFile ?: "index.js",
-      source: package.main.source ?: "src"
-    )
-    let test = package.test?.clone(
-      outDirectory: validateOutDirectory(package.test.outDirectory ?: "dist"),
-      outFile: package.test.outFile ?: "test.js",
-      source: package.test.source ?: "src"
-    )
+  loadSources() {
+    package.sources
+      .mapValues((pair) => {
+        let source = pair.value
+        let updatedSource = source.clone(
+          outDirectory: validateOutDirectory(source.outDirectory ?: "dist"),
+          outFile: source.outFile ?: (pair.key == "test" ? "test.js" : "index.js"),
+          source: source.source ?: "src"
+        )
 
-    return [main, test]
+        Airship.log.trace("
+            Updating #{pair.key} source from #{source.toString().indent(tab: "  ", firstLine: false)}
+            to #{updatedSource.toString().indent(tab: "  ", firstLine: false)}
+          |")
+
+        return updatedSource
+      })
+      .forEach((pair) => {
+        package.sources[pair.key] = pair.value
+      })
+
+    if (package.mainSource) {
+      package.sources
+        .filter({ _.key != "main" })
+        .forEach((pair) => {
+          Airship.log.trace("Propagating main source dependencies to #{pair.key} source dependencies")
+          merge(package.mainSource.dependencies, pair.value.dependencies)
+          Airship.log.trace("Propagating main source defaultExports to #{pair.key} source defaultExports")
+          merge(package.mainSource.defaultExports, pair.value.defaultExports)
+        })
+    }
+
+    if (!isCoreLibrary()) {
+      log.trace("Adding Flat-Core implicit dependency")
+
+      package.sources.forEach({ _.value.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master")) })
+    } else {
+      log.trace("Skipping Flat-Core implicit dependency")
+    }
   }
 
   validateOutDirectory(String location) => location {
@@ -348,18 +351,8 @@ class {
     }
   }
 
-  public getSourceForPackage(String package, PackageSource defaultSource = null) -> PackageSource {
-    return match (package) {
-      "main" => mainSource
-      "test" => testSource
-      default => {
-        if (defaultSource) {
-          return defaultSource
-        }
-
-        throw InvalidCommandException("Invalid installation package '#package'")
-      }
-    }
+  public getSourceForPackage(String installationTarget, PackageSource defaultSource = null) -> PackageSource {
+    return package.sources.getOrDefault(installationTarget, { defaultSource })
   }
 
   async checkFlatHome() => true {

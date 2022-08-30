@@ -10,8 +10,11 @@ class {
   visible String license
   visible String defaultTarget
   visible HashMap<String, Object> scripts
-  visible PackageSource main
-  visible PackageSource test
+  visible HashMap<String, PackageSource> sources
+
+  visible PackageSource mainSource <=> sources["main"]
+  visible PackageSource testSource <=> sources["test"]
+  visible PackageSource defaultSource => mainSource ?: testSource
 
   public construct(HashMap<String, Object> map) {
     name = (String)map["name"]
@@ -21,8 +24,14 @@ class {
     license = (String)map["license"]
     defaultTarget = (String)map["defaultTarget"]
     scripts = (HashMap)map["scripts"]
-    main = map.containsKey("main") ? PackageSource((HashMap)map["main"]) : null
-    test = map.containsKey("test") ? PackageSource((HashMap)map["test"]) : null
+
+    let HashMap<String, HashMap> sourcesMap = (HashMap)map["sources"]
+
+    if (!sourcesMap || !sourcesMap.class.isOfType(HashMap.class)) {
+      sources = HashMap()
+    } else {
+      sources = sourcesMap.mapValues(pair => PackageSource((HashMap)pair.value))
+    }
   }
 
   override public toString() => "|
@@ -33,8 +42,7 @@ class {
       author: \"#author\",
       license: \"#license\",
       defaultTarget: \"#defaultTarget\",
-      main: \"#main\",
-      test: \"#test\",
+      sources: \"#sources\",
       scripts: \"#scripts\"
     }
     |"
