@@ -185,10 +185,10 @@ class {
           log.trace("Adding Flat-Core implicit dependency")
 
           if (mainSource?.dependencies) {
-            mainSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
+            mainSource.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
           if (testSource?.dependencies) {
-            testSource.dependencies.add(GitHubDependency("github:FlatLang/Flat-Core", "master"));
+            testSource.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master"));
           }
         } else {
           log.trace("Skipping Flat-Core implicit dependency")
