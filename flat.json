@@ -8,27 +8,29 @@
   "scripts": {
     "test": "node dist/test.js"
   },
-  "main": {
-    "mainClass": "flatlang/airship/Airship",
-    "source": "src",
-    "dependencies": {
-      "github:FlatLang/Datastruct": "master",
-      "github:FlatLang/Regex": "master",
-      "github:FlatLang/FuCli": "master",
-      "github:FlatLang/Json": "master",
-      "github:FlatLang/System": "master",
-      "github:FlatLang/IO": "master",
-      "github:FlatLang/Git": "master",
-      "github:FlatLang/Logger": "master",
-      "github:FlatLang/Read-Line": "master",
-      "github:FlatLang/CoLorIzer": "master"
-    }
-  },
-  "test": {
-    "mainClass": "flatlang/airship/Airship_TestSuite",
-    "source": "src/**/*_Test*.flat",
-    "dependencies": {
-      "github:FlatLang/Nest": "master"
+  "sources": {
+    "main": {
+      "mainClass": "flatlang/airship/Airship",
+      "source": "src",
+      "dependencies": {
+        "github:FlatLang/Datastruct": "master",
+        "github:FlatLang/Regex": "master",
+        "github:FlatLang/FuCli": "master",
+        "github:FlatLang/Json": "master",
+        "github:FlatLang/System": "master",
+        "github:FlatLang/IO": "master",
+        "github:FlatLang/Git": "master",
+        "github:FlatLang/Logger": "master",
+        "github:FlatLang/Read-Line": "master",
+        "github:FlatLang/CoLorIzer": "master"
+      }
+    },
+    "test": {
+      "mainClass": "flatlang/airship/Airship_TestSuite",
+      "source": "src/**/*_Test*.flat",
+      "dependencies": {
+        "github:FlatLang/Nest": "master"
+      }
     }
   }
 }

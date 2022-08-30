@@ -36,16 +36,23 @@ class {
     )
   }
 
-  override public toString() => "{
-      mainClass: \"#mainClass\",
-      outDirectory: \"#outDirectory\",
-      outFile: \"#outFile\",
-      source: \"#source\",
-      excludedSources: \"#excludedSources\",
-      defaultExports: \"#defaultExports\",
-      dependencies: \"#dependencies\"
+  override public toString() -> String {
+    let excludedSourcesString = excludedSources.toString().indent(tab: "  ", firstLine: false)
+    let defaultExportsString = defaultExports.toString().indent(tab: "  ", firstLine: false)
+    let dependenciesString = dependencies.toString().indent(tab: "  ", firstLine: false)
+
+    return "|
+      {
+        mainClass: \"#mainClass\",
+        outDirectory: \"#outDirectory\",
+        outFile: \"#outFile\",
+        source: \"#source\",
+        excludedSources: \"#{excludedSourcesString}\",
+        defaultExports: \"#{defaultExportsString}\",
+        dependencies: \"#{dependenciesString}\"
+      }
+      |"
     }
-    |"
 
   public clone(
     String mainClass = mainClass,

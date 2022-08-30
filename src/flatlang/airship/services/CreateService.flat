@@ -31,7 +31,7 @@ class {
   }
 
   public async createPipeline(String[] args = Array<String>()) {
-    if (!airship.testSource) {
+    if (!airship.package.testSource) {
       throw ExecutionFailureException("No test source configuration exists in \"#{airship.flatJsonLocation}\"")
     }
 
@@ -110,8 +110,8 @@ class {
               - uses: actions/upload-artifact@v3
                 if: failure()
                 with:
-                  name: #{airship.testSource.outFile}
-                  path: #{airship.testSource.outDirectory}/#{airship.testSource.outFile}
+                  name: #{airship.package.testSource.outFile}
+                  path: #{airship.package.testSource.outDirectory}/#{airship.package.testSource.outFile}
 
               - name: Run #{airship.package.name} Test
                 run: |

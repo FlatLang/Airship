@@ -30,7 +30,7 @@ testable class {
 
     let package = "main"
     let source = airship.getSourceForPackage(package)
-    
+
     let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
     let excludeSources = airship.dependencyService.getDependencyExclusions(currentDependency, package)
     let excludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
@@ -69,7 +69,7 @@ testable class {
 
     topLevelDependencies.dependencies.forEach({
       let childShip = _.airship
-      let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
+      let dependencySource = childShip.getSourceForPackage(package) ?: childShip.package.mainSource
 
       dependencySource?.defaultExports
         .filter({ !_.staticImport })

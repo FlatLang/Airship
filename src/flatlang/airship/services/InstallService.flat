@@ -41,7 +41,11 @@ class {
     }
   }
 
-  public async install(String package, Bool: install = false, Bool: installDependencies = true) {
+  public async install(
+    String package,
+    Bool: install = false,
+    Bool: installDependencies = true
+  ) {
     if (airship.linkArg.enabled) {
       installAndLink(package)
     } else if (package.endsWith(".git")) {
@@ -51,16 +55,12 @@ class {
     }
   }
 
-  public async getInstallCommand(String package, PackageSource source) -> String[] {
-    if (!source) {
-      throw InvalidCommandException("No source found for installation")
-    }
-
+  public async getInstallCommand(String installationTarget, PackageSource source) -> String[] {
     let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
 
-    let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, package)
-    let excludeSources = dependencyService.getDependencyExclusions(currentDependency, package)
-    let excludeSource = package == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
+    let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
+    let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
+    let excludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
     let canonicalSourceLocations = Array<String>()
 
     for (location in sourceLocations) {
@@ -93,15 +93,15 @@ class {
       cmd.addAll(["-x", excludeSource])
     }
 
-    let response = dependencyService.getDependenciesForSource(package, package, source)
-    let topLevelDependencies = dependencyService.getDependenciesForSource(package, package, source, recursive: false)
+    let response = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source)
+    let topLevelDependencies = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source, recursive: false)
 
     let dependencyLocations = HashMap<Dependency, Array<String>>()
     let excludeLocations = HashMap<Dependency, Array<String>>()
 
     for (dependency in response.dependencies) {
       if (!dependencyLocations.containsKey(dependency)) {
-        let dependencySourceLocations = dependencyService.getDependencySourceLocations(dependency, package)
+        let dependencySourceLocations = dependencyService.getDependencySourceLocations(dependency, installationTarget)
 
         dependencyLocations[dependency] = Array()
 
@@ -114,14 +114,15 @@ class {
     response.dependencies
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
       .forEach((dependency) => {
-        dependencyService.getDependencySourceLocations(dependency).forEach({
-          cmd.addAll(["-l", _])
-        })
-        dependencyService.getDependencyExclusions(dependency, package).forEach({
-          cmd.addAll(["-x", _])
-        })
+        dependencyService
+          .getDependencySourceLocations(dependency)
+          .forEach({ cmd.addAll(["-l", _]) })
 
-        let dependencyExcludeSource = package == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
+        dependencyService
+          .getDependencyExclusions(dependency, installationTarget)
+          .forEach({ cmd.addAll(["-x", _]) })
+
+        let dependencyExcludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
         if (dependencyExcludeSource) {
           cmd.addAll(["-x", dependencyExcludeSource])
@@ -130,9 +131,9 @@ class {
 
     topLevelDependencies.dependencies
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
-      .forEach({
-        let childShip = _.airship
-        let dependencySource = childShip.getSourceForPackage(package) ?: childShip.mainSource
+      .forEach((dependency) => {
+        let childship = dependency.airship
+        let dependencySource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
 
         dependencySource?.defaultExports
           .filter({ !_.staticImport })
@@ -153,10 +154,13 @@ class {
   }
 
   async installLocalPackage(String package) {
-    let source = airship.getSourceForPackage(package)
+    log.debug("Installing local package #{airship.packageLocation.normalizedLocation} with target \"#package\"")
+
+    let source = airship.getSourceForPackage(package, airship.parent ? airship.package.defaultSource : null)
 
     if (!source) {
-      throw InvalidCommandException("No source found for installation package '#package'")
+      log.debug("No source for local package #{airship.packageLocation.normalizedLocation}. Skipping installation")
+      return
     }
 
     installDependencies(package, source)
@@ -241,9 +245,9 @@ class {
       childship.runScriptService.runScript("build")
     }
 
-    if (childship.package?.main) {
+    if (childship.package?.mainSource) {
       if (installDependencies) {
-        childship.installService.installDependencies(flatPackageDir.name, childship.package.main)
+        childship.installService.installDependencies(flatPackageDir.name, childship.package.mainSource)
       }
       if (install) {
         childship.installService.install()

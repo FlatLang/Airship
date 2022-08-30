@@ -12,25 +12,23 @@ class {
   public construct(private Airship airship) {}
 
   public async clean() {
-    let mainDirectory = airship.mainSource?.outDirectory
-    let testDirectory = airship.testSource?.outDirectory
+    let directories = airship.package.sources
+      .map({ _.value.outDirectory })
+      .filterNull()
+      .map({ "#{airship.packageLocation.normalizedLocation}/#_" })
+      .unique()
+      .map({ File(_) })
 
-    if (mainDirectory) {
-      clean(airship.mainSource)
-    }
-    if (testDirectory && mainDirectory != testDirectory) {
-      clean(airship.testSource)
+    for (directory in directories) {
+      clean(directory)
     }
   }
 
-  public async clean(PackageSource source) {
-    let location = "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}"
-    let outDirectory = File(location)
-
+  async clean(File directory) {
     try {
-      outDirectory.delete(recursive: true)
+      directory.delete(recursive: true)
     } catch (Exception e) {
-      throw Exception("Failed to clean directory '#{outDirectory.normalizedLocation}'")
+      throw Exception("Failed to clean directory '#{directory.normalizedLocation}'")
     }
   }
 }
