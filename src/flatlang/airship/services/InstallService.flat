@@ -254,7 +254,7 @@ class {
 
     if (childship.package?.mainSource) {
       if (installDependencies) {
-        childship.installService.installDependencies(flatPackageDir.name, childship.package.mainSource)
+        childship.installService.installDependencies(flatPackageDir.name, childship.package.defaultSource)
       }
       if (install) {
         childship.installService.install()
