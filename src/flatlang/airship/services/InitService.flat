@@ -138,8 +138,8 @@ class {
     String: defaultTarget,
     String: mainClass
   ) {
-    let mainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}\",\n    " : ""
-    let testMainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}_TestSuite\",\n    " : ""
+    let mainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}\",\n      " : ""
+    let testMainClassProperty = mainClass ? "\"mainClass\": \"#{mainClass}_TestSuite\",\n      " : ""
 
     let jsonContents = "|
       {
@@ -152,17 +152,19 @@ class {
         \"scripts\": {
           \"test\": \"node dist/test.js\"
         },
-        \"main\": {
-          #mainClassProperty\"source\": \"src\",
-          \"dependencies\": {
-            \"github:FlatLang/System\": \"master\",
-            \"github:FlatLang/IO\": \"master\"
-          }
-        },
-        \"test\": {
-          #testMainClassProperty\"source\": \"src/**/*_Test*.flat\",
-          \"dependencies\": {
-            \"github:FlatLang/Nest\": \"master\"
+        \"sources\": {
+          \"main\": {
+            #mainClassProperty\"source\": \"src\",
+            \"dependencies\": {
+              \"github:FlatLang/System\": \"master\",
+              \"github:FlatLang/IO\": \"master\"
+            }
+          },
+          \"test\": {
+            #testMainClassProperty\"source\": \"src/**/*_Test*.flat\",
+            \"dependencies\": {
+              \"github:FlatLang/Nest\": \"master\"
+            }
           }
         }
       }\n
