@@ -74,6 +74,7 @@ class {
       "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
     ]
 
+    log.trace("Adding source locations: #{sourceLocations}")
     cmd.addAll(sourceLocations)
 
     cmd.addAll([
@@ -82,12 +83,15 @@ class {
     ])
 
     if (airship.target) {
+      log.trace("Adding target: #{airship.target}")
       cmd.addAll(["-target", airship.target])
     }
     if (airship.targetRuntimeArg.enabled) {
+      log.trace("Adding source locations: #{airship.targetRuntimeArg.value}")
       cmd.addAll(["-target-runtime", airship.targetRuntimeArg.value])
     }
 
+    log.trace("Adding source exclusions: #{excludeSources}")
     excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
     if (excludeSource) {
