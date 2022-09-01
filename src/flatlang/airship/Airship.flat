@@ -61,7 +61,7 @@ class {
   visible InstallService installService = InstallService(this, dependencyService, binaryService)
   visible UninstallService uninstallService = UninstallService(this)
   visible ReinstallService reinstallService = ReinstallService(this)
-  visible UpdateService updateService = UpdateService(this, dependencyService)
+  visible UpdateService updateService = UpdateService(this, dependencyService, installService)
   visible CleanService cleanService = CleanService(this)
   visible RunScriptService runScriptService = RunScriptService(this)
   visible SetupService setupService = SetupService(this, dependencyService, updateService)

@@ -15,7 +15,8 @@ class {
 
   public construct(
     private Airship airship,
-    private DependencyService dependencyService
+    private DependencyService dependencyService,
+    private InstallService installService
   ) {}
 
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
@@ -40,23 +41,31 @@ class {
     let source = airship.getSourceForPackage(package)
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
+    let updatedDependencies = Array<Dependency>()
+
     for (dependency in response.dependencies) {
-      updatePackage(dependency)
+      if (updatePackage(dependency)) {
+        updatedDependencies.add(dependency)
+      }
+    }
+    for (dependency in updatedDependencies) {
+      if (dependency.class.isOfType(GitHubDependency.class)) {
+        installService.installGitPackage((GitHubDependency)dependency)
+      }
     }
   }
 
   public async updatePackage(
     String package,
     Bool: build = true
-  ) {
+  ) =>
     updatePackage(Dependency(package), build)
-  }
 
   public async updatePackage(
     Dependency dependency,
     Bool: build = true
-  ) {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
+  ) -> Bool {
+    return if (dependency.class.isOfType(GitHubDependency.class)) {
       updateGitPackage((GitHubDependency)dependency, build)
     } else {
       throw Exception("Cannot update package: #dependency")
@@ -66,7 +75,7 @@ class {
   public async updateGitPackage(
     GitHubDependency dependency,
     Bool: build = true
-  ) {
+  ) -> Bool {
     if (!airship.quietArg.enabled) {
       log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})... ", newLine: false)
     }
@@ -86,25 +95,9 @@ class {
     if (pullResponse.upToDate) {
       log.info("already up to date")
     } else {
-      let args = [
-        "-f", packageLocation.normalizedLocation
-      ]
-
-      airship.propagateArgs(args)
-
-      let childship = Airship(args, airship)
-
-      if (build && childship.package?.scripts.containsKey("build")) {
-        log.info("updated. Building...")
-
-        if (childship.package.scripts.containsKey("clean")) {
-          childship.runScriptService.runScript("clean")
-        }
-
-        childship.runScriptService.runScript("build")
-      } else {
-        log.info("updated")
-      }
+      log.info("updated")
     }
+
+    return !pullResponse.upToDate
   }
 }
