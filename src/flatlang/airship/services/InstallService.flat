@@ -258,6 +258,10 @@ class {
     let childship = Airship(args, airship)
 
     if (build && childship.package?.scripts.containsKey("build")) {
+      if (childship.package.scripts.containsKey("clean")) {
+        childship.runScriptService.runScript("clean")
+      }
+
       childship.runScriptService.runScript("build")
     }
 
