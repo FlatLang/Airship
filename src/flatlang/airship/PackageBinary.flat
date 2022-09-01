@@ -1,0 +1,20 @@
+package flatlang/airship
+
+class {
+  public construct(
+    visible String name,
+    visible String value
+  ) {}
+
+  override public toString() => "|
+    {
+      \"name\": \"#name\",
+      \"value\": \"#value\"
+    }
+    |"
+
+  public clone(
+    String name = name,
+    String value = value
+  ) => PackageBinary(name, value)
+}

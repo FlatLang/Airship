@@ -24,6 +24,7 @@ import flatlang/airship/services/CleanService
 import flatlang/airship/services/RunScriptService
 import flatlang/airship/services/InitService
 import flatlang/airship/services/CreateService
+import flatlang/airship/services/BinaryService
 
 import flatlang/regex/RegexStringExtensions
 
@@ -53,9 +54,11 @@ class {
   visible CliArg runCommand = CliArg("run", ["r"], minCount: 1)
   visible CliArg initCommand = CliArg("init")
   visible CliArg createCommand = CliArg("create", minCount: 1)
+  visible CliArg binCommand = CliArg("bin")
 
   visible DependencyService dependencyService = DependencyService(this)
-  visible InstallService installService = InstallService(this, dependencyService)
+  visible BinaryService binaryService = BinaryService(this)
+  visible InstallService installService = InstallService(this, dependencyService, binaryService)
   visible UninstallService uninstallService = UninstallService(this)
   visible ReinstallService reinstallService = ReinstallService(this)
   visible UpdateService updateService = UpdateService(this, dependencyService)
@@ -111,6 +114,7 @@ class {
         runCommand,
         initCommand,
         createCommand,
+        binCommand,
         targetArg,
         targetRuntimeArg,
         fileArg,
@@ -347,6 +351,7 @@ class {
         runCommand => runScriptService.runScript(command.value)
         initCommand => initService.init()
         createCommand => createService.create(command.value, command.values.skip(1))
+        binCommand => binaryService.create(command.values)
       }
     }
   }

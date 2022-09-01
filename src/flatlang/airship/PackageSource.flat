@@ -6,16 +6,18 @@ class {
   visible Dependency[] localDependencies => dependencies.filter({ _.class.isOfType(LocalDependency.class) })
 
   public construct(
+    visible String name,
     visible String mainClass,
     visible String outDirectory,
     visible String outFile,
     visible String source,
     visible ExcludedSource[] excludedSources,
     visible DefaultExport[] defaultExports,
-    visible Dependency[] dependencies
+    visible Dependency[] dependencies,
+    visible PackageBinary[] binaries
   ) {}
 
-  public construct(HashMap<String, Object> map) {
+  public construct(Package package, String name, HashMap<String, Object> map) {
     let excludesValue = (Object)(map["excluded"])
     let excludedSourcesArray = (Array)excludesValue
     let excludedSources = excludedSourcesArray?.map({ ExcludedSource(_) })
@@ -25,14 +27,29 @@ class {
     let dependenciesValue = (Object)(map["dependencies"])
     let dependenciesMap = (HashMap)dependenciesValue
     let dependencies = dependenciesMap.map(pair => Dependency((String)pair.key, (String)pair.value))
+
+    binaries = Array<PackageBinary>()
+
+    if (map["bin"] && map["bin"].class.isOfType(HashMap.class)) {
+      let HashMap<String, String> binMap = (HashMap)map["bin"]
+
+      binMap.forEach(entry => binaries.add(PackageBinary(entry.key, entry.value)))
+    } else if (map["bin"] && map["bin"].class.isOfType(String.class)) {
+      let String binString = (String)map["bin"]
+
+      binaries.add(PackageBinary(package.name, binString))
+    }
+
     this(
+      name: name,
       mainClass: (String)map["mainClass"],
       outDirectory: (String)map["outDirectory"],
       outFile: (String)map["outFile"],
       source: (String)map["source"],
       excludedSources: excludedSources ?: Array<ExcludedSource>(),
       defaultExports: defaultExports ?: Array<DefaultExport>(),
-      dependencies: dependencies ?: Array<Dependency>()
+      dependencies: dependencies ?: Array<Dependency>(),
+      binaries: binaries ?: Array<PackageBinary>()
     )
   }
 
@@ -40,35 +57,41 @@ class {
     let excludedSourcesString = excludedSources.toString().indent(tab: "  ", firstLine: false)
     let defaultExportsString = defaultExports.toString().indent(tab: "  ", firstLine: false)
     let dependenciesString = dependencies.toString().indent(tab: "  ", firstLine: false)
+    let binariesString = binaries.toString().indent(tab: "  ", firstLine: false)
 
     return "|
-      {
+      \"#{name}\": {
         mainClass: \"#mainClass\",
         outDirectory: \"#outDirectory\",
         outFile: \"#outFile\",
         source: \"#source\",
         excludedSources: \"#{excludedSourcesString}\",
         defaultExports: \"#{defaultExportsString}\",
-        dependencies: \"#{dependenciesString}\"
+        dependencies: \"#{dependenciesString}\",
+        binaries: \"#{binariesString}\"
       }
       |"
     }
 
   public clone(
+    String name = name,
     String mainClass = mainClass,
     String outDirectory = outDirectory,
     String outFile = outFile,
     String source = source,
     ExcludedSource[] excludedSources = excludedSources,
     DefaultExport[] defaultExports = defaultExports,
-    Dependency[] dependencies = dependencies
+    Dependency[] dependencies = dependencies,
+    PackageBinary[] binaries = binaries
   ) => PackageSource(
+    name,
     mainClass,
     outDirectory,
     outFile,
     source,
     excludedSources,
     defaultExports,
-    dependencies
+    dependencies,
+    binaries
   )
 }
