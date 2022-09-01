@@ -19,7 +19,8 @@ class {
 
   public construct(
     private Airship airship,
-    private DependencyService dependencyService
+    private DependencyService dependencyService,
+    private BinaryService binaryService
   ) {}
 
   public async install() {
@@ -180,6 +181,10 @@ class {
 
     if (response.exitCode != 0) {
       throw ExecutionFailureException("Compilation failed")
+    }
+
+    if (source.binaries.count > 0) {
+      binaryService.create(package)
     }
   }
 

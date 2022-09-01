@@ -30,7 +30,7 @@ class {
     if (!sourcesMap || !sourcesMap.class.isOfType(HashMap.class)) {
       sources = HashMap()
     } else {
-      sources = sourcesMap.mapValues(pair => PackageSource((HashMap)pair.value))
+      sources = sourcesMap.mapValues(pair => PackageSource(this, pair.key, (HashMap)pair.value))
     }
   }
 
