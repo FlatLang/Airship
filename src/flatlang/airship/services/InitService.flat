@@ -26,6 +26,16 @@ class {
     let defaultLicense = "ISC"
     let defaultDefaultTarget = "es6"
 
+    log.info("|
+      This utility will walk you through creating a flat.json file.
+      It only covers the most common items, and tries to guess sensible defaults.
+
+      Use `airship add <pkg>` afterwards to install a package and
+      save it as a dependency in the flat.json file.
+
+      Press ^C at any time to quit.
+      |")
+
     let name = question("#{cyan("Package name")} (default: #{underscore(defaultName)}): ")
       .trim().orElse(defaultName)
 
