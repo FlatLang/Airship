@@ -77,7 +77,7 @@ class {
     Bool: build = true
   ) -> Bool {
     if (!airship.quietArg.enabled) {
-      log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})... ", newLine: false)
+      log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})...")
     }
 
     let packageLocation = File(dependency.getLocation())
@@ -93,9 +93,9 @@ class {
     let pullResponse = git.pull(silent: true)
 
     if (pullResponse.upToDate) {
-      log.info("already up to date")
+      log.info("Already up to date")
     } else {
-      log.info("updated")
+      log.info("Updated")
     }
 
     return !pullResponse.upToDate
