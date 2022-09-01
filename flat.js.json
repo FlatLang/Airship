@@ -6,7 +6,10 @@
     "main": {
       "outDirectory": "dist",
       "outFile": "airship.js",
-      "dependencies": {}
+      "dependencies": {},
+      "bin": {
+        "airship": "dist/airship.js"
+      }
     },
     "test": {
       "outDirectory": "dist",
