@@ -25,11 +25,6 @@ class {
   public async setup() {
     let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
 
-    let pathValue = File(Airship.flatHome + "/bin").nativeLocation
-
-    log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
-    Path.appendToUserPath(pathValue)
-
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
       log.info("Airship already installed. Checking for updates")
       updateService.updateGitPackage(airshipDependency, build: true)
@@ -37,6 +32,16 @@ class {
       log.info("Installing Airship")
       airship.installService.installGitPackage(airshipDependency)
     }
+
+    let pathValue = File(Airship.flatHome + "/bin").nativeLocation
+
+    if (System.OS_INT == System.WINDOWS) {
+      log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
+    } else {
+      let files = Path.getUserShellRunCommandsFiles().map({ _.nativeLocation })
+      log.info("Adding \"#{pathValue}\" to user path by modifying files: #{files.join(", ")}")
+    }
+    Path.appendToUserPath(pathValue)
 
     log.info("Finished setup!")
   }
