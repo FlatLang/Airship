@@ -11,6 +11,7 @@ import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
 import flatlang/airship/GitHubDependency
+import flat/path/Path
 
 class {
   let static Logger log = Logger(SetupService.class)
@@ -23,6 +24,11 @@ class {
 
   public async setup() {
     let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
+
+    let pathValue = File(Airship.flatHome + "/bin").nativeLocation
+
+    log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
+    Path.appendToUserPath(pathValue)
 
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
       log.info("Airship already installed. Checking for updates")
