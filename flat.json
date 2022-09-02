@@ -22,7 +22,8 @@
         "github:FlatLang/Git": "master",
         "github:FlatLang/Logger": "master",
         "github:FlatLang/Read-Line": "master",
-        "github:FlatLang/CoLorIzer": "master"
+        "github:FlatLang/CoLorIzer": "master",
+        "github:FlatLang/Path": "master"
       }
     },
     "test": {
