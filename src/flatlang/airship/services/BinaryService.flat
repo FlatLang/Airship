@@ -37,7 +37,7 @@ class {
     }
 
     for (target in targets) {
-      log.debug("Creating bin structure in #{binDirectory.normalizedLocation} for package #{airship.package.name} installation target \"#{target}\"")
+      log.debug("Creating bin structure in #{binDirectory.nativeLocation} for package #{airship.package.name} installation target \"#{target}\"")
 
       let source = airship.getSourceForPackage(target)
 
@@ -84,15 +84,15 @@ class {
 
     let binFile = File(binDirectory, bin.name)
 
-    log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.normalizedLocation}\"")
+    log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.nativeLocation}\"")
 
     if (binFile.exists) {
-      log.debug("Overwriting existing file \"#{binFile.normalizedLocation}\"")
+      log.debug("Overwriting existing file \"#{binFile.nativeLocation}\"")
     }
 
     FileWriter(binFile):write(binFileContents):close()
 
-    log.debug("Updating file permissions for file \"#{binFile.normalizedLocation}\"")
+    log.debug("Updating file permissions for file \"#{binFile.nativeLocation}\"")
 
     binFile.chmod("755")
   }
@@ -123,10 +123,10 @@ class {
 
     let binFile = File(binDirectory, "#{bin.name}.cmd")
 
-    log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.normalizedLocation}\"")
+    log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.nativeLocation}\"")
 
     if (binFile.exists) {
-      log.debug("Overwriting existing file \"#{binFile.normalizedLocation}\"")
+      log.debug("Overwriting existing file \"#{binFile.nativeLocation}\"")
     }
 
     FileWriter(binFile):write(binFileContents):close()
