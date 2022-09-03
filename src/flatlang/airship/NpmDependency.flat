@@ -1,10 +1,37 @@
 package flatlang/airship
 
+import flat/log/Logger
+
 class extends Dependency {
+  let static Logger log = Logger(NpmDependency.class)
+
   public construct(
     visible String packageName,
     visible String version
   ) {}
+
+  public async install(Airship airship) {
+    let cmd = Array<String>()
+      :addAll(["npm", "install"])
+
+    if (version != "latest") {
+      cmd.add("#{packageName}@#{version}")
+    } else {
+      cmd.add(packageName)
+    }
+
+    log.debug("Executing command: #cmd")
+
+    let response = System.execute(
+      cmd,
+      silent: airship.quietArg.enabled,
+      workingDirectory: airship.packageLocation.location
+    )
+
+    if (response.exitCode != 0) {
+      throw ExecutionFailureException("Compilation failed")
+    }
+  }
 
   override public getLocation() => null
 
