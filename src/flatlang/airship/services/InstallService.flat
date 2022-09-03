@@ -10,6 +10,7 @@ import flatlang/airship/PackageSource
 import flatlang/airship/Dependency
 import flatlang/airship/GitHubDependency
 import flatlang/airship/LocalDependency
+import flatlang/airship/NpmDependency
 import flatlang/airship/InvalidCommandException
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
@@ -171,7 +172,7 @@ class {
       return
     }
 
-    installDependencies(package, source)
+    let dependencies = installDependencies(package, source)
     let cmd = getInstallCommand(package, source)
 
     if (airship.debug) {
@@ -185,6 +186,12 @@ class {
 
     if (response.exitCode != 0) {
       throw ExecutionFailureException("Compilation failed")
+    }
+
+    let Array<NpmDependency> npmDependencies = dependencies.filter({ _.class.isOfType(NpmDependency.class) })
+
+    for (dependency in npmDependencies) {
+      dependency.install(airship)
     }
 
     if (source.binaries.count > 0) {
@@ -230,7 +237,7 @@ class {
     String package,
     PackageSource source,
     Bool install = false
-  ) {
+  ) -> Dependency[] {
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
     for (dependency in response.dependencies.filter({ _.class.isOfType(GitHubDependency.class) })) {
@@ -241,6 +248,8 @@ class {
         installDependencies: false
       )
     }
+
+    return response.dependencies
   }
 
   async postInstallPackage(
