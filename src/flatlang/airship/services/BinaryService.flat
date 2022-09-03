@@ -55,6 +55,12 @@ class {
         createBinFileForOs(bin, distFileLocation)
 
         targetFile.copy(distFile)
+
+        let nodeModules = File(airship.packageLocation, "node_modules")
+
+        if (nodeModules.isDirectory) {
+          nodeModules.copy(File(distDirectory, nodeModules.name))
+        }
       }
     }
   }
