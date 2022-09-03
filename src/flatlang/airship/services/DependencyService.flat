@@ -12,6 +12,7 @@ import flatlang/airship/ExecutionFailureException
 import flatlang/airship/Dependency
 import flatlang/airship/GitHubDependency
 import flatlang/airship/LocalDependency
+import flatlang/airship/NpmDependency
 
 class {
   let static Logger log = Logger(DependencyService.class)
@@ -25,6 +26,10 @@ class {
   public getDependencySourceLocations(Dependency dependency, String installationTarget = "main") -> String[] {
     let baseLocation = dependency.getLocation()
 
+    if (!baseLocation) {
+      return Array<String>()
+    }
+
     return dependency.getSourcesForInstallation(installationTarget)
       .map({ _?.source ?: "src" })
       .map({ "#{baseLocation}/#{_}" })
@@ -32,6 +37,10 @@ class {
 
   public getDependencySourceLocation(Dependency dependency, String installationTarget = "main") -> String {
     let baseLocation = dependency.getLocation()
+
+    if (!baseLocation) {
+      return null
+    }
 
     let source = dependency.airship.getSourceForPackage(installationTarget, dependency.airship.package.defaultSource)
 
@@ -64,16 +73,6 @@ class {
     }
 
     return source.excludedSources.map({ "#{baseLocation}/#{_.location}" })
-  }
-
-  public getDependencyGitUrl(Dependency dependency) -> String {
-    return if (dependency.class.isOfType(GitHubDependency.class)) {
-      let gitHubDependency = (GitHubDependency)dependency
-
-      gitHubDependency.getGitUrl()
-    } else {
-      throw InvalidFlatJsonException("Invalid dependency #dependency")
-    }
   }
 
   public class DependenciesResponse {
@@ -123,6 +122,9 @@ class {
     for (dependency in source.dependencies) {
       if (response.dependencies.none({ _.getLocation() == dependency.getLocation() })) {
         response.dependencies.add(dependency)
+      }
+      if (dependency.class.isOfType(NpmDependency.class)) {
+        continue
       }
 
       let dependencyPackageFile = File(dependency.getLocation())

@@ -13,6 +13,15 @@ abstract class {
         gitHubUrl: package,
         branch: "master"
       )
+    } else if (package.toLowerCase().startsWith("npm:")) {
+      let version = package.contains("@") ?
+        package.substring(package.indexOf("@") + 1) :
+        "latest"
+
+      NpmDependency(
+        packageName: package.substring("npm:".count),
+        version: version
+      )
     } else {
       LocalDependency(package)
     }
@@ -25,6 +34,11 @@ abstract class {
       GitHubDependency(
         gitHubUrl: key,
         branch: value
+      )
+    } else if (key.toLowerCase().startsWith("npm:")) {
+      NpmDependency(
+        packageName: key.substring("npm:".count),
+        version: value
       )
     } else if (value == "local") {
       LocalDependency(key)
