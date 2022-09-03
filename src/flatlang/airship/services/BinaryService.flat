@@ -52,7 +52,7 @@ class {
         let distFile = File(distDirectory, targetFile.name)
         let distFileLocation = ".dist/#{bin.name}/#{distFile.name}"
 
-        createBinFileForOs(bin, distFile, distFileLocation)
+        createBinFileForOs(bin, distFileLocation)
 
         targetFile.copy(distFile)
       }
@@ -61,18 +61,16 @@ class {
 
   async createBinFileForOs(
     PackageBinary bin,
-    File distFile,
     String distFileLocation
   ) {
     match System.OS_INT {
-      System.WINDOWS => createBinFileForWindows(bin, distFile, distFileLocation)
-      default => createBinFileForLinux(bin, distFile, distFileLocation)
+      System.WINDOWS => createBinFileForWindows(bin, distFileLocation)
+      default => createBinFileForLinux(bin, distFileLocation)
     }
   }
 
   async createBinFileForLinux(
     PackageBinary bin,
-    File distFile,
     String distFileLocation
   ) {
     let binFileContents = "|
@@ -101,7 +99,6 @@ class {
 
   async createBinFileForWindows(
     PackageBinary bin,
-    File distFile,
     String distFileLocation
   ) {
     let binFileContents = "|
