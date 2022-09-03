@@ -48,7 +48,7 @@ class {
 
       for (bin in source.binaries) {
         let distDirectory = File(Airship.flatHome + "/bin/.dist/#{bin.name}"):mkdirs()
-        let targetFile = File(bin.value)
+        let targetFile = File(airship.packageLocation, bin.value)
         let distFile = File(distDirectory, targetFile.name)
         let distFileLocation = ".dist/#{bin.name}/#{distFile.name}"
 
