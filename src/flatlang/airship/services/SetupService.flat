@@ -11,6 +11,7 @@ import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
 import flatlang/airship/GitHubDependency
+import flat/regedit/RegEdit
 import flat/path/Path
 
 class {
@@ -37,6 +38,7 @@ class {
 
     if (System.OS_INT == System.WINDOWS) {
       log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
+      RegEdit.setExternalVBSLocation("#{airshipDependency.getLocation()}/node_modules/regedit/vbs")
     } else {
       let files = Path.getUserShellRunCommandsFiles().map({ _.nativeLocation })
       log.info("Adding \"#{pathValue}\" to user path by modifying files: #{files.join(", ")}")
