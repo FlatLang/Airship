@@ -231,51 +231,29 @@ class {
 
   getFlatJsonOverrides(File packageLocation) -> File[] => Array<File>() {
     let os = System.OS.toLowerCase()
+    let extensions = Array<String>():add(os)
 
     if (target) {
-      return if (target == "es6") {
-        getFlatJsonOverridesForOsAndTarget(packageLocation, "js", os)
-          .plus(getFlatJsonOverridesForOsAndTarget(packageLocation, target, os))
-      } else {
-        getFlatJsonOverridesForOsAndTarget(packageLocation, target, os)
+      extensions.add(target)
+
+      if (target == "es6") {
+        extensions.add("js")
       }
-    } else {
-      return getFlatJsonOverridesForOsAndTarget(packageLocation, target, os)
     }
+
+    return searchFlatJsonOverrides(packageLocation, extensions)
   }
 
-  getFlatJsonOverridesForOsAndTarget(File packageLocation, String target, String os) -> File[] {
+  searchFlatJsonOverrides(File packageLocation, String[] extensions) -> File[] {
     let overrides = Array<File>()
-
     let parent = packageLocation.normalizedLocation
 
-    if (target) {
-      let targetAndOsFileName = flatJsonFile.rootName + ".#{os}.#{target}" + flatJsonFile.extension
-      let targetAndOsFileLocation = parent + "/" + targetAndOsFileName
-      let targetAndOsFlatJsonFile = File(targetAndOsFileLocation)
+    let flatJsonFiles = packageLocation.getChildFiles()
+      .filter({ _.name.startsWith("flat.") })
+      .filter({ _.extension.equals(".json") })
+      .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) })  })
 
-      if (targetAndOsFlatJsonFile.isFile) {
-        overrides.add(targetAndOsFlatJsonFile)
-      }
-    }
-
-    let osFileName = flatJsonFile.rootName + ".#{os}" + flatJsonFile.extension
-    let osFileLocation = parent + "/" + osFileName
-    let osFlatJsonFile = File(osFileLocation)
-
-    if (osFlatJsonFile.isFile) {
-      overrides.add(osFlatJsonFile)
-    }
-
-    let targetFileName = flatJsonFile.rootName + ".#{target}" + flatJsonFile.extension
-    let targetFileLocation = parent + "/" + targetFileName
-    let targetFlatJsonFile = File(targetFileLocation)
-
-    if (targetFlatJsonFile.isFile) {
-      overrides.add(targetFlatJsonFile)
-    }
-
-    return overrides
+    return flatJsonFiles
   }
 
   merge(
