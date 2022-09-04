@@ -244,17 +244,11 @@ class {
     return searchFlatJsonOverrides(packageLocation, extensions)
   }
 
-  searchFlatJsonOverrides(File packageLocation, String[] extensions) -> File[] {
-    let overrides = Array<File>()
-    let parent = packageLocation.normalizedLocation
-
-    let flatJsonFiles = packageLocation.getChildFiles()
+  searchFlatJsonOverrides(File packageLocation, String[] extensions) =>
+    packageLocation.getChildFiles()
       .filter({ _.name.startsWith("flat.") })
       .filter({ _.extension.equals(".json") })
-      .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) })  })
-
-    return flatJsonFiles
-  }
+      .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) }) })
 
   merge(
     HashMap<String, Object> source,
