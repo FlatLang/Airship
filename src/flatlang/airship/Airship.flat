@@ -155,7 +155,7 @@ class {
     debug = debugArg.enabled
     target = targetArg.value
 
-    flatJsonFile = File(flatJsonLocation)
+    flatJsonFile = File(flatJsonLocation).getCanonicalFileSync()
     packageLocation = flatJsonFile.getParent()
 
     if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
