@@ -54,7 +54,7 @@ class {
       |")
 
     if (System.OS_INT == System.WINDOWS) {
-      log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
+      log.info("This path will then be added to your PATH environment variable by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
 
       RegEdit.setExternalVBSLocation("#{airshipDependency.getLocation()}/node_modules/regedit/vbs")
 
