@@ -61,7 +61,7 @@ class {
 
       RegEdit.setExternalVBSLocation("#{airshipDependency.getLocation()}/node_modules/regedit/vbs")
 
-      Path.appendToUserPath(pathValue)
+      Path.prependToUserPath(pathValue)
 
       log.info("|
         Flat is installed now!
