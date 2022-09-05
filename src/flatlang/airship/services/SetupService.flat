@@ -14,6 +14,8 @@ import flatlang/airship/GitHubDependency
 import flat/regedit/RegEdit
 import flat/path/Path
 
+import static flat/readline/ReadLine
+
 class {
   let static Logger log = Logger(SetupService.class)
 
@@ -34,17 +36,67 @@ class {
       airship.installService.installGitPackage(airshipDependency)
     }
 
-    let pathValue = File(Airship.flatHome + "/bin").nativeLocation
+    let flatHome = File(Airship.flatHome)
+    let pathValue = File(flatHome, "bin").nativeLocation
+
+    log.info("|
+      The Flat home directory is located at:
+
+        #{flatHome.nativeLocation}
+
+      This can be modified with the FLAT_HOME environment variable.
+
+      The 'airship' command and others will be added to
+      Flat's bin directory, located at:
+
+        #{pathValue}
+
+      |")
 
     if (System.OS_INT == System.WINDOWS) {
       log.info("Adding \"#{pathValue}\" to user path by modifying the HKEY_CURRENT_USER/Environment/PATH registry key")
+
       RegEdit.setExternalVBSLocation("#{airshipDependency.getLocation()}/node_modules/regedit/vbs")
+
+      Path.appendToUserPath(pathValue)
+
+      log.info("|
+        Flat is installed now!
+
+        To get started you may need to restart your current shell.
+        This would reload its PATH environment variable to include
+        Airship's bin directory (#{pathValue}).
+
+        |")
+
+      question("Press the Enter key to continue.")
     } else {
       let files = Path.getUserShellRunCommandsFiles().map({ _.nativeLocation })
-      log.info("Adding \"#{pathValue}\" to user path by modifying files: #{files.join(", ")}")
-    }
-    Path.appendToUserPath(pathValue)
 
-    log.info("Finished setup!")
+      if (files.count == 0) {
+        log.error("This user does not seem to have any valid initialization script files (e.g. .bashrc, .zshrc, ...)")
+        log.error("To finish installation, you will need to manually add \"#{pathValue}\" to your path, howewer you see fit.")
+      } else {
+        log.info("|
+          This path will then be added to your PATH environment variable by modifying the profile files located at:
+
+            #{files.join("\n  ")}
+
+          |")
+
+        Path.appendToUserPath(pathValue)
+
+        log.info("|
+          Flat is installed now!
+
+          To get started you may need to restart your current shell.
+          This would reload its PATH environment variable to include
+          Airship's bin directory (#{pathValue}).
+
+          To configure your current shell, run:
+          source \"#{files.first}\"
+          |")
+      }
+    }
   }
 }
