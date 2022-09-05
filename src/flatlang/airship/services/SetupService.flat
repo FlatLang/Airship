@@ -17,7 +17,7 @@ import flat/path/Path
 import static flat/readline/ReadLine
 
 class {
-  let static Logger log = Logger(SetupService.class)
+  let static Logger log = Logger(SetupService.class, lineLength: 65)
 
   public construct(
     private Airship airship,
