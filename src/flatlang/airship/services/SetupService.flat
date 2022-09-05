@@ -15,6 +15,7 @@ import flat/regedit/RegEdit
 import flat/path/Path
 
 import static flat/readline/ReadLine
+import static flat/colorizer/Colorizer
 
 class {
   let static Logger log = Logger(SetupService.class, lineLength: 65)
@@ -42,13 +43,13 @@ class {
     log.info("|
       The Flat home directory is located at:
 
-        #{flatHome.nativeLocation}
+        #{underscore(flatHome.nativeLocation)}
 
       This can be modified with the FLAT_HOME environment variable.
 
       The 'airship' command and others will be added to Flat's bin directory, located at:
 
-        #{pathValue}
+        #{underscore(pathValue)}
 
       |")
 
@@ -65,7 +66,7 @@ class {
       log.info("|
         Flat is installed now!
 
-        To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{pathValue}).
+        To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
 
         |")
 
@@ -75,18 +76,18 @@ class {
 
       if (files.count == 0) {
         log.error("|
-          This user does not seem to have any valid initialization script files (e.g. .bashrc, .zshrc, ...)
+          This user does not seem to have any valid initialization script files (e.g. ~/.bashrc, ~/.zshrc, ...)
 
           |")
         log.error("|
-          To finish installation, you will need to manually add \"#{pathValue}\" to your path, howewer you see fit.
+          To finish installation, you will need to manually add \"#{underscore(pathValue)}\" to your path, howewer you see fit.
 
           |")
       } else {
         log.info("|
           This path will then be added to your PATH environment variable by modifying the profile files located at:
 
-            #{files.join("\n  ")}
+            #{files.map(x => underscore(x)).join("\n  ")}
 
           |")
 
@@ -95,7 +96,7 @@ class {
         log.info("|
           Flat is installed now!
 
-          To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{pathValue}).
+          To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
 
           To configure your current shell, run:
           source \"#{files.first}\"
