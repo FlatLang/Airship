@@ -20,7 +20,8 @@ import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
 
 class {
-  let static Logger log = Logger(SetupService.class, lineLength: 65)
+  let static Logger log = Logger(SetupService.class)
+  let static Logger setupLog = Logger(SetupService.class, showPrefix: false, lineLength: 65)
 
   public construct(
     private Airship airship,
@@ -32,17 +33,17 @@ class {
     let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
 
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
-      log.info("Airship already installed. Checking for updates")
+      setupLog.info("Airship already installed. Checking for updates")
       updateService.updateGitPackage(airshipDependency, build: true)
     } else {
-      log.info("Installing Airship")
+      setupLog.info("Installing Airship")
       airship.installService.installGitPackage(airshipDependency)
     }
 
     let flatHome = File(Airship.flatHome)
     let pathValue = File(flatHome, "bin").nativeLocation
 
-    log.info("|
+    setupLog.info("|
       The Flat home directory is located at:
 
         #{underscore(flatHome.nativeLocation)}
@@ -56,7 +57,7 @@ class {
       |")
 
     if (System.OS_INT == System.WINDOWS) {
-      log.info("|
+      setupLog.info("|
         This path will then be added to your PATH environment variable by modifying the HKEY_CURRENT_USER/Environment/PATH registry key
 
         |")
@@ -65,7 +66,7 @@ class {
 
       Path.prependToUserPath(pathValue)
 
-      log.info("|
+      setupLog.info("|
         Flat is installed now!
 
         To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
@@ -86,7 +87,7 @@ class {
 
           |")
       } else {
-        log.info("|
+        setupLog.info("|
           This path will then be added to your PATH environment variable by modifying the profile files located at:
 
             #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
@@ -136,7 +137,7 @@ class {
             :close()
         }
 
-        log.info("|
+        setupLog.info("|
           Flat is installed now!
 
           To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
