@@ -7,6 +7,8 @@ import flatlang/airship/PackageSource
 import flatlang/datastruct/HashSet
 import flatlang/datastruct/Pair
 import flatlang/io/File
+import flatlang/io/FileReader
+import flatlang/io/FileWriter
 import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
@@ -72,7 +74,7 @@ class {
 
       question("Press the Enter key to continue.")
     } else {
-      let files = Path.getUserShellRunCommandsFiles().map({ _.nativeLocation })
+      let files = Path.getUserShellRunCommandsFiles()
 
       if (files.count == 0) {
         log.error("|
@@ -87,11 +89,52 @@ class {
         log.info("|
           This path will then be added to your PATH environment variable by modifying the profile files located at:
 
-            #{files.map(x => underscore(x)).join("\n  ")}
+            #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
 
           |")
 
-        Path.appendToUserPath(pathValue)
+        let envFile = File(flatHome, "env")
+
+        if (!envFile.exists) {
+          log.debug("Creating env file at \"#{envFile.nativeLocation}\"")
+
+          FileWriter(envFile)
+            :write("|
+              \#!/bin/sh
+              \# Flat shell setup
+              \# affix colons on either side of $PATH to simplify matching
+              case \":${PATH}:\" in
+                  *:\"#{pathValue}\":*)
+                      ;;
+                  *)
+                      \# Prepending path in case a system-installed Flat needs to be overridden
+                      export PATH=\"#{pathValue}:$PATH\"
+                      ;;
+              esac
+              |")
+            :close()
+        } else {
+          log.debug("Env file already exists at \"#{envFile.nativeLocation}\". Skipping")
+        }
+
+        for (file in files) {
+          let contents = FileReader(file).readAllContents()
+
+          if (contents.contains(envFile.nativeLocation)) {
+            log.debug("Environment file is already loaded to the path in file \"#{file.nativeLocation}\". Skipping")
+            continue
+          }
+
+          log.debug("Appending code to load env file \"#{envFile.nativeLocation}\" in file \"#{file.nativeLocation}\"")
+
+          FileWriter(file)
+            :append("|
+
+              \# Flat
+              . \"#{envFile.nativeLocation}\"
+              |")
+            :close()
+        }
 
         log.info("|
           Flat is installed now!
@@ -99,7 +142,7 @@ class {
           To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
 
           To configure your current shell, run:
-          source \"#{files.first}\"
+          source \"#{envFile.nativeLocation}\"
           |")
       }
     }
