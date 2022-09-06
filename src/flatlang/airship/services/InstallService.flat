@@ -58,7 +58,7 @@ class {
   }
 
   public async getInstallCommand(String installationTarget, PackageSource source) -> String[] {
-    let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
+    let currentDependency = Dependency("local:#{airship.packageLocation.normalizedLocation}")
 
     let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
     let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)

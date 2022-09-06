@@ -31,7 +31,7 @@ testable class {
     let package = "main"
     let source = airship.getSourceForPackage(package)
 
-    let currentDependency = Dependency(airship.packageLocation.normalizedLocation)
+    let currentDependency = Dependency("local:#{airship.packageLocation.normalizedLocation}")
     let excludeSources = airship.dependencyService.getDependencyExclusions(currentDependency, package)
     let excludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
 
