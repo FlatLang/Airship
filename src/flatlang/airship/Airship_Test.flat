@@ -40,30 +40,30 @@ testable class {
 
     let cmd = [
       "java", "-jar", "#{flatHome}/packages/Flat/target/flatc.jar",
-      "#{airship.packageLocation.normalizedLocation}/src",
+      "\"#{airship.packageLocation.normalizedLocation}/src\"",
       "-install-dir", "#{flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
       "-target", "js"
     ]
 
-    excludeSources.forEach({ cmd.addAll(["-x", _]) })
+    excludeSources.forEach({ cmd.addAll(["-x", "\"#_\""]) })
 
     if (excludeSource) {
-      cmd.addAll(["-x", excludeSource])
+      cmd.addAll(["-x", "\"#excludeSource\""])
     }
 
     response.dependencies.forEach((dependency) => {
       airship.dependencyService.getDependencySourceLocations(dependency).forEach({
-        cmd.addAll(["-l", _])
+        cmd.addAll(["-l", "\"#_\""])
       })
       airship.dependencyService.getDependencyExclusions(dependency, package).forEach({
-        cmd.addAll(["-x", _])
+        cmd.addAll(["-x", "\"#_\""])
       })
 
       let dependencyExcludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
       if (dependencyExcludeSource) {
-        cmd.addAll(["-x", dependencyExcludeSource])
+        cmd.addAll(["-x", "\"#dependencyExcludeSource\""])
       }
     })
 
@@ -73,11 +73,11 @@ testable class {
 
       dependencySource?.defaultExports
         .filter({ !_.staticImport })
-        .forEach({ cmd.addAll(["-default-import", _.location]) })
+        .forEach({ cmd.addAll(["-default-import", "\"#{_.location}\""]) })
 
       dependencySource?.defaultExports
         .filter({ _.staticImport })
-        .forEach({ cmd.addAll(["-default-static-import", _.location]) })
+        .forEach({ cmd.addAll(["-default-static-import", "\"#{_.location}\""]) })
     })
 
     cmd.addAll([
