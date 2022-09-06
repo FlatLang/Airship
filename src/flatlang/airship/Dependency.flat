@@ -9,10 +9,15 @@ abstract class {
 
   public construct(String package) {
     return if (package.toLowerCase().startsWith("github:")) {
-      GitHubDependency(
-        gitHubUrl: package,
-        branch: "master"
-      )
+      let gitHubUrl = package.contains("@") ?
+        package.substring(end: package.indexOf("@")) :
+        package
+
+      let branch = package.contains("@") ?
+        package.substring(package.indexOf("@") + 1) :
+        "master"
+
+      GitHubDependency(gitHubUrl, branch)
     } else if (package.toLowerCase().startsWith("npm:")) {
       let packageName = package.contains("@") ?
         package.substring(end: package.indexOf("@")) :
