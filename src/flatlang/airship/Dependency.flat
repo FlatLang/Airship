@@ -54,7 +54,10 @@ abstract class {
   }
 
   public abstract getLocation() -> String
-  public abstract toJsonEntry() -> String
+  public abstract toJsonKey() -> String
+  public abstract toJsonValue() -> String
+
+  public toJsonEntry() => "#{toJsonKey()}: #{toJsonValue()}"
 
   public getSourcesForInstallation(
     String installationTarget

@@ -26,8 +26,12 @@ class extends Dependency {
     return "#{Airship.flatHome}/packages/#{repoName}"
   }
 
-  override public toJsonEntry() -> String {
-    return "\"#{gitHubUrl}\": \"#{branch}\""
+  override public toJsonKey() -> String {
+    return "\"#{gitHubUrl}\""
+  }
+
+  override public toJsonValue() -> String {
+    return "\"#{branch}\""
   }
 
   public getGitUrl() -> String {

@@ -35,8 +35,12 @@ class extends Dependency {
 
   override public getLocation() => null
 
-  override public toJsonEntry() -> String {
-    return "\"npm:#{packageName}\": \"#{version}\""
+  override public toJsonKey() -> String {
+    return "\"npm:#{packageName}\""
+  }
+
+  override public toJsonValue() -> String {
+    return "\"#{version}\""
   }
 
   public equals(Object other) =>
