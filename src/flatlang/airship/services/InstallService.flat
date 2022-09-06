@@ -51,7 +51,7 @@ class {
     if (airship.linkArg.enabled) {
       installAndLink(package)
     } else if (package.endsWith(".git")) {
-      installGitPackage(GitHubDependency(package, "master"), install, installDependencies)
+      installDependency(GitHubDependency(package, "master"), install, installDependencies)
     } else {
       installLocalPackage(package)
     }
@@ -96,7 +96,7 @@ class {
     excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
     if (excludeSource) {
-      cmd.addAll(["-x", excludeSource])
+      cmd.addAll(["-x", "'#excludeSource'"])
     }
 
     let response = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source)
@@ -121,15 +121,16 @@ class {
     }
 
     response.dependencies
+      .filter({ _.isFlatPackage() })
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
       .forEach((dependency) => {
         dependencyService
           .getDependencySourceLocations(dependency)
-          .forEach({ cmd.addAll(["-l", _]) })
+          .forEach({ cmd.addAll(["-l", "'#_'"]) })
 
         dependencyService
           .getDependencyExclusions(dependency, installationTarget)
-          .forEach({ cmd.addAll(["-x", _]) })
+          .forEach({ cmd.addAll(["-x", "'#_'"]) })
 
         let dependencyExcludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
@@ -139,6 +140,7 @@ class {
       })
 
     topLevelDependencies.dependencies
+      .filter({ _.isFlatPackage() })
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
       .forEach((dependency) => {
         let childship = dependency.airship
@@ -188,33 +190,32 @@ class {
       throw ExecutionFailureException("Compilation failed")
     }
 
-    let Array<NpmDependency> npmDependencies = dependencies.filter({ _.class.isOfType(NpmDependency.class) })
-
-    for (dependency in npmDependencies) {
-      dependency.install(airship)
-    }
-
     if (source.binaries.count > 0) {
       binaryService.create(package)
     }
   }
 
-  public async installGitPackage(
-    GitHubDependency dependency,
+  public async installDependency(
+    Dependency dependency,
     Bool: build = true,
     Bool: install = true,
     Bool: installDependencies = true
   ) {
     if (!dependencyService.isDependencyInstalled(dependency)) {
-      dependencyService.downloadDependency(dependency)
+      log.debug("Installing dependency #{dependency}")
+      dependencyService.installDependency(dependency)
+    } else {
+      log.debug("Dependency #{dependency} already installed")
     }
 
-    postInstallPackage(
-      File(dependency.getLocation()),
-      build,
-      install,
-      installDependencies
-    )
+    if (dependency.isFlatPackage()) {
+      postInstallPackage(
+        File(dependency.getLocation()),
+        build,
+        install,
+        installDependencies
+      )
+    }
   }
 
   async installAndLink(String url) {
@@ -240,9 +241,12 @@ class {
   ) -> Dependency[] {
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    for (dependency in response.dependencies.filter({ _.class.isOfType(GitHubDependency.class) })) {
-      installGitPackage(
-        (GitHubDependency)dependency,
+    log.trace("Installing dependencies for source #{source}")
+    log.trace("Dependencies #{response.dependencies}")
+
+    for (dependency in response.dependencies) {
+      installDependency(
+        dependency,
         build: response.dependenciesDownloaded.contains(dependency),
         install: false,
         installDependencies: false
@@ -258,6 +262,8 @@ class {
     Bool: install = true,
     Bool: installDependencies = true
   ) {
+    log.debug("Post-installation for package #{flatPackageDir.nativeLocation}")
+
     let args = [
       "-f", flatPackageDir.normalizedLocation
     ]

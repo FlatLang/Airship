@@ -24,11 +24,11 @@ class {
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
   public getDependencySourceLocations(Dependency dependency, String installationTarget = "main") -> String[] {
-    let baseLocation = dependency.getLocation()
-
-    if (!baseLocation) {
+    if (!dependency.isFlatPackage()) {
       return Array<String>()
     }
+
+    let baseLocation = dependency.getLocation()
 
     return dependency.getSourcesForInstallation(installationTarget)
       .map({ _?.source ?: "src" })
@@ -36,12 +36,11 @@ class {
   }
 
   public getDependencySourceLocation(Dependency dependency, String installationTarget = "main") -> String {
-    let baseLocation = dependency.getLocation()
-
-    if (!baseLocation) {
+    if (!dependency.isFlatPackage()) {
       return null
     }
 
+    let baseLocation = dependency.getLocation()
     let source = dependency.airship.getSourceForPackage(installationTarget, dependency.airship.package.defaultSource)
 
     if (source?.source) {
@@ -64,8 +63,11 @@ class {
   }
 
   public getDependencyExclusions(Dependency dependency, String installationTarget = "main") -> String[] {
-    let baseLocation = dependency.getLocation()
+    if (!dependency.isFlatPackage()) {
+      return Array<String>()
+    }
 
+    let baseLocation = dependency.getLocation()
     let source = dependency.airship.getSourceForPackage(installationTarget, dependency.airship.package.defaultSource)
 
     if (!source) {
@@ -131,7 +133,7 @@ class {
 
       if (!dependencyPackageFile.exists) {
         if (download) {
-          downloadDependency(dependency)
+          installDependency(dependency)
           response.dependenciesDownloaded.add(dependency)
         }
 
@@ -149,7 +151,7 @@ class {
       let childship = Airship(args, airship)
 
       let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
-      log.trace("Found source for #{childship.packageLocation.normalizedLocation} with installation target \"#{installationTarget}\": #packageSource")
+      log.trace("Found source for #{childship.packageLocation.normalizedLocation} with source #packageSource")
 
       if (packageSource && recursive) {
         getDependenciesForSource(
@@ -167,18 +169,72 @@ class {
     return response
   }
 
-  public isDependencyInstalled(Dependency dependency) =>
-    File(dependency.getLocation()).getChild(".git").isDirectory
-
-  public async downloadDependency(Dependency dependency) {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
-      downloadGitHubDependency((GitHubDependency)dependency)
-    } else {
-      throw Exception("Cannot download dependency #dependency")
+  public isDependencyInstalled(Dependency dependency) -> Bool {
+    return if (dependency.class.isOfType(GitHubDependency.class)) {
+      isGitHubDependencyInstalled((GitHubDependency)dependency)
+    } else if (dependency.class.isOfType(NpmDependency.class)) {
+      isNpmDependencyInstalled((NpmDependency)dependency)
+    } else if (dependency.class.isOfType(LocalDependency.class)) {
+      isLocalDependencyInstalled((LocalDependency)dependency)
     }
   }
 
-  public async downloadGitHubDependency(GitHubDependency dependency) {
+  isGitHubDependencyInstalled(GitHubDependency dependency) -> Bool {
+    let exists = File(dependency.getLocation()).getChild(".git").isDirectory
+    log.trace("GitHub dependency #{dependency} is installed: #exists")
+    return exists
+  }
+
+  isNpmDependencyInstalled(NpmDependency dependency) -> Bool {
+    let exists = File(dependency.getLocation()).isDirectory
+    log.trace("NPM dependency #{dependency} is installed: #exists")
+    return exists
+  }
+
+  isLocalDependencyInstalled(LocalDependency dependency) -> Bool {
+    let exists = File(dependency.getLocation()).isDirectory
+    log.trace("Local dependency #{dependency} is installed: #exists")
+    return exists
+  }
+
+  public async installDependency(Dependency dependency) {
+    if (dependency.class.isOfType(GitHubDependency.class)) {
+      cloneGitHubDependency((GitHubDependency)dependency)
+    } else if (dependency.class.isOfType(NpmDependency.class)) {
+      installNpmDependency((NpmDependency)dependency)
+    } else if (dependency.class.isOfType(LocalDependency.class)) {
+      log.trace("Nothing to do for local dependency installation")
+    } else {
+      throw Exception("Cannot install dependency #dependency")
+    }
+  }
+
+  public async installNpmDependency(NpmDependency dependency) {
+    let cmd = Array<String>()
+      :addAll(["npm", "install"])
+
+    let packageToInstall = if (dependency.version != "latest") {
+      "#{dependency.packageName}@#{dependency.version}"
+    } else {
+      dependency.packageName
+    }
+
+    cmd.add(packageToInstall)
+
+    log.debug("Executing command: #cmd")
+
+    let response = System.execute(
+      cmd,
+      silent: airship.quietArg.enabled,
+      workingDirectory: airship.packageLocation.location
+    )
+
+    if (response.exitCode != 0) {
+      throw ExecutionFailureException("NPM package installation failed for package \"#{packageToInstall}\"")
+    }
+  }
+
+  public async cloneGitHubDependency(GitHubDependency dependency) {
     let url = dependency.getGitUrl()
     let branch = dependency.branch
     let flatPackageDir = File(dependency.getLocation()):mkdirs()

@@ -49,9 +49,7 @@ class {
       }
     }
     for (dependency in updatedDependencies) {
-      if (dependency.class.isOfType(GitHubDependency.class)) {
-        installService.installGitPackage((GitHubDependency)dependency)
-      }
+      installService.installDependency(dependency)
     }
   }
 

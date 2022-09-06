@@ -37,7 +37,7 @@ class {
       updateService.updateGitPackage(airshipDependency, build: true)
     } else {
       setupLog.info("Installing Airship")
-      airship.installService.installGitPackage(airshipDependency)
+      airship.installService.installDependency(airshipDependency)
     }
 
     let flatHome = File(Airship.flatHome)
