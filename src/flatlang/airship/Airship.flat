@@ -74,7 +74,7 @@ class {
   visible InitService initService = InitService(this)
   visible CreateService createService = CreateService(this)
   visible VersionService versionService = VersionService(this)
-  visible AddDependencyService addDependencyService = AddDependencyService(this)
+  visible AddDependencyService addDependencyService = AddDependencyService(this, installService)
   visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this)
 
   let static HashMap<String, Airship> packageCache = HashMap()
