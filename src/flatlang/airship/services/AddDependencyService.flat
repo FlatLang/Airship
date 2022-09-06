@@ -21,7 +21,10 @@ import flatlang/extensions/SyntaxStringFunctions
 class {
   let static Logger log = Logger(AddDependencyService.class)
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private InstallService installService
+  ) {}
 
   public async addDependencies(String[] dependencyNames) {
     for (dependency in dependencyNames) {
@@ -76,6 +79,8 @@ class {
       (containsExistingDependencies ? "," : "") + "\n" +
       startingWhitespace + dependency.toJsonEntry()  + endingWhitespace +
       contents.substring(endingBrace)
+
+    installService.installDependency(dependency)
 
     FileWriter(airship.flatJsonFile)
       :write(updatedContents)
