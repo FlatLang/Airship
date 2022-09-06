@@ -20,8 +20,8 @@ abstract class {
       GitHubDependency(gitHubUrl, branch)
     } else if (package.toLowerCase().startsWith("npm:")) {
       let packageName = package.contains("@") ?
-        package.substring(end: package.indexOf("@")) :
-        package
+        package.substring("npm:".count, package.indexOf("@")) :
+        package.substring("npm:".count)
 
       let version = package.contains("@") ?
         package.substring(package.indexOf("@") + 1) :
