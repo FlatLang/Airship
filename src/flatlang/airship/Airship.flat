@@ -16,6 +16,7 @@ import flatlang/time/Timer
 
 import flatlang/airship/services/SetupService
 import flatlang/airship/services/DependencyService
+import flatlang/airship/services/AddDependencyService
 import flatlang/airship/services/InstallService
 import flatlang/airship/services/UninstallService
 import flatlang/airship/services/ReinstallService
@@ -57,6 +58,7 @@ class {
   visible CliArg initCommand = CliArg("init")
   visible CliArg createCommand = CliArg("create", minCount: 1)
   visible CliArg binCommand = CliArg("bin")
+  visible CliArg addDependencyCommand = CliArg("add", minCount: 1)
 
   visible DependencyService dependencyService = DependencyService(this)
   visible BinaryService binaryService = BinaryService(this)
@@ -70,6 +72,7 @@ class {
   visible InitService initService = InitService(this)
   visible CreateService createService = CreateService(this)
   visible VersionService versionService = VersionService(this)
+  visible AddDependencyService addDependencyService = AddDependencyService(this)
 
   let static HashMap<String, Airship> packageCache = HashMap()
 
@@ -121,6 +124,7 @@ class {
         initCommand,
         createCommand,
         binCommand,
+        addDependencyCommand,
         versionCommand,
         targetArg,
         targetRuntimeArg,
@@ -360,6 +364,7 @@ class {
         createCommand => createService.create(command.value, command.values.skip(1))
         binCommand => binaryService.create(command.values)
         versionCommand => versionService.getVersion()
+        addDependencyCommand => addDependencyService.addDependencies(command.values)
       }
     }
   }
