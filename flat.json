@@ -24,7 +24,8 @@
         "github:FlatLang/Read-Line": "master",
         "github:FlatLang/CoLorIzer": "master",
         "github:FlatLang/RegEdit": "master",
-        "github:FlatLang/Path": "master"
+        "github:FlatLang/Path": "master",
+        "github:FlatLang/Npm-Client": "master"
       }
     },
     "test": {
