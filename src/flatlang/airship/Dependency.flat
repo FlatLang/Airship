@@ -14,14 +14,15 @@ abstract class {
         branch: "master"
       )
     } else if (package.toLowerCase().startsWith("npm:")) {
+      let packageName = package.contains("@") ?
+        package.substring(end: package.indexOf("@")) :
+        package
+
       let version = package.contains("@") ?
         package.substring(package.indexOf("@") + 1) :
         "latest"
 
-      NpmDependency(
-        packageName: package.substring("npm:".count),
-        version: version
-      )
+      NpmDependency(packageName, version)
     } else {
       LocalDependency(package)
     }
