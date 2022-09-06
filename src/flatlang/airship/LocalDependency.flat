@@ -7,7 +7,11 @@ class extends Dependency {
     super()
   }
 
-  public override getLocation() => path
+  override public getLocation() => path
+
+  override public toJsonEntry() -> String {
+    return "\"#{path}\": \"local\""
+  }
 
   public equals(Object other) =>
     other &&

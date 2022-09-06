@@ -48,6 +48,7 @@ abstract class {
   }
 
   public abstract getLocation() -> String
+  public abstract toJsonEntry() -> String
 
   public getSourcesForInstallation(
     String installationTarget

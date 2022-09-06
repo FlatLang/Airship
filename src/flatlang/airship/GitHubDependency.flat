@@ -20,10 +20,14 @@ class extends Dependency {
     this.gitHubUrl = gitHubUrl
   }
 
-  public override getLocation() -> String {
+  override public getLocation() -> String {
     let fullRepoName = gitHubUrl.substring("github:".count).trim()
     let repoName = fullRepoName.substring(fullRepoName.lastIndexOf('/') + 1)
     return "#{Airship.flatHome}/packages/#{repoName}"
+  }
+
+  override public toJsonEntry() -> String {
+    return "\"#{gitHubUrl}\": \"#{branch}\""
   }
 
   public getGitUrl() -> String {
