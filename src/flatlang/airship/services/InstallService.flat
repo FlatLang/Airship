@@ -76,7 +76,7 @@ class {
     ]
 
     log.trace("Adding source locations: #{sourceLocations}")
-    cmd.addAll(sourceLocations)
+    cmd.addAll(sourceLocations.map({ "\"#_\"" }))
 
     cmd.addAll([
       "-install-dir", "#{Airship.flatHome}/packages",
@@ -93,10 +93,10 @@ class {
     }
 
     log.trace("Adding source exclusions: #{excludeSources}")
-    excludeSources.forEach({ cmd.addAll(["-x", _]) })
+    excludeSources.forEach({ cmd.addAll(["-x", "\"#_\""]) })
 
     if (excludeSource) {
-      cmd.addAll(["-x", "'#excludeSource'"])
+      cmd.addAll(["-x", "\"#excludeSource\""])
     }
 
     let response = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source)
@@ -126,16 +126,16 @@ class {
       .forEach((dependency) => {
         dependencyService
           .getDependencySourceLocations(dependency)
-          .forEach({ cmd.addAll(["-l", "'#_'"]) })
+          .forEach({ cmd.addAll(["-l", "\"#_\""]) })
 
         dependencyService
           .getDependencyExclusions(dependency, installationTarget)
-          .forEach({ cmd.addAll(["-x", "'#_'"]) })
+          .forEach({ cmd.addAll(["-x", "\"#_\""]) })
 
         let dependencyExcludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
         if (dependencyExcludeSource) {
-          cmd.addAll(["-x", dependencyExcludeSource])
+          cmd.addAll(["-x", "\"#dependencyExcludeSource\""])
         }
       })
 
@@ -148,11 +148,11 @@ class {
 
         dependencySource?.defaultExports
           .filter({ !_.staticImport })
-          .forEach({ cmd.addAll(["-default-import", _.location]) })
+          .forEach({ cmd.addAll(["-default-import", "\"#{_.location}\""]) })
 
         dependencySource?.defaultExports
           .filter({ _.staticImport })
-          .forEach({ cmd.addAll(["-default-static-import", _.location]) })
+          .forEach({ cmd.addAll(["-default-static-import", "\"#{_.location}\""]) })
       })
 
     if (source.mainClass) {
