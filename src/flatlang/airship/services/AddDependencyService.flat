@@ -1,0 +1,75 @@
+package flatlang/airship/services
+
+import flat/log/Logger
+
+import flatlang/io/File
+import flatlang/io/FileReader
+import flatlang/io/FileWriter
+import flatlang/airship/Airship
+import flatlang/airship/PackageSource
+import flatlang/airship/Dependency
+
+import flatlang/extensions/SyntaxStringFunctions
+
+class {
+  let static Logger log = Logger(AddDependencyService.class)
+
+  public construct(private Airship airship) {}
+
+  public async addDependencies(String[] dependencyNames) {
+    for (dependency in dependencyNames) {
+      addDependency(dependency)
+    }
+  }
+
+  public async addDependency(String dependencyName) {
+    let dependency = Dependency(dependencyName)
+    let source = airship.package.defaultSource
+
+    if (source.dependencies.contains(dependency)) {
+      log.info("Dependency \"#{dependencyName}\" already installed")
+
+      return
+    }
+
+    log.debug("Installing dependency #{dependency}...")
+
+    let contents = FileReader(airship.flatJsonFile).readAllContents()
+
+    let sourcesIndex = contents.findStringOnTopLevel("\"sources\"", start: contents.indexOf("{") + 1)
+    let sourceIndex = contents.findStringOnTopLevel("\"#{source.name}\"", start: contents.indexOf("{", start: sourcesIndex) + 1)
+    let dependenciesIndex = contents.findStringOnTopLevel("\"dependencies\"", start: contents.indexOf("{", start: sourceIndex) + 1)
+    let startingBrace = contents.indexOf("{", start: dependenciesIndex)
+    let endingBrace = contents.findEndingMatch(startingBrace, '{', '}')
+    let lastContentIndex = contents.nextNonWhitespaceIndex(start: endingBrace - 1, direction: -1) + 1
+    let dependenciesContent = contents.substring(startingBrace + 1, endingBrace)
+    let containsExistingDependencies = dependenciesContent.trim().count > 0
+    let existingEndingWhitespace = contents.substring(lastContentIndex, endingBrace)
+
+    let firstTabLineIndex = contents.indexOf("\n", contents.indexOf("{") + 1) + 1
+    let tab = contents.substring(firstTabLineIndex, contents.nextNonWhitespaceIndex(firstTabLineIndex))
+    let depth = 4
+
+    let startingWhitespace = if (containsExistingDependencies) {
+      let lineStart = contents.lastIndexOf("\n", start: lastContentIndex - 1) + 1
+      contents.substring(lineStart, contents.nextNonWhitespaceIndex(lineStart))
+    } else {
+      tab.repeat(depth)
+    }
+
+    let endingWhitespace = if (!existingEndingWhitespace.contains("\n")) {
+      "\n#{tab.repeat(depth - 1)}"
+    } else {
+      existingEndingWhitespace
+    }
+
+    let updatedContents = contents.substring(end: lastContentIndex) +
+      (containsExistingDependencies ? "," : "") + "\n" +
+      startingWhitespace + dependency.toJsonEntry()  + endingWhitespace +
+      contents.substring(endingBrace)
+
+    FileWriter(airship.flatJsonFile)
+        :write(updatedContents)
+        :close()
+  }
+}
