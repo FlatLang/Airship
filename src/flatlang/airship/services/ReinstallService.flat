@@ -34,6 +34,6 @@ class {
 
   async reinstallGitPackage(String url) {
     airship.uninstallService.uninstallGitPackage(url)
-    airship.installService.installGitPackage(GitHubDependency(url, "master"))
+    airship.installService.installDependency(GitHubDependency(url, "master"))
   }
 }
