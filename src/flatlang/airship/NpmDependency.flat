@@ -35,6 +35,10 @@ class extends Dependency {
 
   override public getLocation() => null
 
+  override public toJsonEntry() -> String {
+    return "\"npm:#{packageName}\": \"#{version}\""
+  }
+
   public equals(Object other) =>
     other &&
     other.class.isOfType(NpmDependency.class) &&
