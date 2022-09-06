@@ -69,7 +69,7 @@ class {
       contents.substring(endingBrace)
 
     FileWriter(airship.flatJsonFile)
-        :write(updatedContents)
-        :close()
+      :write(updatedContents)
+      :close()
   }
 }
