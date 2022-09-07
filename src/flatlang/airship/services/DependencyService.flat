@@ -250,7 +250,7 @@ class {
       depth: 1,
       branch,
       outputDirectory: flatPackageDir.normalizedLocation,
-      silent: true
+      silent: airship.quietArg.enabled || log.loggingLevel < Logger.DEBUG
     )
 
     if (response.exitCode != 0) {
