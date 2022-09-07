@@ -10,6 +10,7 @@ import flatlang/io/File
 import flatlang/git/Git
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
+import flatlang/airship/InvalidCommandException
 import flatlang/airship/Dependency
 import flatlang/airship/GitHubDependency
 import flatlang/airship/LocalDependency
@@ -259,5 +260,44 @@ class {
         #{response.stderr.join("\n")}
         |")
     }
+  }
+
+  public async uninstallDependency(Dependency dependency) {
+    if (dependency.class.isOfType(GitHubDependency.class)) {
+      uninstallGitHubDependency((GitHubDependency)dependency)
+    } else if (dependency.class.isOfType(NpmDependency.class)) {
+      uninstallNpmDependency((NpmDependency)dependency)
+    } else if (dependency.class.isOfType(LocalDependency.class)) {
+      log.trace("Nothing to do for local dependency unistallation")
+    } else {
+      throw Exception("Cannot uninstall dependency #dependency")
+    }
+  }
+
+  async uninstallGitHubDependency(GitHubDependency dependency) {
+    uninstallPackageDirectory(dependency.getFlatPackageDirectory())
+  }
+
+  async uninstallNpmDependency(NpmDependency dependency) {
+    let response = Npm.uninstall(
+      dependency.packageName,
+      workingDirectory: airship.packageLocation.location,
+      silent: airship.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+    )
+
+    if (response.exitCode != 0) {
+      throw ExecutionFailureException("|
+        NPM package uninstallation failed for package \"#{dependency.packageName}\"
+          Error: #{response.stderr.join("\n")}
+        |")
+    }
+  }
+
+  async uninstallPackageDirectory(File flatPackageDir) {
+    if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
+      throw InvalidCommandException("Package is not installed at \"#flatPackageDir.nativeLocation\"")
+    }
+
+    flatPackageDir.delete(recursive: true)
   }
 }
