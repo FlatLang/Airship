@@ -14,7 +14,10 @@ import flatlang/extensions/SyntaxStringFunctions
 class {
   let static Logger log = Logger(RemoveDependencyService.class)
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private UninstallService uninstallService
+  ) {}
 
   public async removeDependencies(String[] dependencyNames) {
     for (dependency in dependencyNames) {
@@ -77,6 +80,8 @@ class {
     }
 
     let updatedContents = contents.substring(end: removeStart) + contents.substring(removeEnd)
+
+    uninstallService.uninstallDependency(dependency)
 
     FileWriter(airship.flatJsonFile)
       :write(updatedContents)

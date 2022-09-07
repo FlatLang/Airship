@@ -5,11 +5,15 @@ import flat/log/Logger
 import flatlang/io/File
 import flatlang/airship/Airship
 import flatlang/airship/InvalidCommandException
+import flatlang/airship/Dependency
 
 class {
   let static Logger log = Logger(UninstallService.class)
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private DependencyService dependencyService
+  ) {}
 
   public async uninstall() {
     if (airship.uninstallCommand.values.isEmpty) {
@@ -32,10 +36,15 @@ class {
   }
 
   public async uninstall(String package) {
-    if (package.endsWith(".git")) {
-      uninstallGitPackage(package)
+    uninstallDependency(Dependency(package))
+  }
+
+  public async uninstallDependency(Dependency dependency) {
+    if (dependencyService.isDependencyInstalled(dependency)) {
+      log.debug("Uninstalling dependency #{dependency}")
+      dependencyService.uninstallDependency(dependency)
     } else {
-      throw InvalidCommandException("Cannot uninstall package '#package'")
+      log.debug("Dependency #{dependency} not installed")
     }
   }
 

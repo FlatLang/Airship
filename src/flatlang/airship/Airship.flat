@@ -65,7 +65,7 @@ class {
   visible DependencyService dependencyService = DependencyService(this)
   visible BinaryService binaryService = BinaryService(this)
   visible InstallService installService = InstallService(this, dependencyService, binaryService)
-  visible UninstallService uninstallService = UninstallService(this)
+  visible UninstallService uninstallService = UninstallService(this, dependencyService)
   visible ReinstallService reinstallService = ReinstallService(this)
   visible UpdateService updateService = UpdateService(this, dependencyService, installService)
   visible CleanService cleanService = CleanService(this)
@@ -75,7 +75,7 @@ class {
   visible CreateService createService = CreateService(this)
   visible VersionService versionService = VersionService(this)
   visible AddDependencyService addDependencyService = AddDependencyService(this, installService)
-  visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this)
+  visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
 
   let static HashMap<String, Airship> packageCache = HashMap()
 
