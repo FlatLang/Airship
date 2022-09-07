@@ -6,7 +6,7 @@ import flatlang/datastruct/HashMap
 import flatlang/airship/PackageSource
 
 abstract class {
-  let Airship airship => Airship(getLocation())
+  let lazy Airship airship => Airship(getLocation())
 
   public construct(String package) {
     return if (package.toLowerCase().startsWith("github:")) {
