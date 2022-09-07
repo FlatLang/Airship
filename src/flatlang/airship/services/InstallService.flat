@@ -14,6 +14,7 @@ import flatlang/airship/NpmDependency
 import flatlang/airship/InvalidCommandException
 import flatlang/airship/InvalidFlatJsonException
 import flatlang/airship/ExecutionFailureException
+import flatlang/airship/FlatInstallationFailureException
 
 class {
   let static Logger log = Logger(InstallService.class)
@@ -187,7 +188,7 @@ class {
     let response = System.execute(cmd, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
-      throw ExecutionFailureException("Compilation failed")
+      throw FlatInstallationFailureException("Compilation failed")
     }
 
     if (source.binaries.count > 0) {

@@ -90,8 +90,10 @@ class {
       Airship(args.skip(1)):run()
     } catch (Exception e) {
       log.error(e.message)
-      external {
-        console.error(#{e}.error);
+      if (!e.class.isOfType(FlatInstallationFailureException.class)) {
+        external {
+          console.error(#{e}.error);
+        }
       }
       System.exit(1)
     }
