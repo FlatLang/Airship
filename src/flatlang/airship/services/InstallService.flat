@@ -51,8 +51,8 @@ class {
   ) {
     if (airship.linkArg.enabled) {
       installAndLink(package)
-    } else if (package.endsWith(".git")) {
-      installDependency(GitHubDependency(package, "master"), install, installDependencies)
+    } else if (package.contains(":")) {
+      installDependency(Dependency(package), install, installDependencies)
     } else {
       installLocalPackage(package)
     }
