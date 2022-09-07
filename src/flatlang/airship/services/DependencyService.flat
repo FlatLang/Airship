@@ -1,6 +1,7 @@
 package flatlang/airship/services
 
 import flat/log/Logger
+import flat/npm/Npm
 
 import flatlang/airship/Airship
 import flatlang/airship/PackageSource
@@ -219,18 +220,17 @@ class {
       dependency.packageName
     }
 
-    cmd.add(packageToInstall)
-
-    log.debug("Executing command: #cmd")
-
-    let response = System.execute(
-      cmd,
-      silent: airship.quietArg.enabled,
-      workingDirectory: airship.packageLocation.location
+    let response = Npm.install(
+      packageToInstall,
+      workingDirectory: airship.packageLocation.location,
+      silent: airship.quietArg.enabled || log.loggingLevel < Logger.DEBUG
     )
 
     if (response.exitCode != 0) {
-      throw ExecutionFailureException("NPM package installation failed for package \"#{packageToInstall}\"")
+      throw ExecutionFailureException("|
+        NPM package installation failed for package \"#{packageToInstall}\"
+          Error: #{response.stderr.join("\n")}
+        |")
     }
   }
 
