@@ -27,10 +27,10 @@ class {
       updateLocalPackage("main")
     } else {
       for (package in airship.updateCommand.values) {
-        match (package) {
-          "main" => fallthrough
-          "test" => updateLocalPackage(package)
-          default => updatePackage(package)
+        if (airship.getSourceForPackage(package)) {
+          updateLocalPackage(package)
+        } else {
+          updatePackage(package)
         }
       }
     }
