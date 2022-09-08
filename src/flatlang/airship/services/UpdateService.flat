@@ -8,6 +8,7 @@ import flatlang/airship/Airship
 import flatlang/airship/ExecutionFailureException
 import flatlang/airship/Dependency
 import flatlang/airship/GitHubDependency
+import flatlang/airship/NpmDependency
 import flatlang/airship/LocalDependency
 
 class {
@@ -65,6 +66,12 @@ class {
   ) -> Bool {
     return if (dependency.class.isOfType(GitHubDependency.class)) {
       updateGitPackage((GitHubDependency)dependency, build)
+    } else if (dependency.class.isOfType(NpmDependency.class)) {
+      log.trace("No need to update node package")
+      false
+    } else if (dependency.class.isOfType(LocalDependency.class)) {
+      log.trace("No need to update local package")
+      false
     } else {
       throw Exception("Cannot update package: #dependency")
     }
