@@ -86,7 +86,7 @@ testable class {
 
     let expected = cmd.map((arg, i) => {
       if (i > 0) {
-        return '"' + arg + '"'
+        return '"' + arg.trimStart('"').trimEnd('"') + '"'
       } else {
         return arg
       }
