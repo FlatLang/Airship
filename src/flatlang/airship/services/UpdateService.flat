@@ -98,9 +98,9 @@ class {
     let pullResponse = git.pull(silent: true)
 
     if (pullResponse.upToDate) {
-      log.info("Already up to date")
+      log.info("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) already up to date")
     } else {
-      log.info("Updated")
+      log.info("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) updated")
     }
 
     return !pullResponse.upToDate
