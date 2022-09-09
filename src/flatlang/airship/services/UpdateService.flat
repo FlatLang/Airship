@@ -42,16 +42,9 @@ class {
     let source = airship.getSourceForPackage(package)
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    let updatedDependencies = Array<Dependency>()
-
-    for (dependency in response.dependencies) {
-      if (updatePackage(dependency)) {
-        updatedDependencies.add(dependency)
-      }
-    }
-    for (dependency in updatedDependencies) {
-      installService.installDependency(dependency)
-    }
+    response.dependencies
+      .filterParallel(async { updatePackage(_) })
+      .forEachAsync(async { installService.installDependency(_) })
   }
 
   public async updatePackage(
