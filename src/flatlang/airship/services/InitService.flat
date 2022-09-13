@@ -13,25 +13,33 @@ import static flat/colorizer/Colorizer
 
 class {
   let static Logger log = Logger(InitService.class)
+  let static Logger initLog = Logger(InitService.class, showPrefix: false, lineLength: 65)
 
   public construct(private Airship airship) {}
 
   requireValue(String value) => value.trim().count > 0
 
-  public async init() {
-    var directory = File(System.workingDirectory)
+  public async init(String[] args) {
+    if (args.count == 1) {
+      init(args[0], File(args[0]))
+    } else if (args.count == 0) {
+      init(File(System.workingDirectory).name)
+    } else {
+      throw ExecutionFailureException("Too many arguents passed to init command")
+    }
+  }
 
-    let defaultName = directory.name
+  public async init(String defaultName, File initialTargetDirectory = File(System.workingDirectory)) {
+    var directory = initialTargetDirectory
+
     let defaultVersion = "0.1.0"
     let defaultLicense = "ISC"
     let defaultDefaultTarget = "es6"
 
-    log.info("|
-      This utility will walk you through creating a flat.json file.
-      It only covers the most common items, and tries to guess sensible defaults.
+    initLog.info("|
+      This utility will walk you through creating a flat.json file. It only covers the most common items, and tries to guess sensible defaults.
 
-      Use `airship add <pkg>` afterwards to install a package and
-      save it as a dependency in the flat.json file.
+      Use `airship add <pkg>` afterwards to install a package and save it as a dependency in the flat.json file.
 
       Press ^C at any time to quit.
       |")
@@ -39,14 +47,22 @@ class {
     let name = question("#{cyan("Package name")} (default: #{underscore(defaultName)}): ")
       .trim().orElse(defaultName)
 
-    let currentDirectory = underscore(directory.normalizedLocation)
-    let useCurrentFolder = boolQuestion(cyan("Initialize package in current folder") + ": \"#{currentDirectory}\"? (Y/n): ")
+    let currentDirectory = underscore(directory.getCanonicalPath())
+    var useDefaultFolder = false
 
-    if (!useCurrentFolder) {
+    if (directory.location == System.workingDirectory) {
+      useDefaultFolder = boolQuestion(cyan("Initialize package in current folder") + ": \"#{currentDirectory}\"? (Y/n): ")
+    } else {
+      useDefaultFolder = boolQuestion(cyan("Initialize package in folder") + ": \"#{currentDirectory}\"? (Y/n): ")
+    }
+
+    if (!useDefaultFolder) {
       let folderName = question("#{cyan("Folder name")} (default: #{underscore(name)}): ")
         .trim().orElse(name)
 
-      directory = File("#{directory.normalizedLocation}/#{folderName}"):mkdir()
+      directory = File("#{System.workingDirectory}/#{folderName}"):mkdir()
+    } else if (!directory.exists) {
+      directory.mkdir()
     }
 
     let flatJson = File("#{directory.normalizedLocation}/flat.json")
