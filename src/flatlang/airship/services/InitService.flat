@@ -99,6 +99,10 @@ class {
 
     writeSources(directory, mainClass)
 
+    if (mainClass) {
+      createService.writeMainClassFile(directory, mainClass)
+    }
+
     if (mainClass && boolQuestion(cyan("Create a testing suite") + " (#{mainClass}_TestSuite)? (Y/n): ")) {
       createService.createTest(mainClass)
       createService.createTestingSuite(mainClass)
@@ -117,40 +121,6 @@ class {
       sourceRoot.mkdir()
     } else if (!sourceRoot.isDirectory) {
       throw ExecutionFailureException("Invalid 'src' directory at #sourceRoot.location")
-    }
-
-    if (mainClass) {
-      writeMainClassFile(directory, mainClass)
-    }
-  }
-
-  async writeMainClassFile(File directory, String mainClass) {
-    let mainClassFile = File("#{directory.normalizedLocation}/src/#{mainClass}.flat")
-
-    if (!mainClassFile.exists) {
-      let packageDirectory = mainClassFile.getParent()
-
-      if (!packageDirectory.exists) {
-        packageDirectory.mkdirs()
-      }
-
-      let packageEndLocation = mainClass.lastIndexOf("/")
-      let packageLocation = packageEndLocation == -1 ? null : mainClass.substring(0, packageEndLocation)
-      let packageStatement = packageLocation ? "package #packageLocation" : ""
-
-      let mainClassFileContents = "|
-        #{packageStatement}
-
-        class {
-          public static main(String[] args) {
-
-          }
-        }\n
-        |".trimStart()
-
-      FileWriter(mainClassFile)
-        :write(mainClassFileContents)
-        .close()
     }
   }
 

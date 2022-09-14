@@ -22,11 +22,13 @@ class {
   requireValue(String value) => value.trim().count > 0
 
   public async create(String value, String[] args = Array<String>()) {
-    match (value) {
+    match value.toLowerCase() {
       "pipeline" => createPipeline(args)
       "gitignore" => createGitignore(args)
       "test" => createTest(args)
       "testing-suite" => createTestingSuite(args)
+      "mainclass" => createMainClass(args)
+      "main-class" => createMainClass(args)
     }
   }
 
@@ -146,13 +148,16 @@ class {
     log.info(".gitignore file created at \"#{gitignoreFile.normalizedLocation}\"")
   }
 
+  fixupMainClassFileNameSuffix(String name) =>
+    fixupFileNameSuffix(name)
+
   fixupTestFileNameSuffix(String name) =>
     fixupFileNameSuffix(name, "_Test")
 
   fixupTestingSuiteFileNameSuffix(String name) =>
     fixupFileNameSuffix(name, "_TestSuite")
 
-  fixupFileNameSuffix(var String name, String suffix) -> String {
+  fixupFileNameSuffix(var String name, String suffix = null) -> String {
     name = name.trim()
     var String previous = null
 
@@ -162,7 +167,7 @@ class {
 
       if (lower.endsWith(".flat")) {
         name = name.trimEnd(".flat".count)
-      } else if (lower.endsWith(suffix)) {
+      } else if (suffix != null && lower.endsWith(suffix)) {
         name = name.trimEnd(suffix.count)
       }
 
@@ -372,5 +377,50 @@ class {
       |"
 
     FileWriter(testSuiteFile).write(testSuiteContents).close()
+  }
+
+  public async createMainClass(String[] args = Array<String>()) {
+    let mainClass = if (args.count == 0) {
+      question(
+        value: cyan("Enter a main class name: (e.g. example/myproject/Runner)") + ": ",
+        responseMatcher: value => value.trim().count > 0,
+        responseMapper: fixupMainClassFileNameSuffix,
+        invalidResponseMessage: "Invalid main class name"
+      )
+    } else {
+      args[0]
+    }
+
+    writeMainClassFile(File(System.workingDirectory), mainClass)
+  }
+
+  public async writeMainClassFile(File directory, String mainClass) {
+    let mainClassFile = File("#{directory.normalizedLocation}/src/#{mainClass}.flat")
+
+    if (!mainClassFile.exists) {
+      let packageDirectory = mainClassFile.getParent()
+
+      if (!packageDirectory.exists) {
+        packageDirectory.mkdirs()
+      }
+
+      let packageEndLocation = mainClass.lastIndexOf("/")
+      let packageLocation = packageEndLocation == -1 ? null : mainClass.substring(0, packageEndLocation)
+      let packageStatement = packageLocation ? "package #packageLocation" : ""
+
+      let mainClassFileContents = "|
+        #{packageStatement}
+
+        class {
+          public static main(String[] args) {
+
+          }
+        }\n
+        |".trimStart()
+
+      FileWriter(mainClassFile)
+        :write(mainClassFileContents)
+        .close()
+    }
   }
 }
