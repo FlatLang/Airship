@@ -2,7 +2,7 @@ name: Prepare Airship Release
 
 on:
   release:
-    types: [published, edited]
+    types: [published, edited, created]
 
 jobs:
   package:
