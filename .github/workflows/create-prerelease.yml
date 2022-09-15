@@ -57,3 +57,4 @@ jobs:
           token: ${{ secrets.CREATE_RELEASE_TOKEN }}
           tag: "${{github.ref_name}}"
           prerelease: true
+          body: ""
