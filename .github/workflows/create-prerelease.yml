@@ -54,6 +54,6 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "airship.js"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CREATE_RELEASE_TOKEN }}
           tag: "${{github.ref_name}}"
           prerelease: true
