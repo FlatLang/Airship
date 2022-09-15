@@ -1,0 +1,33 @@
+name: Create Nightly Airship Release
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  create-nightly-release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CREATE_RELEASE_TOKEN }}
+
+      - name: Get latest release of NodeJS
+        uses: rez0n/actions-github-release@main
+        id: latest_release
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "FlatLang/Airship"
+          type: "latest"
+
+      - name: Get Tag Name
+        id: tag_name
+        run: |
+          echo "::set-output name=TAG_NAME::${{ steps.latest_release.outputs.release }}-nightly-$(date +%Y-%m-%d)"
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.tag_name.outputs.TAG_NAME }}
+          git push origin ${{ steps.tag_name.outputs.TAG_NAME }}
