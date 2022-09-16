@@ -14,18 +14,10 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
-      - name: Get latest release of NodeJS
-        uses: rez0n/actions-github-release@main
-        id: latest_release
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "${{ github.repository }}"
-          type: "latest"
-
       - name: Get Tag Name
         id: tag_name
         run: |
-          echo "::set-output name=TAG_NAME::${{ steps.latest_release.outputs.release }}-nightly-$(date +%Y-%m-%d)"
+          echo "::set-output name=TAG_NAME::${GITHUB_REF##*/}-nightly-$(date +%Y-%m-%d)"
 
       - name: Create and push tag
         run: |
