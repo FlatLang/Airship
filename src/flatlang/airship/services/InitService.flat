@@ -95,6 +95,7 @@ class {
       mainClass
     )
 
+    Airship.clearCache(flatJson.normalizedLocation)
     let createService = CreateService(Airship(flatJson, airship))
 
     writeSources(directory, mainClass)
