@@ -41,16 +41,6 @@ data class extends Dependency {
 
   getGitHubUrlFromRepoName(String repoName) => "https://github.com/#{repoName}.git"
 
-  public equals(Object other) =>
-    other &&
-    other.class.isOfType(GitHubDependency.class) &&
-    equals((GitHubDependency)other)
-
-  public equals(GitHubDependency other) =>
-    other &&
-    other.gitHubUrl == gitHubUrl &&
-    other.branch == branch
-
   public override toString() => "|
     {
       \"gitHubUrl\": \"#{gitHubUrl}\",
