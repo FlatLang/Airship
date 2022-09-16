@@ -19,7 +19,7 @@ jobs:
         id: latest_release
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "FlatLang/Airship"
+          repository: "${{ github.repository }}"
           type: "latest"
 
       - name: Get Tag Name
