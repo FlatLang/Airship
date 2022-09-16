@@ -26,7 +26,7 @@ class {
     let defaultExports = defaultExportsArray?.map({ DefaultExport(_) })
     let dependenciesValue = (Object)(map["dependencies"])
     let dependenciesMap = (HashMap)dependenciesValue
-    let dependencies = dependenciesMap.map(pair => Dependency((String)pair.key, (String)pair.value))
+    let dependencies = dependenciesMap.map(pair => Dependency.fromKeyValue((String)pair.key, (String)pair.value))
 
     binaries = Array<PackageBinary>()
 

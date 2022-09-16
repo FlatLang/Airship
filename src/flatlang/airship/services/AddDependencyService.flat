@@ -33,7 +33,7 @@ class {
   }
 
   public async addDependency(String dependencyName) {
-    let dependency = Dependency(dependencyName)
+    let dependency = Dependency.fromPackage(dependencyName)
     let source = airship.package.defaultSource
 
     if (source.dependencies.contains(dependency)) {

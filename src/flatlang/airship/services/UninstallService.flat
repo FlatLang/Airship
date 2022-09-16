@@ -36,7 +36,7 @@ class {
   }
 
   public async uninstall(String package) {
-    uninstallDependency(Dependency(package))
+    uninstallDependency(Dependency.fromPackage(package))
   }
 
   public async uninstallDependency(Dependency dependency) {

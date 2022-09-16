@@ -52,14 +52,14 @@ class {
     if (airship.linkArg.enabled) {
       installAndLink(package)
     } else if (package.contains(":")) {
-      installDependency(Dependency(package), install, installDependencies)
+      installDependency(Dependency.fromPackage(package), install, installDependencies)
     } else {
       installLocalPackage(package)
     }
   }
 
   public async getInstallCommand(String installationTarget, PackageSource source) -> String[] {
-    let currentDependency = Dependency("local:#{airship.packageLocation.normalizedLocation}")
+    let currentDependency = Dependency.fromPackage("local:#{airship.packageLocation.normalizedLocation}")
 
     let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
     let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
