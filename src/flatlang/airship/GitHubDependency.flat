@@ -1,6 +1,6 @@
 package flatlang/airship
 
-class extends Dependency {
+data class extends Dependency {
   public construct(
     visible String gitHubUrl,
     visible String branch
