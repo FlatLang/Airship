@@ -25,4 +25,9 @@ class extends Dependency {
   public equals(LocalDependency other) =>
     other &&
     other.path == path
+
+  override public clone() =>
+    LocalDependency(
+      path
+    )
 }

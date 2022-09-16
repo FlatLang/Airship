@@ -36,15 +36,17 @@ class {
     }
   }
 
-  public async updateLocalPackage(String package) {
+  public async updateLocalPackage(String package) -> Dependency[] {
     log.info("Updating dependencies for #{package}...")
 
     let source = airship.getSourceForPackage(package)
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
-    response.dependencies
+    return response.dependencies
       .filterParallel(async { updatePackage(_) })
-      .forEachAsync(async { installService.installDependency(_) })
+      :forEach({ Airship.clearCache(_.airship) })
+      .map({ _.clone() })
+      :forEachAsync(async { installService.installDependency(_) })
   }
 
   public async updatePackage(
@@ -57,14 +59,14 @@ class {
     Dependency dependency,
     Bool: build = true
   ) -> Bool {
-    return if (dependency.class.isOfType(GitHubDependency.class)) {
-      updateGitPackage((GitHubDependency)dependency, build)
+    if (dependency.class.isOfType(GitHubDependency.class)) {
+      return updateGitPackage((GitHubDependency)dependency, build)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       log.trace("No need to update node package")
-      false
+      return false
     } else if (dependency.class.isOfType(LocalDependency.class)) {
       log.trace("No need to update local package")
-      false
+      return false
     } else {
       throw Exception("Cannot update package: #dependency")
     }
