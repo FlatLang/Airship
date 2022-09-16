@@ -51,7 +51,7 @@ jobs:
           rm airship.js
           mv Airship/dist/airship.js airship.js
 
-      - name: Get latest release of NodeJS
+      - name: Get latest release of Airship
         uses: rez0n/actions-github-release@main
         id: stable_release
         env:
