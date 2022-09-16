@@ -3,7 +3,7 @@ package flatlang/airship
 class {
   public construct(
     visible String name,
-    visible String value
+    visible String value = null
   ) {}
 
   override public toString() => "|

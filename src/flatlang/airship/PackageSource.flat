@@ -37,7 +37,7 @@ class {
     } else if (map["bin"] && map["bin"].class.isOfType(String.class)) {
       let String binString = (String)map["bin"]
 
-      binaries.add(PackageBinary(package.name, binString))
+      binaries.add(PackageBinary(binString))
     }
 
     this(

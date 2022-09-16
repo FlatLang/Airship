@@ -309,10 +309,17 @@ class {
     package.sources
       .mapValues((pair) => {
         let source = pair.value
+        let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
+        let outFile = source.outFile ?: (pair.key == "test" ? "test.js" : "index.js")
         let updatedSource = source.clone(
-          outDirectory: validateOutDirectory(source.outDirectory ?: "dist"),
-          outFile: source.outFile ?: (pair.key == "test" ? "test.js" : "index.js"),
-          source: source.source ?: "src"
+          outDirectory: outDirectory,
+          outFile: outFile,
+          source: source.source ?: "src",
+          binaries: source.binaries.map((bin) => {
+            return bin.value ?
+              bin :
+              bin.clone(value: outDirectory + "/" + outFile)
+          })
         )
 
         Airship.log.trace("
