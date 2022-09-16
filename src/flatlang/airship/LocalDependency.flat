@@ -17,15 +17,6 @@ data class extends Dependency {
     return "\"local\""
   }
 
-  public equals(Object other) =>
-    other &&
-    other.class.isOfType(LocalDependency.class) &&
-    equals((LocalDependency)other)
-
-  public equals(LocalDependency other) =>
-    other &&
-    other.path == path
-
   override public clone() =>
     LocalDependency(
       path

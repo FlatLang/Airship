@@ -20,16 +20,6 @@ data class extends Dependency {
     return "\"#{version}\""
   }
 
-  public equals(Object other) =>
-    other &&
-    other.class.isOfType(NpmDependency.class) &&
-    equals((NpmDependency)other)
-
-  public equals(NpmDependency other) =>
-    other &&
-    other.packageName == packageName &&
-    other.version == version
-
   public override toString() => "|
     {
       \"packageName\": \"#{packageName}\",
