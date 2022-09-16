@@ -53,7 +53,7 @@ class {
     String package,
     Bool: build = true
   ) =>
-    updatePackage(Dependency(package), build)
+    updatePackage(Dependency.fromPackage(package), build)
 
   public async updatePackage(
     Dependency dependency,

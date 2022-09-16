@@ -8,7 +8,7 @@ import flatlang/airship/PackageSource
 abstract class {
   let lazy Airship airship => Airship(getLocation())
 
-  public construct(String package) {
+  public static fromPackage(String package) -> Dependency {
     return if (package.toLowerCase().startsWith("github:")) {
       let gitHubUrl = package.contains("@") ?
         package.substring(end: package.indexOf("@")) :
@@ -36,7 +36,7 @@ abstract class {
     throw Exception("Invalid dependency \"#package\"")
   }
 
-  public construct(String key, String value) {
+  public static fromKeyValue(String key, String value) -> Dependency {
     return if (key.toLowerCase().startsWith("github:")) {
       GitHubDependency(
         gitHubUrl: key,
