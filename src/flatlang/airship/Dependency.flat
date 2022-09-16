@@ -5,7 +5,7 @@ import flatlang/datastruct/HashMap
 
 import flatlang/airship/PackageSource
 
-abstract class {
+abstract data class {
   let lazy Airship airship => Airship(getLocation())
 
   public static fromPackage(String package) -> Dependency {
