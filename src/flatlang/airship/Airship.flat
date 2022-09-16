@@ -218,6 +218,14 @@ class {
     }
   }
 
+  public static clearCache(String flatJsonLocation) {
+    packageCache.remove(flatJsonLocation)
+  }
+
+  public static clearCache(Airship airship) {
+    packageCache.removeWhere({ _.key == airship.flatJsonLocation })
+  }
+
   getFlatJsonLocation(String location) -> String {
     if (!location) {
       return File("#{System.workingDirectory}/flat.json").normalizedLocation
