@@ -57,7 +57,7 @@ jobs:
         id: stable_release
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "FlatLang/Airship"
+          repository: "${{ github.repository }}"
           type: "stable"
 
       - name: Get latest release of Airship
@@ -65,7 +65,7 @@ jobs:
         id: latest_release
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "FlatLang/Airship"
+          repository: "${{ github.repository }}"
           type: "latest"
 
       - uses: ncipollo/release-action@v1
@@ -75,6 +75,6 @@ jobs:
           tag: "${{github.ref_name}}"
           prerelease: true
           body: |
-            **Full Changelog**: https://github.com/FlatLang/Airship/compare/${{ steps.stable_release.outputs.release }}...${{github.ref_name}}
-            **Latest Changelog**: https://github.com/FlatLang/Airship/compare/${{ steps.latest_release.outputs.release }}...${{github.ref_name}}
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.stable_release.outputs.release }}...${{github.ref_name}}
+            **Latest Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.latest_release.outputs.release }}...${{github.ref_name}}
           generateReleaseNotes: false

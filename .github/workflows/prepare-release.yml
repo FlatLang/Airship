@@ -33,7 +33,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: airship-win.exe
 
       - name: Upload Windows Asset
@@ -52,7 +52,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: airship-macos
 
       - name: Upload Mac Asset
@@ -71,7 +71,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: airship-linux
 
       - name: Upload Linux Asset
@@ -128,21 +128,21 @@ jobs:
       - name: Download Windows Asset
         uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: FlatLang/Airship
+          repo: ${{ github.repository }}
           file: airship-win.exe
           version: ${{ github.event.release.id }}
 
       - name: Download Mac Asset
         uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: FlatLang/Airship
+          repo: ${{ github.repository }}
           file: airship-macos
           version: ${{ github.event.release.id }}
 
       - name: Download Linux Asset
         uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: FlatLang/Airship
+          repo: ${{ github.repository }}
           file: airship-linux
           version: ${{ github.event.release.id }}
 
@@ -165,7 +165,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: ${{ matrix.compression.replace_extension && 'airship.' || 'airship.js.' }}${{ matrix.compression.extension }}
 
       - name: Upload Asset
@@ -193,7 +193,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: ${{ matrix.compression.replace_extension && 'airship-win.' || 'airship-win.exe.' }}${{ matrix.compression.extension }}
 
       - name: Upload Asset
@@ -221,7 +221,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: airship-macos.${{ matrix.compression.extension }}
 
       - name: Upload Asset
@@ -249,7 +249,7 @@ jobs:
           fail-if-no-assets: false
           token: ${{ github.token }}
           tag: ${{ github.event.release.tag_name }}
-          repository: FlatLang/Airship
+          repository: ${{ github.repository }}
           assets: airship-linux.${{ matrix.compression.extension }}
 
       - name: Upload Asset
