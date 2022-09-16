@@ -57,4 +57,10 @@ class extends Dependency {
       \"branch\": \"#{branch}\"
     }
     |"
+
+  override public clone() =>
+    GitHubDependency(
+      gitHubUrl,
+      branch
+    )
 }

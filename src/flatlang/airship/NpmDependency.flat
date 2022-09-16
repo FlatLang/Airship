@@ -36,4 +36,10 @@ class extends Dependency {
       \"version\": \"#{version}\"
     }
     |"
+
+  override public clone() =>
+    NpmDependency(
+      packageName,
+      version
+    )
 }
