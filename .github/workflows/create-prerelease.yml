@@ -52,7 +52,7 @@ jobs:
           rm airship.js
           mv Airship/dist/airship.js airship.js
 
-      - name: Get latest release of NodeJS
+      - name: Get latest stable release of Airship
         uses: rez0n/actions-github-release@main
         id: stable_release
         env:
@@ -60,11 +60,21 @@ jobs:
           repository: "FlatLang/Airship"
           type: "stable"
 
+      - name: Get latest release of Airship
+        uses: rez0n/actions-github-release@main
+        id: latest_release
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "FlatLang/Airship"
+          type: "latest"
+
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "airship.js"
           token: ${{ secrets.CREATE_RELEASE_TOKEN }}
           tag: "${{github.ref_name}}"
           prerelease: true
-          body: "**Full Changelog**: https://github.com/FlatLang/Airship/compare/${{ steps.stable_release.outputs.release }}...${{github.ref_name}}"
+          body: |
+            **Full Changelog**: https://github.com/FlatLang/Airship/compare/${{ steps.stable_release.outputs.release }}...${{github.ref_name}}
+            **Latest Changelog**: https://github.com/FlatLang/Airship/compare/${{ steps.latest_release.outputs.release }}...${{github.ref_name}}
           generateReleaseNotes: false
