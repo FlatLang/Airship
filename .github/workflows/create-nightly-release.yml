@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.CREATE_RELEASE_TOKEN }}
+          token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
       - name: Get latest release of NodeJS
         uses: rez0n/actions-github-release@main
