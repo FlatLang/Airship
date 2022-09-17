@@ -20,13 +20,6 @@ data class extends Dependency {
     return "\"#{version}\""
   }
 
-  public override toString() => "|
-    {
-      \"packageName\": \"#{packageName}\",
-      \"version\": \"#{version}\"
-    }
-    |"
-
   override public clone() =>
     NpmDependency(
       packageName,
