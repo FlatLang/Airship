@@ -41,13 +41,6 @@ data class extends Dependency {
 
   getGitHubUrlFromRepoName(String repoName) => "https://github.com/#{repoName}.git"
 
-  public override toString() => "|
-    {
-      \"gitHubUrl\": \"#{gitHubUrl}\",
-      \"branch\": \"#{branch}\"
-    }
-    |"
-
   override public clone() =>
     GitHubDependency(
       gitHubUrl,
