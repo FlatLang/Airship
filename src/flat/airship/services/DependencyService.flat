@@ -123,50 +123,57 @@ class {
       return response
     }
 
-    for (dependency in source.dependencies) {
-      if (response.dependencies.none({ _.getLocation() == dependency.getLocation() })) {
-        response.dependencies.add(dependency)
-      }
-      if (dependency.class.isOfType(NpmDependency.class)) {
-        continue
-      }
+    source.dependencies
+      :forEach((dependency) => {
+        if (response.dependencies.none({ _.getLocation() == dependency.getLocation() })) {
+          response.dependencies.add(dependency)
+        }
+      })
+      .filter({ !_.class.isOfType(NpmDependency.class) })
+      .filter((dependency) => {
+        let dependencyPackageFile = File(dependency.getLocation())
 
-      let dependencyPackageFile = File(dependency.getLocation())
+        if (dependencyPackageFile.exists && !dependency.isFlatPackage()) {
+          DependencyService.log.debug("Dependency \"#{dependency}\" is not a valid Flat package. Skipping")
+          return false
+        } else {
+          return true
+        }
+      })
+      :forEachParallel(async (dependency) => {
+        let dependencyPackageFile = File(dependency.getLocation())
 
-      if (!dependencyPackageFile.exists) {
-        if (download) {
+        if (download && !dependencyPackageFile.exists) {
           installDependency(dependency)
           response.dependenciesDownloaded.add(dependency)
         }
+      })
+      :forEachAsync(async (dependency) => {
+        let dependencyPackageFile = File(dependency.getLocation())
 
-        if (!dependencyPackageFile.exists) {
-          continue
+        let args = [
+          "-f", dependencyPackageFile.normalizedLocation
+        ]
+
+        airship.propagateArgs(args)
+
+        let childship = Airship(args, airship)
+
+        let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
+        DependencyService.log.trace("Found source for #{childship.packageLocation.normalizedLocation} with source #packageSource")
+
+        if (packageSource && recursive) {
+          getDependenciesForSource(
+            dependencyPackageFile.name,
+            installationTarget,
+            packageSource,
+            download,
+            recursive,
+            response,
+            dependenciesAdded
+          )
         }
-      }
-
-      let args = [
-        "-f", dependencyPackageFile.normalizedLocation
-      ]
-
-      airship.propagateArgs(args)
-
-      let childship = Airship(args, airship)
-
-      let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
-      log.trace("Found source for #{childship.packageLocation.normalizedLocation} with source #packageSource")
-
-      if (packageSource && recursive) {
-        getDependenciesForSource(
-          dependencyPackageFile.name,
-          installationTarget,
-          packageSource,
-          download,
-          recursive,
-          response,
-          dependenciesAdded
-        )
-      }
-    }
+      })
 
     return response
   }
