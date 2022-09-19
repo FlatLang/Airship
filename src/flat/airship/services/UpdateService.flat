@@ -43,10 +43,10 @@ class {
     let response = dependencyService.getDependenciesForSource(package, package, source)
 
     return response.dependencies
-      .filterParallel(async { updatePackage(_) })
+      .filterParallel({ updatePackage(_) })
       :forEach({ Airship.clearCache(_.airship) })
       .map({ _.copy() })
-      :forEachAsync(async { installService.installDependency(_) })
+      :forEachAsync({ installService.installDependency(_) })
   }
 
   public async updatePackage(

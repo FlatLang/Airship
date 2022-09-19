@@ -140,7 +140,7 @@ class {
           return true
         }
       })
-      :forEachParallel(async (dependency) => {
+      :forEachParallel((dependency) => {
         let dependencyPackageFile = File(dependency.getLocation())
 
         if (download && !dependencyPackageFile.exists) {
@@ -148,7 +148,7 @@ class {
           response.dependenciesDownloaded.add(dependency)
         }
       })
-      :forEachAsync(async (dependency) => {
+      :forEachAsync((dependency) => {
         let dependencyPackageFile = File(dependency.getLocation())
 
         let args = [

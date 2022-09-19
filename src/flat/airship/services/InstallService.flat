@@ -64,7 +64,7 @@ class {
     let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
     let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
     let excludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
-    let canonicalSourceLocations = sourceLocations.mapParallel(async { File(_).getCanonicalPath() }).unique()
+    let canonicalSourceLocations = sourceLocations.mapParallel({ File(_).getCanonicalPath() }).unique()
 
     let cmd = [
       "java",
@@ -105,7 +105,7 @@ class {
     let dependencyLocations = HashMap<Dependency, Array<String>>()
     let excludeLocations = HashMap<Dependency, Array<String>>()
 
-    response.dependencies.forEachParallel(async (dependency) => {
+    response.dependencies.forEachParallel((dependency) => {
       if (!dependencyLocations.containsKey(dependency)) {
         let dependencySourceLocations = dependencyService.getDependencySourceLocations(dependency, installationTarget)
 
