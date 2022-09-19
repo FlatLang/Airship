@@ -20,7 +20,7 @@ testable class {
 
     expect(airship.debug).toBe(true, "Expected debug flag to be true")
 
-    let allOutput = Console.out.captureOutput(async { airship.installService.install() })
+    let allOutput = Console.out.captureOutput({ airship.installService.install() })
 
     expect(allOutput.count).toBe(1, "Extaneous output: #allOutput")
 
