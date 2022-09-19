@@ -19,6 +19,8 @@ import flat/airship/GitHubDependency
 import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
 
+import flat/extensions/SyntaxStringFunctions
+
 class {
   let static Logger log = Logger(SetupService.class)
   let static Logger setupLog = Logger(SetupService.class, showPrefix: false, lineLength: 65)
@@ -30,7 +32,9 @@ class {
   ) {}
 
   public async setup() {
-    if (airship.uninstallArg.enabled) {
+    if (airship.reinstallArg.enabled) {
+      reinstall()
+    } else if (airship.uninstallArg.enabled) {
       uninstall()
     } else {
       install()
@@ -38,7 +42,13 @@ class {
   }
 
   async install() {
-    let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
+    let existingDependency = GitHubDependency("github:FlatLang/Airship", "master")
+
+    if (existingDependency.isFlatPackage() && existingDependency.getFlatPackageDirectory().exists) {
+      Airship.clearCache(existingDependency.airship)
+    }
+
+    let airshipDependency = existingDependency.copy()
 
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
       setupLog.info("Airship already installed. Checking for updates")
@@ -76,6 +86,8 @@ class {
 
       setupLog.info("|
         Flat is installed now!
+
+        You can uninstall at any time with `airship setup --uninstall` and these changes will be reverted.
 
         To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
 
@@ -139,6 +151,7 @@ class {
           FileWriter(file)
             :append("|
 
+
               #{getFlatUnixConfig(envFile)}
               |")
             :close()
@@ -146,6 +159,8 @@ class {
 
         setupLog.info("|
           Flat is installed now!
+
+          You can uninstall at any time with `airship setup --uninstall` and these changes will be reverted.
 
           To get started you may need to restart your current shell. This would reload its PATH environment variable to include Airship's bin directory (#{underscore(pathValue)}).
 
@@ -175,8 +190,8 @@ class {
       let files = Path.getUserShellRunCommandsFiles()
 
       if (files.isNotEmpty) {
-        setupLog.info("|
-          Removing Flat configuration from the files located at:
+        log.trace("|
+          Checking for Flat configuration in the files located at:
 
             #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
 
@@ -192,8 +207,6 @@ class {
             continue
           }
 
-          log.debug("Removing code to load env file \"#{envFile.nativeLocation}\" in file \"#{file.nativeLocation}\"")
-
           let config = getFlatUnixConfig(envFile)
           let index = contents.indexOf(config)
 
@@ -202,7 +215,11 @@ class {
             continue
           }
 
-          let newContents = contents.substring(0, index) + contents.substring(index + config.count)
+          log.info("Removing Flat configuration from file \"#{file.nativeLocation}\"")
+
+          let removeStartIndex = contents.nextNonWhitespaceIndex(start: index - 1, direction: -1)
+
+          let newContents = contents.substring(0, removeStartIndex != -1 ? removeStartIndex + 1 : index) + contents.substring(index + config.count)
 
           FileWriter(file)
             :write(newContents)
@@ -211,21 +228,19 @@ class {
       }
     }
 
-    log.debug("Deleting Flat home directory \"#{flatHome.nativeLocation}\"")
+    log.info("Deleting Flat home directory \"#{flatHome.nativeLocation}\"")
 
     flatHome.delete(
       recursive: true,
       force: true
     )
 
-    let reinstall = boolQuestion("|
-      Flat is uninstalled now. :(
+    setupLog.info("Flat is uninstalled now. :(")
+  }
 
-      Would you like to reinstall Flat? (Y/n): ")
-
-    if (reinstall) {
-      install()
-    }
+  async reinstall() {
+    uninstall()
+    install()
   }
 
   getFlatUnixConfig(File envFile) -> String {

@@ -49,6 +49,7 @@ class {
   visible CliArg quietArg = CliArg("--quiet", ["-q"])
   visible CliArg versionCommand = CliArg("--version", count: 0)
   visible CliArg uninstallArg = CliArg("--uninstall")
+  visible CliArg reinstallArg = CliArg("--reinstall")
   visible CliArg setupCommand = CliArg("setup")
   visible CliArg installCommand = CliArg("install", ["i"], minCount: 0)
   visible CliArg uninstallCommand = CliArg("uninstall", minCount: 1)
@@ -138,7 +139,8 @@ class {
         linkArg,
         debugArg,
         quietArg,
-        uninstallArg
+        uninstallArg,
+        reinstallArg
       ]):parse(args),
       parent
     )
