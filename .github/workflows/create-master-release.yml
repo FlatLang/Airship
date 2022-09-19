@@ -14,14 +14,14 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
-      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      - uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
-          delete_release: true
-          tag_name: master-release
+          keep_latest: 2
+          delete_tag_pattern: master-
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
       - name: Create and push tag
         run: |
-          git tag master-release
-          git push origin master-release
+          git tag master-$(git rev-parse --short HEAD)
+          git push origin master-$(git rev-parse --short HEAD)
