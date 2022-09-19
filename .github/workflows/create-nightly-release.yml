@@ -14,6 +14,13 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
+      - uses: dev-drprasad/delete-older-releases@v0.2.0
+        with:
+          keep_latest: 2
+          delete_tag_pattern: -nightly-
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
+
       - name: Get Tag Name
         id: tag_name
         run: |
@@ -23,10 +30,3 @@ jobs:
         run: |
           git tag ${{ steps.tag_name.outputs.TAG_NAME }}
           git push origin ${{ steps.tag_name.outputs.TAG_NAME }}
-
-      - uses: dev-drprasad/delete-older-releases@v0.2.0
-        with:
-          keep_latest: 3
-          delete_tag_pattern: -nightly-
-        env:
-          GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
