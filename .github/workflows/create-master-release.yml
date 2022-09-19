@@ -1,0 +1,27 @@
+name: Create Master Airship Release
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  create-master-release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
+
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: master-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
+
+      - name: Create and push tag
+        run: |
+          git tag master-release
+          git push origin master-release
