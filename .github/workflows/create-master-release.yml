@@ -17,7 +17,7 @@ jobs:
       - uses: BSteffaniak/delete-older-releases@master
         with:
           keep_latest: 2
-          delete_tag_pattern: ^master-[0-9a-z]{7,7}$
+          delete_tag_pattern: ^master-[0-9a-f]{7,7}$
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
