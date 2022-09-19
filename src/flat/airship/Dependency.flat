@@ -72,6 +72,4 @@ abstract data class {
       :add(airship.getSourceForPackage(installationTarget))
       .unique()
   }
-
-  public abstract clone() -> Dependency
 }

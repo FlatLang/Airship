@@ -19,10 +19,4 @@ data class extends Dependency {
   override public toJsonValue() -> String {
     return "\"#{version}\""
   }
-
-  override public clone() =>
-    NpmDependency(
-      packageName,
-      version
-    )
 }

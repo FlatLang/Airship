@@ -2,7 +2,12 @@ package flat/airship
 
 import flat/datastruct/HashMap
 
-class {
+data class {
+  public construct(
+    visible String location,
+    visible Bool staticImport
+  ) {}
+
   public construct(Object value) {
     if (value.class.isOfType(String.class)) {
       this((String)value, false)
@@ -28,26 +33,4 @@ class {
       throw Exception("Invalid DefaultExport value: #map")
     }
   }
-
-  public construct(
-    visible String location,
-    visible Bool staticImport
-  ) {}
-
-  public equals(Object other) =>
-    other &&
-    other.class.isOfType(DefaultExport.class) &&
-    equals((DefaultExport)other)
-
-  public equals(DefaultExport other) =>
-    other &&
-    other.location == location &&
-    other.staticImport == staticImport
-
-  public override toString() => "|
-    {
-      \"location\": \"#{location}\",
-      \"staticImport\": \"#{staticImport}\"
-    }
-    |"
 }

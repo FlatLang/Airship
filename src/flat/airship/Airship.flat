@@ -314,14 +314,14 @@ class {
         let source = pair.value
         let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
         let outFile = source.outFile ?: (pair.key == "test" ? "test.js" : "index.js")
-        let updatedSource = source.clone(
+        let updatedSource = source.copy(
           outDirectory: outDirectory,
           outFile: outFile,
           source: source.source ?: "src",
           binaries: source.binaries.map((bin) => {
             return bin.value ?
               bin :
-              bin.clone(value: outDirectory + "/" + outFile)
+              bin.copy(value: outDirectory + "/" + outFile)
           })
         )
 
