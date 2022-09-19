@@ -9,7 +9,7 @@
   },
   "sources": {
     "main": {
-      "mainClass": "flatlang/airship/Airship",
+      "mainClass": "flat/airship/Airship",
       "source": "src/main",
       "dependencies": {
         "github:FlatLang/FuCli": "master",
@@ -18,7 +18,7 @@
       }
     },
     "test": {
-      "mainClass": "flatlang/airship/Airship_TestSuite",
+      "mainClass": "flat/airship/Airship_TestSuite",
       "source": "src/**/*_Test*.flat",
       "dependencies": {
         "github:FlatLang/Nest": "master"

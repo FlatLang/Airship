@@ -1,0 +1,444 @@
+package flat/airship
+
+import flat/log/Logger
+
+import flat/datastruct/HashMap
+import flat/datastruct/HashSet
+import flat/datastruct/Pair
+import flat/regex/Pattern
+import flat/json/JsonDeserializer
+import flat/io/File
+import flat/io/FileReader
+import flat/fucli/FuCli
+import flat/fucli/CliArg
+import flat/git/Git
+import flat/time/Timer
+
+import flat/airship/services/SetupService
+import flat/airship/services/DependencyService
+import flat/airship/services/AddDependencyService
+import flat/airship/services/RemoveDependencyService
+import flat/airship/services/InstallService
+import flat/airship/services/UninstallService
+import flat/airship/services/ReinstallService
+import flat/airship/services/UpdateService
+import flat/airship/services/CleanService
+import flat/airship/services/RunScriptService
+import flat/airship/services/InitService
+import flat/airship/services/CreateService
+import flat/airship/services/BinaryService
+import flat/airship/services/VersionService
+
+import flat/regex/RegexStringExtensions
+
+class {
+  visible static String flatHome = getFlatHome()
+
+  visible Package package
+  visible String outFile
+  visible Bool debug
+  visible String flatJsonLocation
+  visible File flatJsonFile
+  visible File packageLocation
+  visible String target
+
+  visible CliArg targetArg = CliArg("--target", ["-t"], count: 1)
+  visible CliArg targetRuntimeArg = CliArg("--target-runtime", ["--runtime", "-r"], count: 1)
+  visible CliArg fileArg = CliArg("--file", ["-f"], count: 1)
+  visible CliArg linkArg = CliArg("--link", minCount: 0, maxCount: 1)
+  visible CliArg debugArg = CliArg("--debug", ["-d"])
+  visible CliArg quietArg = CliArg("--quiet", ["-q"])
+  visible CliArg versionCommand = CliArg("--version", count: 0)
+  visible CliArg setupCommand = CliArg("setup")
+  visible CliArg installCommand = CliArg("install", ["i"], minCount: 0)
+  visible CliArg uninstallCommand = CliArg("uninstall", minCount: 1)
+  visible CliArg reinstallCommand = CliArg("reinstall", minCount: 0)
+  visible CliArg updateCommand = CliArg("update", ["u"], minCount: 0)
+  visible CliArg cleanCommand = CliArg("clean", ["c"])
+  visible CliArg runCommand = CliArg("run", ["r"], minCount: 1)
+  visible CliArg initCommand = CliArg("init", minCount: 0, maxCount: 1)
+  visible CliArg createCommand = CliArg("create", minCount: 1)
+  visible CliArg binCommand = CliArg("bin")
+  visible CliArg addDependencyCommand = CliArg("add", minCount: 1)
+  visible CliArg removeDependencyCommand = CliArg("remove", minCount: 1)
+
+  visible DependencyService dependencyService = DependencyService(this)
+  visible BinaryService binaryService = BinaryService(this)
+  visible InstallService installService = InstallService(this, dependencyService, binaryService)
+  visible UninstallService uninstallService = UninstallService(this, dependencyService)
+  visible ReinstallService reinstallService = ReinstallService(this)
+  visible UpdateService updateService = UpdateService(this, dependencyService, installService)
+  visible CleanService cleanService = CleanService(this)
+  visible RunScriptService runScriptService = RunScriptService(this)
+  visible SetupService setupService = SetupService(this, dependencyService, updateService)
+  visible InitService initService = InitService(this)
+  visible CreateService createService = CreateService(this)
+  visible VersionService versionService = VersionService(this)
+  visible AddDependencyService addDependencyService = AddDependencyService(this, installService)
+  visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
+
+  let static HashMap<String, Airship> packageCache = HashMap()
+
+  let static Logger log = Logger(Airship.class)
+
+  public static async main(String[] args) {
+    try {
+      if (args.count < 2) {
+        throw Exception("Missing command")
+      }
+
+      Airship(args.skip(1)):run()
+    } catch (Exception e) {
+      log.error(e.message)
+      if (!e.class.isOfType(FlatInstallationFailureException.class)) {
+        external {
+          console.error(#{e}.error);
+        }
+      }
+      System.exit(1)
+    }
+  }
+
+  public construct(
+    File packageLocationFile,
+    Airship parent = null
+  ) {
+    this(packageLocationFile.normalizedLocation, parent)
+  }
+
+  public construct(
+    String packageLocation,
+    Airship parent = null
+  ) {
+    this(["-f", packageLocation], parent)
+  }
+
+  public construct(
+    String[] args,
+    Airship parent = null
+  ) {
+    this(
+      FuCli([
+        setupCommand,
+        installCommand,
+        uninstallCommand,
+        reinstallCommand,
+        updateCommand,
+        cleanCommand,
+        runCommand,
+        initCommand,
+        createCommand,
+        binCommand,
+        addDependencyCommand,
+        removeDependencyCommand,
+        versionCommand,
+        targetArg,
+        targetRuntimeArg,
+        fileArg,
+        linkArg,
+        debugArg,
+        quietArg
+      ]):parse(args),
+      parent
+    )
+  }
+
+  public construct(
+    visible FuCli cli,
+    visible Airship parent = null
+  ) {
+    if (debugArg.enabled) {
+      quietArg.enabled = true
+    }
+
+    if (quietArg.enabled) {
+      Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
+    }
+
+    if (parent) {
+      log.trace("Creating Airship with CLI args: #cli")
+    } else {
+      log.debug("Creating Airship with CLI args: #cli")
+    }
+
+    flatJsonLocation = getFlatJsonLocation(fileArg.value)
+    debug = debugArg.enabled
+    target = targetArg.value
+
+    flatJsonFile = File(flatJsonLocation).getCanonicalFileSync()
+    packageLocation = flatJsonFile.getParent()
+
+    if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
+      log.trace("Airship has already been created for #{flatJsonFile.normalizedLocation}. Using sources from existing package")
+
+      let airship = packageCache[flatJsonFile.normalizedLocation]
+
+      target = target ?: airship.target
+      package = airship.package
+    } else {
+      if (flatJsonFile.isFile) {
+        log.trace("Parsing \"#{flatJsonFile.normalizedLocation}\" ...")
+        let timer = Timer():start()
+        let map = JsonDeserializer().parseObject(flatJsonFile)
+        timer.stop()
+        log.trace("Parsing \"#{flatJsonFile.normalizedLocation}\" took #{timer.duration}ms")
+
+        let String defaultTarget = (String)map["defaultTarget"]
+        target = target ?: defaultTarget
+
+        let overrideFlatJsonFiles = getFlatJsonOverrides(packageLocation)
+
+        for (overrideFlatJsonFile in overrideFlatJsonFiles) {
+          let overrideMap = JsonDeserializer().parseObject(overrideFlatJsonFile)
+
+          merge(overrideMap, map)
+        }
+
+        package = Package(map)
+
+        loadSources()
+      }
+
+      packageCache[flatJsonFile.normalizedLocation] = this
+    }
+  }
+
+  visible PackageSource[] sources {
+    get {
+      let value = Array<PackageSource>()
+
+      if (package.mainSource) {
+        value.add(package.mainSource)
+      }
+      if (package.testSource) {
+        value.add(package.testSource)
+      }
+
+      return value
+    }
+  }
+
+  public static clearCache(String flatJsonLocation) {
+    packageCache.remove(flatJsonLocation)
+  }
+
+  public static clearCache(Airship airship) {
+    packageCache.removeWhere({ _.key == airship.flatJsonLocation })
+  }
+
+  getFlatJsonLocation(String location) -> String {
+    if (!location) {
+      return File("#{System.workingDirectory}/flat.json").normalizedLocation
+    }
+
+    let file = File(location)
+
+    return if (file.isDirectory || file.isSymbolicLink) {
+      file.normalizedLocation + "/flat.json"
+    } else if (file.isFile) {
+      file.normalizedLocation
+    } else {
+      throw InvalidFlatJsonException("Invalid flat.json location '#file.location'")
+    }
+  }
+
+  public static getFlatHome() -> String {
+    return if (System.getEnv("FLAT_HOME")) {
+      File(System.getEnv("FLAT_HOME")).normalizedLocation
+    } else {
+      File("#{System.homeDirectory}/.flat").normalizedLocation
+    }
+  }
+
+  getFlatJsonOverrides(File packageLocation) -> File[] => Array<File>() {
+    let os = System.OS.toLowerCase()
+    let extensions = Array<String>():add(os)
+
+    if (target) {
+      extensions.add(target)
+
+      if (target == "es6") {
+        extensions.add("js")
+      }
+    }
+
+    return searchFlatJsonOverrides(packageLocation, extensions)
+  }
+
+  searchFlatJsonOverrides(File packageLocation, String[] extensions) =>
+    packageLocation.getChildFiles()
+      .filter({ _.name.startsWith("flat.") })
+      .filter({ _.extension.equals(".json") })
+      .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) }) })
+
+  merge(
+    HashMap<String, Object> source,
+    HashMap<String, Object> dest
+  ) {
+    source.forEach((Pair<String, Object> pair) => {
+      if (!dest.containsKey(pair.key)) {
+        dest[pair.key] = pair.value
+      }
+
+      if (pair.value.class.isOfType(HashMap.class)) {
+        let HashMap<String, Object> hashmap = (HashMap)pair.value
+        let HashMap<String, Object> existingHashmap = (HashMap)dest[pair.key]
+        merge(hashmap, existingHashmap)
+      } else {
+        dest[pair.key] = pair.value
+      }
+    })
+  }
+
+  merge(
+    Object[] source,
+    Object[] dest
+  ) {
+    if (!source || !dest) {
+      return
+    }
+
+    source.forEach((value) => {
+      if (!dest.contains(value)) {
+        dest.add(value)
+      }
+    })
+  }
+
+  loadSources() {
+    package.sources
+      .mapValues((pair) => {
+        let source = pair.value
+        let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
+        let outFile = source.outFile ?: (pair.key == "test" ? "test.js" : "index.js")
+        let updatedSource = source.clone(
+          outDirectory: outDirectory,
+          outFile: outFile,
+          source: source.source ?: "src",
+          binaries: source.binaries.map((bin) => {
+            return bin.value ?
+              bin :
+              bin.clone(value: outDirectory + "/" + outFile)
+          })
+        )
+
+        Airship.log.trace("
+            Updating #{pair.key} source from #{source.toString().indent(tab: "  ", firstLine: false)}
+            to #{updatedSource.toString().indent(tab: "  ", firstLine: false)}
+          |")
+
+        return updatedSource
+      })
+      .forEach((pair) => {
+        package.sources[pair.key] = pair.value
+      })
+
+    if (package.mainSource) {
+      package.sources
+        .filter({ _.key != "main" })
+        .forEach((pair) => {
+          Airship.log.trace("Propagating main source dependencies to #{pair.key} source dependencies")
+          merge(package.mainSource.dependencies, pair.value.dependencies)
+          Airship.log.trace("Propagating main source defaultExports to #{pair.key} source defaultExports")
+          merge(package.mainSource.defaultExports, pair.value.defaultExports)
+        })
+    }
+
+    if (!isCoreLibrary()) {
+      log.trace("Adding Flat-Core implicit dependency")
+
+      package.sources.forEach({ _.value.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master")) })
+    } else {
+      log.trace("Skipping Flat-Core implicit dependency")
+    }
+  }
+
+  validateOutDirectory(String location) => location {
+    if (location.trim().count == 0) {
+      throw InvalidOutDirException("outDirectory cannot be empty")
+    } else if (location.trim().startsWith(/[/\\.]/)) {
+      throw InvalidOutDirException("outDirectory cannot start with #location.first")
+    } else if (location.contains(":/") || location.contains(":\\")) {
+      throw InvalidOutDirException("outDirectory cannot be absolute")
+    }
+  }
+
+  async run() {
+    if (!checkFlatHome()) {
+      return
+    }
+
+    let commands = cli.args.filter({ _.enabled })
+
+    for (command in commands) {
+      log.debug("Running command \"#command\"")
+
+      match (command) {
+        setupCommand => setupService.setup()
+        installCommand => installService.install()
+        uninstallCommand => uninstallService.uninstall()
+        reinstallCommand => reinstallService.reinstall()
+        updateCommand => updateService.update()
+        cleanCommand => cleanService.clean()
+        runCommand => runScriptService.runScript(command.value)
+        initCommand => initService.init(command.values)
+        createCommand => createService.create(command.value, command.values.skip(1))
+        binCommand => binaryService.create(command.values)
+        versionCommand => versionService.getVersion()
+        addDependencyCommand => addDependencyService.addDependencies(command.values)
+        removeDependencyCommand => removeDependencyService.removeDependencies(command.values)
+      }
+    }
+  }
+
+  public getSourceForPackage(String installationTarget, PackageSource defaultSource = null) -> PackageSource {
+    return package.sources.getOrDefault(installationTarget, { defaultSource })
+  }
+
+  async checkFlatHome() => true {
+    let flatHomeFile = File("#{flatHome}")
+
+    if (!flatHomeFile.isDirectory) {
+      if (!flatHomeFile.getParent().isDirectory) {
+        log.error("Invalid FLAT_HOME directory location '#{flatHome}'")
+        return false
+      }
+
+      flatHomeFile.mkdirs()
+    }
+  }
+
+  public async getGitOriginUrl() -> String => null {
+    let response = Git.getOriginUrl(silent: true)
+
+    if (response.success) {
+      let url = response.value
+
+      return if (!url.endsWith(".git")) {
+        "#{url}.git"
+      } else {
+        url
+      }
+    }
+  }
+
+  getRootParent() -> Airship => this {
+    if (parent) {
+      return parent.getRootParent()
+    }
+  }
+
+  isCoreLibrary() => getRootParent().packageLocation.normalizedLocation.endsWith("/Flat-Core")
+
+  public propagateArgs(String[] args) {
+    if (target) {
+      args.addAll(["-t", target])
+    }
+    if (targetRuntimeArg.enabled) {
+      args.addAll(["-r", targetRuntimeArg.value])
+    }
+    if (quietArg.enabled) {
+      args.add("-q")
+    }
+  }
+}
