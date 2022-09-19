@@ -10,7 +10,7 @@
   "sources": {
     "main": {
       "mainClass": "flat/airship/Airship",
-      "source": "src/main",
+      "source": "src",
       "dependencies": {
         "github:FlatLang/FuCli": "master",
         "github:FlatLang/Json": "master",

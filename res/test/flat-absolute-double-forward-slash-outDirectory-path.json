@@ -7,7 +7,7 @@
       "mainClass": "flat/airship/Airship",
       "outDirectory": "C://test",
       "outFile": "airship.js",
-      "source": "src/main",
+      "source": "src",
       "dependencies": {
         "github:FlatLang/Json": "master",
         "github:FlatLang/Compiler-String-Extensions": "master"
