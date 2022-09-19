@@ -2,12 +2,12 @@ package flat/airship/services
 
 import flat/log/Logger
 import flat/npm/Npm
-
 import flat/airship/Airship
 import flat/airship/PackageSource
 import flat/datastruct/HashSet
 import flat/io/File
 import flat/git/Git
+
 import flat/airship/InvalidFlatJsonException
 import flat/airship/ExecutionFailureException
 import flat/airship/InvalidCommandException
