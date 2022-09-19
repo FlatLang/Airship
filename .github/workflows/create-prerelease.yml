@@ -5,7 +5,7 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+*'
       - '*-nightly-*'
-      - 'master-*'
+      - 'master-[0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z]'
 
 jobs:
   create-prerelease:
