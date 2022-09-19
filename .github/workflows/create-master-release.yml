@@ -18,6 +18,7 @@ jobs:
         with:
           keep_latest: 2
           delete_tag_pattern: ^master-[0-9a-f]{7,7}$
+          regex: true
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
