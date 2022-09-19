@@ -45,7 +45,7 @@ class {
     return response.dependencies
       .filterParallel(async { updatePackage(_) })
       :forEach({ Airship.clearCache(_.airship) })
-      .map({ _.clone() })
+      .map({ _.copy() })
       :forEachAsync(async { installService.installDependency(_) })
   }
 

@@ -2,7 +2,7 @@ package flat/airship
 
 import flat/datastruct/HashMap
 
-class {
+data class {
   visible String name
   visible String version
   visible String description
@@ -17,33 +17,32 @@ class {
   visible PackageSource defaultSource => mainSource ?: testSource
 
   public construct(HashMap<String, Object> map) {
-    name = (String)map["name"]
-    version = (String)map["version"]
-    description = (String)map["description"]
-    author = (String)map["author"]
-    license = (String)map["license"]
-    defaultTarget = (String)map["defaultTarget"]
-    scripts = (HashMap)map["scripts"]
+    let String name = (String)map["name"]
+    let String version = (String)map["version"]
+    let String description = (String)map["description"]
+    let String author = (String)map["author"]
+    let String license = (String)map["license"]
+    let String defaultTarget = (String)map["defaultTarget"]
+    let HashMap<String, Object> scripts = (HashMap)map["scripts"]
 
     let HashMap<String, HashMap> sourcesMap = (HashMap)map["sources"]
+    var HashMap<String, PackageSource> sources
 
     if (!sourcesMap || !sourcesMap.class.isOfType(HashMap.class)) {
       sources = HashMap()
     } else {
       sources = sourcesMap.mapValues(pair => PackageSource(this, pair.key, (HashMap)pair.value))
     }
-  }
 
-  override public toString() => "|
-    {
-      name: \"#name\",
-      version: \"#version\",
-      description: \"#description\",
-      author: \"#author\",
-      license: \"#license\",
-      defaultTarget: \"#defaultTarget\",
-      sources: \"#sources\",
-      scripts: \"#scripts\"
-    }
-    |"
+    this(
+      name: name,
+      version: version,
+      description: description,
+      author: author,
+      license: license,
+      defaultTarget: defaultTarget,
+      scripts: scripts,
+      sources: sources
+    )
+  }
 }
