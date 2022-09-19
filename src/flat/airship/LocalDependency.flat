@@ -1,0 +1,24 @@
+package flat/airship
+
+data class extends Dependency {
+  public construct(
+    visible String path
+  ) {
+    super()
+  }
+
+  override public getLocation() => path
+
+  override public toJsonKey() -> String {
+    return "\"#{path}\""
+  }
+
+  override public toJsonValue() -> String {
+    return "\"local\""
+  }
+
+  override public clone() =>
+    LocalDependency(
+      path
+    )
+}

@@ -1,0 +1,72 @@
+package flat/airship/services
+
+import flat/log/Logger
+
+import flat/io/File
+import flat/airship/Airship
+import flat/airship/InvalidScriptException
+import flat/airship/ExecutionFailureException
+
+class {
+  let static Logger log = Logger(RunScriptService.class)
+
+  public construct(private Airship airship) {}
+
+  public async runScript(String script) {
+    if (!airship.package.scripts.containsKey(script)) {
+      throw InvalidScriptException("Script command '#script' is not defined")
+    }
+
+    let workingDirectory = airship.flatJsonFile.getParent().location
+    let cmd = airship.package.scripts[script]
+
+    if (cmd?.class.isOfType(Array.class)) {
+      let Object[] array = (Object[])cmd
+
+      if (array.isEmpty) {
+        return
+      }
+
+      for (obj in array) {
+        if (obj.class.isOfType(Array.class)) {
+          let String[] c = (Array)obj
+
+          if (airship.debug) {
+            Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
+          } else {
+            let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
+
+            if (response.exitCode != 0) {
+              throw ExecutionFailureException("Script exited with exit code #response.exitCode")
+            }
+          }
+        } else if (obj.class.isOfType(String.class)) {
+          let String c = (String)obj
+
+          if (airship.debug) {
+            Console.writeLine(c)
+          } else {
+            let response = System.execute(c, workingDirectory, silent: airship.quietArg.enabled)
+
+            if (response.exitCode != 0) {
+              throw ExecutionFailureException("Script exited with exit code #response.exitCode")
+            }
+          }
+        }
+      }
+
+      return
+    }
+
+    if (airship.debug) {
+      Console.writeLine(cmd)
+      return
+    }
+
+    let response = System.execute(cmd.toString(), workingDirectory, silent: airship.quietArg.enabled)
+
+    if (response.exitCode != 0) {
+      throw ExecutionFailureException("Script exited with exit code #response.exitCode")
+    }
+  }
+}
