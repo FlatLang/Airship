@@ -1,8 +1,8 @@
 package flat/airship/services
 
 import flat/log/Logger
-
 import flat/io/File
+
 import flat/airship/Airship
 import flat/airship/InvalidCommandException
 import flat/airship/GitHubDependency

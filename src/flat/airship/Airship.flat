@@ -1,7 +1,6 @@
 package flat/airship
 
 import flat/log/Logger
-
 import flat/datastruct/HashMap
 import flat/datastruct/HashSet
 import flat/datastruct/Pair
