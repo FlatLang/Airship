@@ -30,6 +30,14 @@ class {
   ) {}
 
   public async setup() {
+    if (airship.uninstallArg.enabled) {
+      uninstall()
+    } else {
+      install()
+    }
+  }
+
+  async install() {
     let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
 
     if (dependencyService.isDependencyInstalled(airshipDependency)) {
@@ -131,8 +139,7 @@ class {
           FileWriter(file)
             :append("|
 
-              \# Flat
-              . \"#{envFile.nativeLocation}\"
+              #{getFlatUnixConfig(envFile)}
               |")
             :close()
         }
@@ -147,5 +154,84 @@ class {
           |")
       }
     }
+  }
+
+  async uninstall() {
+    let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
+
+    let flatHome = File(Airship.flatHome)
+    let pathValue = File(flatHome, "bin").nativeLocation
+
+    if (System.OS_INT == System.WINDOWS) {
+      setupLog.info("|
+        Removing Flat from PATH environment variable by modifying the HKEY_CURRENT_USER/Environment/PATH registry key
+
+        |")
+
+      RegEdit.setExternalVBSLocation("#{airshipDependency.getLocation()}/node_modules/regedit/vbs")
+
+      Path.removeFromUserPath(pathValue)
+    } else {
+      let files = Path.getUserShellRunCommandsFiles()
+
+      if (files.isNotEmpty) {
+        setupLog.info("|
+          Removing Flat configuration from the files located at:
+
+            #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
+
+          |")
+
+        let envFile = File(flatHome, "env")
+
+        for (file in files) {
+          let contents = FileReader(file).readAllContents()
+
+          if (!contents.contains(envFile.nativeLocation)) {
+            log.debug("Environment file doesn't contain any Flat configuration. Skipping")
+            continue
+          }
+
+          log.debug("Removing code to load env file \"#{envFile.nativeLocation}\" in file \"#{file.nativeLocation}\"")
+
+          let config = getFlatUnixConfig(envFile)
+          let index = contents.indexOf(config)
+
+          if (index == -1) {
+            log.warn("File \"#{file.nativeLocation}\" has modified Flat configuration. Skipping")
+            continue
+          }
+
+          let newContents = contents.substring(0, index) + contents.substring(index + config.count)
+
+          FileWriter(file)
+            :write(newContents)
+            :close()
+        }
+      }
+    }
+
+    log.debug("Deleting Flat home directory \"#{flatHome.nativeLocation}\"")
+
+    flatHome.delete(
+      recursive: true,
+      force: true
+    )
+
+    let reinstall = boolQuestion("|
+      Flat is uninstalled now. :(
+
+      Would you like to reinstall Flat? (Y/n): ")
+
+    if (reinstall) {
+      install()
+    }
+  }
+
+  getFlatUnixConfig(File envFile) -> String {
+    return "|
+      \# Flat
+      . \"#{envFile.nativeLocation}\"
+      |"
   }
 }
