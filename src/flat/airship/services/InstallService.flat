@@ -184,7 +184,7 @@ class {
     let response = System.execute(cmd, silent: airship.quietArg.enabled)
 
     if (response.exitCode != 0) {
-      throw FlatInstallationFailureException("Compilation failed")
+      throw FlatInstallationFailureException("Compilation failed: exit code #{response.exitCode}")
     }
 
     if (source.binaries.count > 0) {
