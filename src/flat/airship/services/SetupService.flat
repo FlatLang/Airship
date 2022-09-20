@@ -235,7 +235,11 @@ class {
       force: true
     )
 
-    setupLog.info("Flat is uninstalled now. :(")
+    if (airship.reinstallArg.enabled) {
+      setupLog.info("Flat is uninstalled now.")
+    } else {
+      setupLog.info("Flat is uninstalled now. :(")
+    }
   }
 
   async reinstall() {
