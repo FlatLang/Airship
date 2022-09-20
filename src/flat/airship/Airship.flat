@@ -47,6 +47,7 @@ class {
   visible CliArg linkArg = CliArg("--link", minCount: 0, maxCount: 1)
   visible CliArg debugArg = CliArg("--debug", ["-d"])
   visible CliArg quietArg = CliArg("--quiet", ["-q"])
+  visible CliArg flatcRuntimeArg = CliArg("--flatc-runtime", count: 1)
   visible CliArg versionCommand = CliArg("--version", count: 0)
   visible CliArg uninstallArg = CliArg("--uninstall")
   visible CliArg reinstallArg = CliArg("--reinstall")
@@ -140,7 +141,8 @@ class {
         debugArg,
         quietArg,
         uninstallArg,
-        reinstallArg
+        reinstallArg,
+        flatcRuntimeArg
       ]):parse(args),
       parent
     )
