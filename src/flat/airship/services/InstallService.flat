@@ -152,7 +152,7 @@ class {
           .getDependencyExclusions(dependency, installationTarget)
           .forEach({ cmd.addAll(["-x", "\"#_\""]) })
 
-        let dependencyExcludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(dependency, "test")
+        let dependencyExcludeSource = dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
         if (dependencyExcludeSource) {
           cmd.addAll(["-x", "\"#dependencyExcludeSource\""])
