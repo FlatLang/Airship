@@ -159,6 +159,14 @@ class {
         }
       })
 
+    source.defaultExports
+      .filter({ !_.staticImport })
+      .forEach({ cmd.addAll(["-default-import", "\"#{_.location}\""]) })
+
+    source.defaultExports
+      .filter({ _.staticImport })
+      .forEach({ cmd.addAll(["-default-static-import", "\"#{_.location}\""]) })
+
     topLevelDependencies.dependencies
       .filter({ _.isFlatPackage() })
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
