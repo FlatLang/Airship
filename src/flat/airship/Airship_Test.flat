@@ -60,7 +60,7 @@ testable class {
         cmd.addAll(["-x", "\"#_\""])
       })
 
-      let dependencyExcludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
+      let dependencyExcludeSource = airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
       if (dependencyExcludeSource) {
         cmd.addAll(["-x", "\"#dependencyExcludeSource\""])
