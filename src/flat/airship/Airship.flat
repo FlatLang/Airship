@@ -13,20 +13,7 @@ import flat/fucli/CliArg
 import flat/git/Git
 import flat/time/Timer
 
-import flat/airship/services/SetupService
-import flat/airship/services/DependencyService
-import flat/airship/services/AddDependencyService
-import flat/airship/services/RemoveDependencyService
-import flat/airship/services/InstallService
-import flat/airship/services/UninstallService
-import flat/airship/services/ReinstallService
-import flat/airship/services/UpdateService
-import flat/airship/services/CleanService
-import flat/airship/services/RunScriptService
-import flat/airship/services/InitService
-import flat/airship/services/CreateService
-import flat/airship/services/BinaryService
-import flat/airship/services/VersionService
+import flat/airship/services
 
 import flat/regex/RegexStringExtensions
 
