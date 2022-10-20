@@ -224,7 +224,7 @@ class {
 
             Timer timer = Timer().start()
 
-            let results = new TestResult[]
+            let results = TestResult[]
 
             test.runTests({
               results.add(_)
