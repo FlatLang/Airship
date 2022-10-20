@@ -66,9 +66,9 @@ class {
   visible AddDependencyService addDependencyService = AddDependencyService(this, installService)
   visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
 
-  let static HashMap<String, Airship> packageCache = HashMap()
+  static HashMap<String, Airship> packageCache = HashMap()
 
-  let static Logger log = Logger(Airship.class)
+  static Logger log = Logger(Airship.class)
 
   public static async main(String[] args) {
     try {

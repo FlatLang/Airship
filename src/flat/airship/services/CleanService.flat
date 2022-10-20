@@ -7,7 +7,7 @@ import flat/airship/Airship
 import flat/airship/PackageSource
 
 class {
-  let static Logger log = Logger(CleanService.class)
+  static Logger log = Logger(CleanService.class)
 
   public construct(private Airship airship) {}
 

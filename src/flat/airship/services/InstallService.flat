@@ -17,7 +17,7 @@ import flat/airship/ExecutionFailureException
 import flat/airship/FlatInstallationFailureException
 
 class {
-  let static Logger log = Logger(InstallService.class)
+  static Logger log = Logger(InstallService.class)
 
   public construct(
     private Airship airship,

@@ -12,7 +12,7 @@ import flat/airship/NpmDependency
 import flat/airship/LocalDependency
 
 class {
-  let static Logger log = Logger(UpdateService.class)
+  static Logger log = Logger(UpdateService.class)
 
   public construct(
     private Airship airship,

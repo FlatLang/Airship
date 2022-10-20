@@ -22,8 +22,8 @@ import static flat/colorizer/Colorizer
 import flat/extensions/SyntaxStringFunctions
 
 class {
-  let static Logger log = Logger(SetupService.class)
-  let static Logger setupLog = Logger(SetupService.class, showPrefix: false, lineLength: 65)
+  static Logger log = Logger(SetupService.class)
+  static Logger setupLog = Logger(SetupService.class, showPrefix: false, lineLength: 65)
 
   public construct(
     private Airship airship,
