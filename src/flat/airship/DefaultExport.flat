@@ -24,7 +24,7 @@ data class {
       var Bool staticImport = false
 
       if (map.containsKey("static")) {
-        let staticValue = (Bool)map["static"]
+        staticValue = (Bool)map["static"]
         staticImport = (Bool)staticValue
       }
 

@@ -15,7 +15,7 @@ import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
 
 class {
-  let static Logger log = Logger(CreateService.class)
+  static Logger log = Logger(CreateService.class)
 
   public construct(private Airship airship) {}
 

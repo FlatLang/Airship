@@ -3,7 +3,7 @@ package flat/airship
 import flat/log/Logger
 
 data class extends Dependency {
-  let static Logger log = Logger(NpmDependency.class)
+  static Logger log = Logger(NpmDependency.class)
 
   public construct(
     visible String packageName,

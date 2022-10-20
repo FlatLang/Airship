@@ -12,7 +12,7 @@ import flat/airship/Dependency
 import flat/extensions/SyntaxStringFunctions
 
 class {
-  let static Logger log = Logger(RemoveDependencyService.class)
+  static Logger log = Logger(RemoveDependencyService.class)
 
   public construct(
     private Airship airship,
