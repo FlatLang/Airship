@@ -219,7 +219,7 @@ class {
         [TestSuite [
         ]]
         class {
-          public static async main(String args[]) {
+          public static async main(String[] args) {
             let test = #{testSuiteFile.rootName}()
 
             Timer timer = Timer().start()

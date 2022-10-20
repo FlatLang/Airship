@@ -9,7 +9,7 @@ import novex/nest/TestResult
   Airship_Test
 ]]
 class {
-  public static async main(String args[]) {
+  public static async main(String[] args) {
     let test = Airship_TestSuite()
 
     Timer timer = Timer().start()
