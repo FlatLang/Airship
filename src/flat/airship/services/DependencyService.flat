@@ -79,7 +79,7 @@ class {
     return source.excludedSources.map({ "#{baseLocation}/#{_.location}" })
   }
 
-  public class DependenciesResponse {
+  class DependenciesResponse {
     construct(
       visible Array<Dependency> dependencies = Array(),
       visible Array<Dependency> dependenciesDownloaded = Array()
