@@ -222,13 +222,15 @@ class {
           public static async main(String[] args) {
             let test = #{testSuiteFile.rootName}()
 
-            Timer timer = Timer().start()
-
             let results = TestResult[]
+
+            Timer timer = Timer().start()
 
             test.runTests({
               results.add(_)
             })
+
+            timer.stop()
 
             let fancy = FancyOutputStream(headerPattern: \"/\\\\\")
 
@@ -241,9 +243,11 @@ class {
                 symmetrical: true
               )
 
-              unsuccessful.forEach({
-                Console.log(\"\#_\")
-              })
+              if (unsuccessful.count > 1 || results.last.success) {
+                unsuccessful.forEach({
+                  Console.log(\"\#_\")
+                })
+              }
             } else {
               fancy.writeHeader(
                 \"All \#results.count Successful\",
@@ -251,8 +255,6 @@ class {
                 symmetrical: true
               )
             }
-
-            timer.stop()
 
             Console.writeLine(\"Took \#{timer.duration}ms\")
 
