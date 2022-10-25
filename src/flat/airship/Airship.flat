@@ -147,11 +147,7 @@ class {
       Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
     }
 
-    if (parent) {
-      log.trace("Creating Airship with CLI args: #cli")
-    } else {
-      log.debug("Creating Airship with CLI args: #cli")
-    }
+    log.trace("Creating Airship with CLI args: #cli")
 
     flatJsonLocation = getFlatJsonLocation(fileArg.value)
     debug = debugArg.enabled
