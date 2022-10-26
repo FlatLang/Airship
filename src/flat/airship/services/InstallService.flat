@@ -79,6 +79,11 @@ class {
           "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
         ]
       }
+      "flat" => {
+        return [
+          "flatc",
+        ]
+      }
       default => {
         throw ExecutionFailureException("Invalid flatc runtime \"#{runtime}\"")
       }
