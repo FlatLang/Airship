@@ -134,7 +134,7 @@ class {
         let dependencyPackageFile = File(dependency.getLocation())
 
         if (dependencyPackageFile.exists && !dependency.isFlatPackage()) {
-          DependencyService.log.debug("Dependency \"#{dependency}\" is not a valid Flat package. Skipping")
+          log.debug("Dependency \"#{dependency}\" is not a valid Flat package. Skipping")
           return false
         } else {
           return true
@@ -160,7 +160,7 @@ class {
         let childship = Airship(args, airship)
 
         let packageSource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
-        DependencyService.log.trace("Found source for #{childship.packageLocation.normalizedLocation} with source #packageSource")
+        log.trace("Found source for #{childship.packageLocation.normalizedLocation} with source #packageSource")
 
         if (packageSource && recursive) {
           getDependenciesForSource(

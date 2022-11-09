@@ -310,7 +310,7 @@ class {
           })
         )
 
-        Airship.log.trace("
+        log.trace("
             Updating #{pair.key} source from #{source.toString().indent(tab: "  ", firstLine: false)}
             to #{updatedSource.toString().indent(tab: "  ", firstLine: false)}
           |")
@@ -325,9 +325,9 @@ class {
       package.sources
         .filter({ _.key != "main" })
         .forEach((pair) => {
-          Airship.log.trace("Propagating main source dependencies to #{pair.key} source dependencies")
+          log.trace("Propagating main source dependencies to #{pair.key} source dependencies")
           merge(package.mainSource.dependencies, pair.value.dependencies)
-          Airship.log.trace("Propagating main source defaultExports to #{pair.key} source defaultExports")
+          log.trace("Propagating main source defaultExports to #{pair.key} source defaultExports")
           merge(package.mainSource.defaultExports, pair.value.defaultExports)
         })
     }
