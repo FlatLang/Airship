@@ -64,7 +64,7 @@ class {
   visible InitService initService = InitService(this)
   visible CreateService createService = CreateService(this)
   visible VersionService versionService = VersionService(this)
-  visible GetPackageService getPackageService = GetPackageService(this, installService)
+  visible GetPackageService getPackageService = GetPackageService(this, installService, dependencyService)
   visible AddDependencyService addDependencyService = AddDependencyService(this, getPackageService, installService)
   visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
 

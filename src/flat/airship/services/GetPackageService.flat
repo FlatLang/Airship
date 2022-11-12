@@ -15,7 +15,8 @@ class {
 
   public construct(
     private Airship airship,
-    private InstallService installService
+    private InstallService installService,
+    private DependencyService dependencyService
   ) {}
 
   public async getPackages(String[] dependencyNames) {
@@ -26,10 +27,9 @@ class {
 
   public async getPackage(String dependencyName) {
     let dependency = Dependency.fromPackage(dependencyName)
-    let source = airship.package.defaultSource
 
-    if (source.dependencies.contains(dependency)) {
-      log.info("Dependency \"#{dependencyName}\" already downloaded")
+    if (dependencyService.isDependencyInstalled(dependency)) {
+      log.info("Package already exists")
 
       return
     }
