@@ -189,19 +189,19 @@ class {
   }
 
   isGitHubDependencyInstalled(GitHubDependency dependency) -> Bool {
-    let exists = File(dependency.getLocation()).getChild(".git").isDirectory
+    let exists = File(dependency.getLocation()).getChild(".git").exists
     log.trace("GitHub dependency #{dependency} is installed: #exists")
     return exists
   }
 
   isNpmDependencyInstalled(NpmDependency dependency) -> Bool {
-    let exists = File(dependency.getLocation()).isDirectory
+    let exists = File(dependency.getLocation()).exists
     log.trace("NPM dependency #{dependency} is installed: #exists")
     return exists
   }
 
   isLocalDependencyInstalled(LocalDependency dependency) -> Bool {
-    let exists = File(dependency.getLocation()).isDirectory
+    let exists = File(dependency.getLocation()).exists
     log.trace("Local dependency #{dependency} is installed: #exists")
     return exists
   }
