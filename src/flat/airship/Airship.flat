@@ -354,7 +354,7 @@ class {
     }
   }
 
-  async run() {
+  public async run() {
     if (!checkFlatHome()) {
       return
     }
