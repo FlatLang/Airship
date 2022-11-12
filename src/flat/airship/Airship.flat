@@ -40,6 +40,7 @@ class {
   visible CliArg reinstallArg = CliArg("--reinstall")
   visible CliArg setupCommand = CliArg("setup")
   visible CliArg installCommand = CliArg("install", ["i"], minCount: 0)
+  visible CliArg getCommand = CliArg("get", minCount: 0)
   visible CliArg uninstallCommand = CliArg("uninstall", minCount: 1)
   visible CliArg reinstallCommand = CliArg("reinstall", minCount: 0)
   visible CliArg updateCommand = CliArg("update", ["u"], minCount: 0)
@@ -63,7 +64,8 @@ class {
   visible InitService initService = InitService(this)
   visible CreateService createService = CreateService(this)
   visible VersionService versionService = VersionService(this)
-  visible AddDependencyService addDependencyService = AddDependencyService(this, installService)
+  visible GetPackageService getPackageService = GetPackageService(this, installService)
+  visible AddDependencyService addDependencyService = AddDependencyService(this, getPackageService, installService)
   visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
 
   static HashMap<String, Airship> packageCache = HashMap()
@@ -110,6 +112,7 @@ class {
       FuCli([
         setupCommand,
         installCommand,
+        getCommand,
         uninstallCommand,
         reinstallCommand,
         updateCommand,
@@ -364,6 +367,7 @@ class {
       match (command) {
         setupCommand => setupService.setup()
         installCommand => installService.install()
+        getCommand => getPackageService.getPackages(command.values)
         uninstallCommand => uninstallService.uninstall()
         reinstallCommand => reinstallService.reinstall()
         updateCommand => updateService.update()
