@@ -171,6 +171,9 @@ class {
     if (!airship.syncArg.enabled) {
       args.add("-parallel")
     }
+    if (airship.noReplaceLogLineArg.enabled) {
+      args.add("-no-replace-log-line")
+    }
 
     log.trace("Adding source exclusions: #{excludeSources}")
     excludeSources.forEach({ args.addAll(["-x", "\"#_\""]) })
