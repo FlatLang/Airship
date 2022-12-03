@@ -168,6 +168,9 @@ class {
       log.trace("Adding source locations: #{airship.targetRuntimeArg.value}")
       args.addAll(["-target-runtime", airship.targetRuntimeArg.value])
     }
+    if (!airship.syncArg.enabled) {
+      args.add("-parallel")
+    }
 
     log.trace("Adding source exclusions: #{excludeSources}")
     excludeSources.forEach({ args.addAll(["-x", "\"#_\""]) })

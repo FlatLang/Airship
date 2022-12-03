@@ -33,6 +33,7 @@ class {
   visible CliArg fileArg = CliArg("--file", ["-f"], count: 1)
   visible CliArg linkArg = CliArg("--link", minCount: 0, maxCount: 1)
   visible CliArg debugArg = CliArg("--debug", ["-d"])
+  visible CliArg syncArg = CliArg("--sync", ["-s"])
   visible CliArg quietArg = CliArg("--quiet", ["-q"])
   visible CliArg flatcRuntimeArg = CliArg("--flatc-runtime", count: 1)
   visible CliArg versionCommand = CliArg("--version", count: 0)
@@ -129,6 +130,7 @@ class {
         fileArg,
         linkArg,
         debugArg,
+        syncArg,
         quietArg,
         uninstallArg,
         reinstallArg,
