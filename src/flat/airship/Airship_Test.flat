@@ -43,7 +43,8 @@ testable class {
       "\"#{airship.packageLocation.normalizedLocation}/src\"",
       "-install-dir", "#{flatHome}/packages",
       "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
-      "-target", "js"
+      "-target", "js",
+      "-parallel",
     ]
 
     excludeSources.forEach({ cmd.addAll(["-x", "\"#_\""]) })
