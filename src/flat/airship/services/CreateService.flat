@@ -68,9 +68,9 @@ class {
             branches: [ \"master\" ]
 
         env:
-          LOGGING_DEFAULT_SHOW_PREFIX: true
-          LOGGING_DEFAULT_LOGGING_LEVEL: DEBUG
-          LOGGING_DEFAULT_SHOW_FORMATTING: true
+          LOGGING_defaultShowPrefix: true
+          LOGGING_defaultLoggingLevel: DEBUG
+          LOGGING_defaultShowFormatting: true
 
         jobs:
           build:

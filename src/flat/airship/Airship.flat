@@ -151,7 +151,7 @@ class {
     }
 
     if (quietArg.enabled) {
-      Logger.DEFAULT_LOGGING_LEVEL = Logger.OFF
+      Logger.defaultLoggingLevel = Logger.OFF
     }
 
     log.trace("Creating Airship with CLI args: #cli")
