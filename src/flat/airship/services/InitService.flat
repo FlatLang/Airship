@@ -154,7 +154,8 @@ class {
             #mainClassProperty\"source\": \"src\",
             \"dependencies\": {
               \"github:FlatLang/System\": \"master\",
-              \"github:FlatLang/IO\": \"master\"
+              \"github:FlatLang/IO\": \"master\",
+              \"github:FlatLang/Stream\": \"master\"
             }
           },
           \"test\": {
