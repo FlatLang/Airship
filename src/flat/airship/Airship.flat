@@ -289,53 +289,49 @@ class {
     Object[] source,
     Object[] dest
   ) {
-    if (!source || !dest) {
-      return
-    }
+    if (!source || !dest) return
 
-    source.forEach((value) => {
-      if (!dest.contains(value)) {
-        dest.add(value)
-      }
-    })
+    source.stream()
+      .filter({ !dest.contains(_) })
+      .forEach({ dest.add(_) })
   }
 
   loadSources() {
     package.sources
-      .mapValues((pair) => {
-        let source = pair.value
+      .mapValues({
+        let source = _x.value
         let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
-        let outFile = source.outFile ?: (pair.key == "test" ? "test.js" : "index.js")
+        let outFile = source.outFile ?: (_x.key == "test" ? "test.js" : "index.js")
         let updatedSource = source.copy(
           outDirectory: outDirectory,
           outFile: outFile,
           source: source.source ?: "src",
-          binaries: source.binaries.map((bin) => {
-            return bin.value ?
-              bin :
-              bin.copy(value: outDirectory + "/" + outFile)
+          binaries: source.binaries.map({
+            return _x.value
+              ? _x
+              : _x.copy(value: outDirectory + "/" + outFile)
           })
         )
 
         log.trace("
-            Updating #{pair.key} source from #{source.toString().indent(tab: "  ", firstLine: false)}
+            Updating #{_x.key} source from #{source.toString().indent(tab: "  ", firstLine: false)}
             to #{updatedSource.toString().indent(tab: "  ", firstLine: false)}
           |")
 
         return updatedSource
       })
-      .forEach((pair) => {
-        package.sources[pair.key] = pair.value
+      .forEach({
+        package.sources[_x.key] = _x.value
       })
 
     if (package.mainSource) {
       package.sources
         .filter({ _.key != "main" })
-        .forEach((pair) => {
-          log.trace("Propagating main source dependencies to #{pair.key} source dependencies")
-          merge(package.mainSource.dependencies, pair.value.dependencies)
-          log.trace("Propagating main source defaultExports to #{pair.key} source defaultExports")
-          merge(package.mainSource.defaultExports, pair.value.defaultExports)
+        .forEach({
+          log.trace("Propagating main source dependencies to #{_x.key} source dependencies")
+          merge(package.mainSource.dependencies, _x.value.dependencies)
+          log.trace("Propagating main source defaultExports to #{_x.key} source defaultExports")
+          merge(package.mainSource.defaultExports, _x.value.defaultExports)
         })
     }
 

@@ -130,26 +130,26 @@ class {
         }
       })
       .filter({ !_.class.isOfType(NpmDependency.class) })
-      .filter((dependency) => {
-        let dependencyPackageFile = File(dependency.getLocation())
+      .filter({
+        let dependencyPackageFile = File(_x.getLocation())
 
-        if (dependencyPackageFile.exists && !dependency.isFlatPackage()) {
-          log.debug("Dependency \"#{dependency}\" is not a valid Flat package. Skipping")
+        if (dependencyPackageFile.exists && !_x.isFlatPackage()) {
+          log.debug("Dependency \"#{_x}\" is not a valid Flat package. Skipping")
           return false
         } else {
           return true
         }
       })
-      :forEachParallel((dependency) => {
-        let dependencyPackageFile = File(dependency.getLocation())
+      :forEachParallel({
+        let dependencyPackageFile = File(_x.getLocation())
 
         if (download && !dependencyPackageFile.exists) {
-          installDependency(dependency)
-          response.dependenciesDownloaded.add(dependency)
+          installDependency(_x)
+          response.dependenciesDownloaded.add(_x)
         }
       })
-      :forEachAsync((dependency) => {
-        let dependencyPackageFile = File(dependency.getLocation())
+      :forEachAsync({
+        let dependencyPackageFile = File(_x.getLocation())
 
         let args = [
           "-f", dependencyPackageFile.normalizedLocation

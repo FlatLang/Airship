@@ -191,14 +191,14 @@ class {
     let dependencyLocations = HashMap<Dependency, Array<String>>()
     let excludeLocations = HashMap<Dependency, Array<String>>()
 
-    response.dependencies.forEachParallel((dependency) => {
-      if (!dependencyLocations.containsKey(dependency)) {
-        let dependencySourceLocations = dependencyService.getDependencySourceLocations(dependency, installationTarget)
+    response.dependencies.forEachParallel({
+      if (!dependencyLocations.containsKey(_x)) {
+        let dependencySourceLocations = dependencyService.getDependencySourceLocations(_x, installationTarget)
 
-        dependencyLocations[dependency] = Array()
+        dependencyLocations[_x] = Array()
 
         for (src in dependencySourceLocations) {
-           dependencyLocations[dependency].add(File(src).getCanonicalPath())
+           dependencyLocations[_x].add(File(src).getCanonicalPath())
         }
       }
     })
@@ -206,16 +206,16 @@ class {
     response.dependencies
       .filter({ _.isFlatPackage() })
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
-      .forEach((dependency) => {
+      .forEach({
         dependencyService
-          .getDependencySourceLocations(dependency)
+          .getDependencySourceLocations(_x)
           .forEach({ args.addAll(["-l", "\"#_\""]) })
 
         dependencyService
-          .getDependencyExclusions(dependency, installationTarget)
+          .getDependencyExclusions(_x, installationTarget)
           .forEach({ args.addAll(["-x", "\"#_\""]) })
 
-        let dependencyExcludeSource = dependencyService.getDependencySourceGlobLocation(dependency, "test")
+        let dependencyExcludeSource = dependencyService.getDependencySourceGlobLocation(_x, "test")
 
         if (dependencyExcludeSource) {
           args.addAll(["-x", "\"#dependencyExcludeSource\""])
@@ -233,8 +233,8 @@ class {
     topLevelDependencies.dependencies
       .filter({ _.isFlatPackage() })
       .filter({ dependencyLocations[_].none(l => canonicalSourceLocations.contains(l)) })
-      .forEach((dependency) => {
-        let childship = dependency.airship
+      .forEach({
+        let childship = _x.airship
         let dependencySource = childship.getSourceForPackage(installationTarget, childship.package.defaultSource)
 
         dependencySource?.defaultExports

@@ -85,11 +85,11 @@ testable class {
       "-main", "flat/airship/Airship"
     ])
 
-    let expected = cmd.map((arg, i) => {
-      if (i > 0) {
-        return '"' + arg.trimStart('"').trimEnd('"') + '"'
+    let expected = cmd.map({
+      if (_i > 0) {
+        return '"' + _x.trimStart('"').trimEnd('"') + '"'
       } else {
-        return arg
+        return _x
       }
     })
 
