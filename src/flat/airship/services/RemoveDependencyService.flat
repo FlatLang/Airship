@@ -63,12 +63,12 @@ class {
       return
     }
 
-    let dependencyLineStart = contents.lastIndexOf("\n", dependencyIndex)
+    let dependencyLitestart = contents.lastIndexOf("\n", dependencyIndex)
     let dependencyLineEnd = contents.indexOf("\n", dependencyIndex)
     let dependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLineEnd - 1, direction: -1)
-    let prevDependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLineStart - 1, direction: -1)
+    let prevDependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLitestart - 1, direction: -1)
 
-    var Int removeStart = dependencyLineStart
+    var Int removeStart = dependencyLitestart
     var Int removeEnd = dependencyEndIndex + 1
 
     if (contents[prevDependencyEndIndex] == ',') {

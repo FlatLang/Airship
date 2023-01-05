@@ -54,8 +54,8 @@ class {
     let depth = 4
 
     let startingWhitespace = if (containsExistingDependencies) {
-      let lineStart = contents.lastIndexOf("\n", start: lastContentIndex - 1) + 1
-      contents.substring(lineStart, contents.nextNonWhitespaceIndex(lineStart))
+      let litestart = contents.lastIndexOf("\n", start: lastContentIndex - 1) + 1
+      contents.substring(litestart, contents.nextNonWhitespaceIndex(litestart))
     } else {
       tab.repeat(depth)
     }

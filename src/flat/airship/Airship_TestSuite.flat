@@ -3,7 +3,7 @@ package flat/airship
 import flat/time/Timer
 import flat/io/FancyOutputStream
 
-import novex/nest/TestResult
+import flat/test/TestResult
 
 [TestSuite [
   Airship_Test
