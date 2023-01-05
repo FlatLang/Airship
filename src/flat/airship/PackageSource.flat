@@ -26,14 +26,14 @@ data class {
     let defaultExports = defaultExportsArray?.map({ DefaultExport(_) })
     let dependenciesValue = (Object)(map["dependencies"])
     let dependenciesMap = (HashMap)dependenciesValue
-    let dependencies = dependenciesMap.map(pair => Dependency.fromKeyValue((String)pair.key, (String)pair.value))
+    let dependencies = dependenciesMap.map({ Dependency.fromKeyValue((String)_x.key, (String)_x.value) })
 
     binaries = Array<PackageBinary>()
 
     if (map["bin"] && map["bin"].class.isOfType(HashMap.class)) {
       let HashMap<String, String> binMap = (HashMap)map["bin"]
 
-      binMap.forEach(entry => binaries.add(PackageBinary(entry.key, entry.value)))
+      binMap.forEach({ binaries.add(PackageBinary(_x.key, _x.value)) })
     } else if (map["bin"] && map["bin"].class.isOfType(String.class)) {
       let String binString = (String)map["bin"]
 

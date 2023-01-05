@@ -110,7 +110,7 @@ class {
         setupLog.info("|
           This path will then be added to your PATH environment variable by modifying the profile files located at:
 
-            #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
+            #{files.map({ underscore(_.nativeLocation) }).join("\n  ")}
 
           |")
 
@@ -193,7 +193,7 @@ class {
         log.trace("|
           Checking for Flat configuration in the files located at:
 
-            #{files.map(x => underscore(x.nativeLocation)).join("\n  ")}
+            #{files.map({ underscore(_.nativeLocation) }).join("\n  ")}
 
           |")
 
