@@ -296,6 +296,18 @@ class {
       .forEach({ dest.add(_) })
   }
 
+  getDefaultOutDirectory(String packageTarget) -> String {
+    match target {
+      "java" => {
+        match packageTarget {
+          "test" => return "dist/java/test"
+          default => return "dist/java/main"
+        }
+      }
+      default => return "dist"
+    }
+  }
+
   getDefaultOutFile(String packageTarget) -> String {
     match target {
       "js" => fallthrough
@@ -313,7 +325,7 @@ class {
     package.sources
       .mapValues({
         let source = _x.value
-        let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
+        let outDirectory = validateOutDirectory(source.outDirectory ?: getDefaultOutDirectory(_x.key))
         let outFile = source.outFile ?: getDefaultOutFile(_x.key)
         let updatedSource = source.copy(
           outDirectory: outDirectory,
