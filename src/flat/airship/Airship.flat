@@ -301,15 +301,13 @@ class {
       .mapValues({
         let source = _x.value
         let outDirectory = validateOutDirectory(source.outDirectory ?: "dist")
-        let outFile = source.outFile ?: (_x.key == "test" ? "test.js" : "index.js")
         let updatedSource = source.copy(
           outDirectory: outDirectory,
-          outFile: outFile,
           source: source.source ?: "src",
           binaries: source.binaries.map({
             return _x.value
               ? _x
-              : _x.copy(value: outDirectory + "/" + outFile)
+              : _x.copy(value: outDirectory + (source.outFile ? "/" + source.outFile : ""))
           })
         )
 

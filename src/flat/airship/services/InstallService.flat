@@ -157,8 +157,13 @@ class {
 
     args.addAll([
       "-install-dir", "#{Airship.flatHome}/packages",
-      "-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"
     ])
+
+    if (source.outFile) {
+      args.addAll(["-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"])
+    } else {
+      args.addAll(["-d", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}"])
+    }
 
     if (airship.target) {
       log.trace("Adding target: #{airship.target}")
