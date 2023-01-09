@@ -298,13 +298,7 @@ class {
 
   getDefaultOutDirectory(String packageTarget) -> String {
     match target {
-      "java" => {
-        match packageTarget {
-          "test" => return "dist/java/test"
-          default => return "dist/java/main"
-        }
-      }
-      default => return "dist"
+      default => return "dist/#{target}"
     }
   }
 
