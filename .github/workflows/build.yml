@@ -104,4 +104,4 @@ jobs:
       - name: Run Stability-Test
         working-directory: Stability-Test
         run: |
-          node dist/test.js
+          node dist/${{ matrix.target }}/test.js

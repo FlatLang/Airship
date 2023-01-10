@@ -5,9 +5,6 @@
   "author": "Braden Steffaniak",
   "license": "ISC",
   "defaultTarget": "es6",
-  "scripts": {
-    "test": "node dist/test.js"
-  },
   "sources": {
     "main": {
       "mainClass": "flat/airship/Airship",
