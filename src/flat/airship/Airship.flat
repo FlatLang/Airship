@@ -270,12 +270,11 @@ class {
       .filter({ _.extension.equals(".json") })
       .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) }) })
       .sort({
-        let extensionsToMatch = extensions.map({ ".#{_}." })
-        let extension1 = _a.fullExtension.toLowerCase()
-        let extension2 = _b.fullExtension.toLowerCase()
+        let extensions1 = _a.extensionNames.map({ _.toLowerCase() })
+        let extensions2 = _b.extensionNames.map({ _.toLowerCase() })
 
-        let extension1Index = extensionsToMatch.findIndex({ extension1.contains(_) }, defaultReturnValue: extensions.count)
-        let extension2Index = extensionsToMatch.findIndex({ extension2.contains(_) }, defaultReturnValue: extensions.count)
+        let extension1Index = extensions.findIndex({ extensions1.contains(_) }, defaultReturnValue: extensions.count)
+        let extension2Index = extensions.findIndex({ extensions2.contains(_) }, defaultReturnValue: extensions.count)
 
         var Int extension1Score = extension1Index
         var Int extension2Score = extension2Index
@@ -284,18 +283,18 @@ class {
           Sorting flat json overrides by extension:
             _a.name: #{_a.name}
             _b.name: #{_b.name}
-            extension1: #{extension1}
+            extensions1: #{extensions1}
             extension1Index: #{extension1Index}
             extension1Score: #{extension1Score}
-            extension2: #{extension2}
+            extensions2: #{extensions2}
             extension2Index: #{extension2Index}
             extension2Score: #{extension2Score}
-            extensionsToMatch: #{extensionsToMatch}
+            extensions: #{extensions}
           |")
 
         if (extension1Score == extension2Score) {
-          let howManyExtension1 = extensionsToMatch.howMany({ extension1.contains(_) })
-          let howManyExtension2 = extensionsToMatch.howMany({ extension2.contains(_) })
+          let howManyExtension1 = extensions.howMany({ extensions1.contains(_) })
+          let howManyExtension2 = extensions.howMany({ extensions2.contains(_) })
 
           extension1Score = howManyExtension1
           extension2Score = howManyExtension2
