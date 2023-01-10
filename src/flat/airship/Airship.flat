@@ -183,6 +183,8 @@ class {
 
         let overrideFlatJsonFiles = getFlatJsonOverrides(packageLocation)
 
+        log.debug("Found overrideFlatJsonFiles: #{overrideFlatJsonFiles}")
+
         for (overrideFlatJsonFile in overrideFlatJsonFiles) {
           let overrideMap = JsonDeserializer().parseObject(overrideFlatJsonFile)
 
@@ -247,7 +249,7 @@ class {
 
   getFlatJsonOverrides(File packageLocation) -> File[] => Array<File>() {
     let os = System.OS.toLowerCase()
-    let extensions = Array<String>():add(os)
+    let extensions = String[]
 
     if (target) {
       extensions.add(target)
@@ -257,6 +259,8 @@ class {
       }
     }
 
+    extensions.add(os)
+
     return searchFlatJsonOverrides(packageLocation, extensions)
   }
 
@@ -265,6 +269,52 @@ class {
       .filter({ _.name.startsWith("flat.") })
       .filter({ _.extension.equals(".json") })
       .filter({ _.extensionNames.skipLast(1).all({ extensions.contains(_) }) })
+      .sort({
+        let extensionsToMatch = extensions.map({ ".#{_}." })
+        let extension1 = _a.fullExtension.toLowerCase()
+        let extension2 = _b.fullExtension.toLowerCase()
+
+        let extension1Index = extensionsToMatch.findIndex({ extension1.contains(_) }, defaultReturnValue: extensions.count)
+        let extension2Index = extensionsToMatch.findIndex({ extension2.contains(_) }, defaultReturnValue: extensions.count)
+
+        var Int extension1Score = extension1Index
+        var Int extension2Score = extension2Index
+
+        log.trace("|
+          Sorting flat json overrides by extension:
+            _a.name: #{_a.name}
+            _b.name: #{_b.name}
+            extension1: #{extension1}
+            extension1Index: #{extension1Index}
+            extension1Score: #{extension1Score}
+            extension2: #{extension2}
+            extension2Index: #{extension2Index}
+            extension2Score: #{extension2Score}
+            extensionsToMatch: #{extensionsToMatch}
+          |")
+
+        if (extension1Score == extension2Score) {
+          let howManyExtension1 = extensionsToMatch.howMany({ extension1.contains(_) })
+          let howManyExtension2 = extensionsToMatch.howMany({ extension2.contains(_) })
+
+          extension1Score = howManyExtension1
+          extension2Score = howManyExtension2
+
+          log.trace("|
+              Same score, checking howMany matches:
+                extension1Score: #{extension1Score}
+                extension2Score: #{extension2Score}
+            |")
+        }
+
+        if (extension2Score > extension1Score) {
+          log.trace("Sorted values to [#{_b.name}, #{_a.name}]")
+        } else {
+          log.trace("Sorted values to [#{_a.name}, #{_b.name}]")
+        }
+
+        return extension2Score - extension1Score
+      })
 
   merge(
     HashMap<String, Object> source,
