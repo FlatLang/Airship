@@ -54,6 +54,7 @@ class {
 
         createBinFileForOs(bin, distFileLocation)
 
+        log.debug("Copying target file (#{targetFile.nativeLocation}) to dist (#{distFile.nativeLocation})")
         targetFile.copy(distFile)
 
         let nodeModules = File(airship.packageLocation, "node_modules")
