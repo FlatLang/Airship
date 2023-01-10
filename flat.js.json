@@ -1,16 +1,18 @@
 {
   "scripts": {
-    "test": "node dist/js/test.js"
+    "test": "node dist/test.js"
   },
   "sources": {
     "main": {
+      "outDirectory": "dist",
       "outFile": "airship.js",
       "dependencies": {},
       "bin": {
-        "airship": "dist/js/airship.js"
+        "airship": "dist/airship.js"
       }
     },
     "test": {
+      "outDirectory": "dist",
       "outFile": "test.js",
       "dependencies": {}
     }

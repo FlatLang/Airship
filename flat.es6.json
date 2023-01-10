@@ -1,11 +1,11 @@
 {
   "scripts": {
-    "test": "node dist/es6/test.js"
+    "test": "node dist/test.js"
   },
   "sources": {
     "main": {
       "bin": {
-        "airship": "dist/es6/airship.js"
+        "airship": "dist/airship.js"
       }
     }
   }
