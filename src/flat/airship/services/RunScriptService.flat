@@ -13,7 +13,7 @@ class {
   public construct(private Airship airship) {}
 
   public async runScript(String script) {
-    if (!airship.package.scripts.containsKey(script)) {
+    if (!airship.package?.scripts?.containsKey(script)) {
       throw InvalidScriptException("Script command '#script' is not defined")
     }
 
