@@ -14,7 +14,7 @@ class {
 
   public construct(
     private Airship airship,
-    private DependencyService dependencyService
+    private AssetService assetService
   ) {}
 
   public async create(String installationTarget) => create([installationTarget])
@@ -61,27 +61,7 @@ class {
           nodeModules.copy(File(distDirectory, nodeModules.name))
         }
 
-        airship.package.assets
-          .map({ File(airship.packageLocation, _) })
-          .forEachParallel((asset) => {
-            let distFile = File(distDirectory, asset.name)
-
-            log.debug("Copying assets #{distFile.isDirectory ? "directory" : "file"} (#{asset.nativeLocation}) to dist (#{distFile.nativeLocation})")
-
-            asset.copy(distFile)
-          })
-
-        dependencyService.getDependenciesForSource(target, target, source).dependencies
-          .map({ _.airship })
-          .filter({ _.package?.assets.isNotEmpty })
-          .flatMap(airship => airship.package.assets.map({ File(airship.packageLocation, _) }))
-          .forEachParallel((asset) => {
-            let distFile = File(distDirectory, asset.name)
-
-            log.debug("Copying assets #{distFile.isDirectory ? "directory" : "file"} (#{asset.nativeLocation}) to dist (#{distFile.nativeLocation})")
-
-            asset.copy(distFile)
-          })
+        assetService.copyAssets(distDirectory, target, source)
       }
     }
   }
