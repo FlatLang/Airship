@@ -27,6 +27,7 @@ class {
   visible File flatJsonFile
   visible File packageLocation
   visible String target
+  visible String targetRuntime
 
   visible CliArg targetArg = CliArg(
     name: "--target",
@@ -323,6 +324,7 @@ class {
 
         let String defaultTarget = (String)map["defaultTarget"]
         target = target ?: defaultTarget
+        targetRuntime = targetRuntimeArg.value ?: getDefaultTargetRuntime((String)map["defaultTargetRuntime"])
 
         let overrideFlatJsonFiles = getFlatJsonOverrides(packageLocation)
 
@@ -366,6 +368,14 @@ class {
     packageCache.removeWhere({ _.key == airship.flatJsonLocation })
   }
 
+  getDefaultTargetRuntime(String configDefaultRuntime) -> String => null {
+    if (configDefaultRuntime) return configDefaultRuntime
+
+    match target {
+      "js" => "es6" => return "node"
+    }
+  }
+
   getFlatJsonLocation(String location) -> String {
     if (!location) {
       return File("#{System.workingDirectory}/flat.json").normalizedLocation
@@ -403,6 +413,10 @@ class {
     }
 
     extensions.add(os)
+
+    if (targetRuntime) {
+      extensions.add(targetRuntime)
+    }
 
     return searchFlatJsonOverrides(packageLocation, extensions)
   }
