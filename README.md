@@ -17,7 +17,7 @@ COMMANDS:
     create        Create Flat package scaffoldings
     bin           Generate a Flat package binary file
     add           Add a Flat package as a dependency
-    remove        Remove a Flat package from the dependeciesh
+    remove        Remove a Flat package from the dependecies
     help, ?       Print help information
 
 OPTIONS:

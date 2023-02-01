@@ -179,7 +179,7 @@ class {
   visible CliArg removeDependencyCommand = CliArg(
     name: "remove",
     minCount: 1,
-    description: "Remove a Flat package from the dependeciesh"
+    description: "Remove a Flat package from the dependecies"
   )
 
   visible CliArg helpCommand = CliArg(
