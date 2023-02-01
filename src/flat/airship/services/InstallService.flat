@@ -1,20 +1,10 @@
 package flat/airship/services
 
-import flat/datastruct/HashMap
-import flat/log/Logger
-import flat/io/File
-import flat/git/Git
-
-import flat/airship/Airship
-import flat/airship/PackageSource
-import flat/airship/Dependency
-import flat/airship/GitHubDependency
-import flat/airship/LocalDependency
-import flat/airship/NpmDependency
-import flat/airship/InvalidCommandException
-import flat/airship/InvalidFlatJsonException
-import flat/airship/ExecutionFailureException
-import flat/airship/FlatInstallationFailureException
+import flat/airship
+import flat/datastruct
+import flat/log
+import flat/io
+import flat/git
 
 class {
   static Logger log = Logger(InstallService.class)
