@@ -191,7 +191,7 @@ class {
   visible DependencyService dependencyService = DependencyService(this)
   visible AssetService assetService = AssetService(this, dependencyService)
   visible BinaryService binaryService = BinaryService(this, assetService)
-  visible InstallService installService = InstallService(this, dependencyService, binaryService)
+  visible InstallService installService = InstallService(this, dependencyService, binaryService, assetService)
   visible UninstallService uninstallService = UninstallService(this, dependencyService)
   visible ReinstallService reinstallService = ReinstallService(this)
   visible UpdateService updateService = UpdateService(this, dependencyService, installService)

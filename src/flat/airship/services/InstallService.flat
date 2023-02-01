@@ -12,7 +12,8 @@ class {
   public construct(
     private Airship airship,
     private DependencyService dependencyService,
-    private BinaryService binaryService
+    private BinaryService binaryService,
+    private AssetService assetService
   ) {}
 
   public async install() {
@@ -86,6 +87,8 @@ class {
     }
   }
 
+  getOutputDirectory(PackageSource source) => File("#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}")
+
   public async getInstallCommand(String installationTarget, PackageSource source) -> String[] {
     return getFlatcExecutableCommand().plus(getFlatcExecutableArguments(installationTarget, source))
   }
@@ -150,9 +153,9 @@ class {
     ])
 
     if (source.outFile) {
-      args.addAll(["-o", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}/#{source.outFile}"])
+      args.addAll(["-o", "#{getOutputDirectory(source).location}/#{source.outFile}"])
     } else {
-      args.addAll(["-d", "#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}"])
+      args.addAll(["-d", getOutputDirectory(source).location])
     }
 
     if (airship.target) {
@@ -294,6 +297,8 @@ class {
     if (response.exitCode != 0) {
       throw FlatInstallationFailureException("Compilation failed: exit code #{response.exitCode}")
     }
+
+    assetService.copyAssets(getOutputDirectory(source), package, source)
 
     if (source.binaries.count > 0) {
       binaryService.create(package)
