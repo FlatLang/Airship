@@ -28,31 +28,164 @@ class {
   visible File packageLocation
   visible String target
 
-  visible CliArg targetArg = CliArg("--target", ["-t"], count: 1)
-  visible CliArg targetRuntimeArg = CliArg("--target-runtime", ["--runtime", "-r"], count: 1)
-  visible CliArg fileArg = CliArg("--file", ["-f"], count: 1)
-  visible CliArg linkArg = CliArg("--link", minCount: 0, maxCount: 1)
-  visible CliArg debugArg = CliArg("--debug", ["-d"])
-  visible CliArg syncArg = CliArg("--sync", ["-s"])
-  visible CliArg noReplaceLogLineArg = CliArg("--no-replace-log-line")
-  visible CliArg quietArg = CliArg("--quiet", ["-q"])
-  visible CliArg flatcRuntimeArg = CliArg("--flatc-runtime", count: 1)
-  visible CliArg versionCommand = CliArg("--version", count: 0)
-  visible CliArg uninstallArg = CliArg("--uninstall")
-  visible CliArg reinstallArg = CliArg("--reinstall")
-  visible CliArg setupCommand = CliArg("setup")
-  visible CliArg installCommand = CliArg("install", ["i"], minCount: 0)
-  visible CliArg getCommand = CliArg("get", minCount: 0)
-  visible CliArg uninstallCommand = CliArg("uninstall", minCount: 1)
-  visible CliArg reinstallCommand = CliArg("reinstall", minCount: 0)
-  visible CliArg updateCommand = CliArg("update", ["u"], minCount: 0)
-  visible CliArg cleanCommand = CliArg("clean", ["c"])
-  visible CliArg runCommand = CliArg("run", ["r"], minCount: 1)
-  visible CliArg initCommand = CliArg("init", minCount: 0, maxCount: 1)
-  visible CliArg createCommand = CliArg("create", minCount: 1)
-  visible CliArg binCommand = CliArg("bin")
-  visible CliArg addDependencyCommand = CliArg("add", minCount: 1)
-  visible CliArg removeDependencyCommand = CliArg("remove", minCount: 1)
+  visible CliArg targetArg = CliArg(
+    name: "--target",
+    aliases: ["-t"],
+    count: 1,
+    description: "Specify the target language to compile the package to"
+  )
+
+  visible CliArg targetRuntimeArg = CliArg(
+    name: "--target-runtime",
+    aliases: ["--runtime", "-r"],
+    count: 1,
+    description: "Specify the target runtime the binary will build for"
+  )
+
+  visible CliArg fileArg = CliArg(
+    name: "--file",
+    aliases: ["-f"],
+    count: 1,
+    description: "Specify an explicit flat.json file to reference when running the Airship commands"
+  )
+
+  visible CliArg linkArg = CliArg(
+    name: "--link",
+    minCount: 0,
+    maxCount: 1,
+    description: "Link the Flat package to the h location in #{flatHome}/packages"
+  )
+
+  visible CliArg debugArg = CliArg(
+    name: "--debug",
+    aliases: ["-d"],
+    description: "Print the command used to compile the package to stdout and exit"
+  )
+
+  visible CliArg syncArg = CliArg(
+    name: "--sync",
+    aliases: ["-s"],
+    description: "Run the compilation synchronously"
+  )
+
+  visible CliArg noReplaceLogLineArg = CliArg(
+    name: "--no-replace-log-line",
+    description: "Do not replace the logging info output after each line"
+  )
+
+  visible CliArg quietArg = CliArg(
+    name: "--quiet",
+    aliases: ["-q"],
+    description: "Do not print Airship log messages"
+  )
+
+  visible CliArg flatcRuntimeArg = CliArg(
+    name: "--flatc-runtime",
+    count: 1,
+    description: "Specify the Flat compiler runtime"
+  )
+
+  visible CliArg versionCommand = CliArg(
+    name: "--version",
+    count: 0,
+    description: "Print version info and exit"
+  )
+
+  visible CliArg uninstallArg = CliArg(
+    name: "--uninstall",
+    description: "Uninstall the Airship package"
+  )
+
+  visible CliArg reinstallArg = CliArg(
+    name: "--reinstall",
+    description: "Reinstall the Airship package"
+  )
+
+  visible CliArg setupCommand = CliArg(
+    name: "setup",
+    description: "Setup the Airship CLI"
+  )
+
+  visible CliArg installCommand = CliArg(
+    name: "install",
+    aliases: ["i"],
+    minCount: 0,
+    description: "Install a Flat package"
+  )
+
+  visible CliArg getCommand = CliArg(
+    name: "get",
+    minCount: 0,
+    description: "Install the specified dependency"
+  )
+
+  visible CliArg uninstallCommand = CliArg(
+    name: "uninstall",
+    minCount: 1,
+    description: "Uninstall a Flat package"
+  )
+
+  visible CliArg reinstallCommand = CliArg(
+    name: "reinstall",
+    minCount: 0,
+    description: "Reinstall a Flat package"
+  )
+
+  visible CliArg updateCommand = CliArg(
+    name: "update",
+    aliases: ["u"],
+    minCount: 0,
+    description: "Update a Flat package's dependencies"
+  )
+
+  visible CliArg cleanCommand = CliArg(
+    name: "clean",
+    aliases: ["c"],
+    description: "Clean a Flat package's out directory"
+  )
+
+  visible CliArg runCommand = CliArg(
+    name: "run",
+    aliases: ["r"],
+    minCount: 1,
+    description: "Run a script defined in a flat.json"
+  )
+
+  visible CliArg initCommand = CliArg(
+    name: "init",
+    minCount: 0,
+    maxCount: 1,
+    description: "Initialize a new Flat package, guided by a CLI prompt"
+  )
+
+  visible CliArg createCommand = CliArg(
+    name: "create",
+    minCount: 1,
+    description: "Create Flat package scaffoldings"
+  )
+
+  visible CliArg binCommand = CliArg(
+    name: "bin",
+    description: "Generate a Flat package binary file"
+  )
+
+  visible CliArg addDependencyCommand = CliArg(
+    name: "add",
+    minCount: 1,
+    description: "Add a Flat package as a dependency"
+  )
+
+  visible CliArg removeDependencyCommand = CliArg(
+    name: "remove",
+    minCount: 1,
+    description: "Remove a Flat package from the dependeciesh"
+  )
+
+  visible CliArg helpCommand = CliArg(
+    name: "help",
+    aliases: ["?"],
+    description: "Print help information"
+  )
 
   visible DependencyService dependencyService = DependencyService(this)
   visible BinaryService binaryService = BinaryService(this)
@@ -111,33 +244,38 @@ class {
     Airship parent = null
   ) {
     this(
-      FuCli([
-        setupCommand,
-        installCommand,
-        getCommand,
-        uninstallCommand,
-        reinstallCommand,
-        updateCommand,
-        cleanCommand,
-        runCommand,
-        initCommand,
-        createCommand,
-        binCommand,
-        addDependencyCommand,
-        removeDependencyCommand,
-        versionCommand,
-        targetArg,
-        targetRuntimeArg,
-        fileArg,
-        linkArg,
-        debugArg,
-        syncArg,
-        noReplaceLogLineArg,
-        quietArg,
-        uninstallArg,
-        reinstallArg,
-        flatcRuntimeArg
-      ]):parse(args),
+      FuCli(
+        [
+          setupCommand,
+          installCommand,
+          getCommand,
+          uninstallCommand,
+          reinstallCommand,
+          updateCommand,
+          cleanCommand,
+          runCommand,
+          initCommand,
+          createCommand,
+          binCommand,
+          addDependencyCommand,
+          removeDependencyCommand,
+          helpCommand,
+          versionCommand,
+          targetArg,
+          targetRuntimeArg,
+          fileArg,
+          linkArg,
+          debugArg,
+          syncArg,
+          noReplaceLogLineArg,
+          quietArg,
+          uninstallArg,
+          reinstallArg,
+          flatcRuntimeArg,
+        ],
+        description: "Flat's package manager",
+        usage: "airship {COMMAND} [OPTIONS]"
+      ):parse(args),
       parent
     )
   }
@@ -146,6 +284,11 @@ class {
     visible FuCli cli,
     visible Airship parent = null
   ) {
+    if (helpCommand.enabled) {
+      Console.log(cli.getHelpString())
+      System.exit(0)
+    }
+
     if (debugArg.enabled) {
       quietArg.enabled = true
     }
