@@ -1,13 +1,8 @@
 package flat/airship/services
 
-import flat/log/Logger
-import flat/io/File
-import flat/io/FileWriter
-
-import flat/airship/Airship
-import flat/airship/PackageBinary
-import flat/airship/InvalidScriptException
-import flat/airship/ExecutionFailureException
+import flat/airship
+import flat/log
+import flat/io
 
 import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
@@ -17,7 +12,10 @@ class {
 
   static File binDirectory = File(Airship.flatHome + "/bin")
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private DependencyService dependencyService
+  ) {}
 
   public async create(String installationTarget) => create([installationTarget])
 
@@ -62,6 +60,28 @@ class {
         if (nodeModules.isDirectory) {
           nodeModules.copy(File(distDirectory, nodeModules.name))
         }
+
+        airship.package.assets
+          .map({ File(airship.packageLocation, _) })
+          .forEachParallel((asset) => {
+            let distFile = File(distDirectory, asset.name)
+
+            log.debug("Copying assets #{distFile.isDirectory ? "directory" : "file"} (#{asset.nativeLocation}) to dist (#{distFile.nativeLocation})")
+
+            asset.copy(distFile)
+          })
+
+        dependencyService.getDependenciesForSource(target, target, source).dependencies
+          .map({ _.airship })
+          .filter({ _.package?.assets.isNotEmpty })
+          .flatMap(airship => airship.package.assets.map({ File(airship.packageLocation, _) }))
+          .forEachParallel((asset) => {
+            let distFile = File(distDirectory, asset.name)
+
+            log.debug("Copying assets #{distFile.isDirectory ? "directory" : "file"} (#{asset.nativeLocation}) to dist (#{distFile.nativeLocation})")
+
+            asset.copy(distFile)
+          })
       }
     }
   }
