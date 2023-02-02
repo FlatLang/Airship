@@ -102,16 +102,28 @@ class {
     description: "Reinstall the Airship CLI package"
   )
 
+  visible CliArg allHelpArg = CliArg(
+    name: "--all",
+    description: "Print all the help information recursively for a command or option"
+  )
+
   visible CliArg setupCommand = CliArg(
     name: "setup",
-    description: "Setup the Airship CLI"
+    description: "Setup the Airship CLI",
+    args: [
+      uninstallArg,
+      reinstallArg,
+    ]
   )
 
   visible CliArg installCommand = CliArg(
     name: "install",
     aliases: ["i"],
     minCount: 0,
-    description: "Install a Flat package"
+    description: "Install a Flat package",
+    args: [
+      linkArg,
+    ]
   )
 
   visible CliArg getCommand = CliArg(
@@ -185,7 +197,8 @@ class {
   visible CliArg helpCommand = CliArg(
     name: "help",
     aliases: ["?"],
-    description: "Print help information"
+    description: "Print help information",
+    args: [allHelpArg]
   )
 
   visible DependencyService dependencyService = DependencyService(this)
@@ -247,6 +260,7 @@ class {
   ) {
     this(
       FuCli(
+        "airship",
         [
           setupCommand,
           installCommand,
@@ -266,17 +280,13 @@ class {
           targetArg,
           targetRuntimeArg,
           fileArg,
-          linkArg,
           debugArg,
           syncArg,
           noReplaceLogLineArg,
           quietArg,
-          uninstallArg,
-          reinstallArg,
           flatcRuntimeArg,
         ],
-        description: "Flat's package manager",
-        usage: "airship {COMMAND} [OPTIONS]"
+        description: "Flat's package manager"
       ):parse(args),
       parent
     )
@@ -287,7 +297,21 @@ class {
     visible Airship parent = null
   ) {
     if (helpCommand.enabled) {
-      Console.log(cli.getHelpString())
+      if (allHelpArg.enabled) {
+        cli.usedArgs.removeFirstWhere({ _ == allHelpArg })
+        let separator = "-".repeat(80)
+        Console.log(
+          cli.getAllHelp()
+            .map((help) => {
+              let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""
+              return "#{header}```\n#{help.help}\n```"
+            })
+            .join("\n\n#{separator}\n\n")
+        )
+      } else {
+        Console.log(cli.getHelp().help)
+      }
+
       System.exit(0)
     }
 
