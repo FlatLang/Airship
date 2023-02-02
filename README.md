@@ -30,7 +30,7 @@ OPTIONS:
     --sync, -s                         Run the compilation synchronously
     --no-replace-log-line              Do not replace the logging info output after each line
     --quiet, -q                        Do not print Airship log messages
-    --uninstall                        Uninstall the Airship package
-    --reinstall                        Reinstall the Airship package
+    --uninstall                        Uninstall the Airship CLI package
+    --reinstall                        Reinstall the Airship CLI package
     --flatc-runtime                    Specify the Flat compiler runtime
 ```

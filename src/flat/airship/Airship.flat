@@ -94,12 +94,12 @@ class {
 
   visible CliArg uninstallArg = CliArg(
     name: "--uninstall",
-    description: "Uninstall the Airship package"
+    description: "Uninstall the Airship CLI package"
   )
 
   visible CliArg reinstallArg = CliArg(
     name: "--reinstall",
-    description: "Reinstall the Airship package"
+    description: "Reinstall the Airship CLI package"
   )
 
   visible CliArg setupCommand = CliArg(
