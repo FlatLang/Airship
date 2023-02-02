@@ -54,7 +54,7 @@ class {
     name: "--link",
     minCount: 0,
     maxCount: 1,
-    description: "Link the Flat package to the h location in #{flatHome}/packages"
+    description: "Link the Flat package to the location in #{flatHome}/packages"
   )
 
   visible CliArg debugArg = CliArg(
