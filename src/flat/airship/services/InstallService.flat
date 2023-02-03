@@ -17,7 +17,7 @@ class {
   ) {}
 
   public async install() {
-    if (airship.installCommand.values.isEmpty) {
+    if (airship.installCommand["installationTarget"].values.isEmpty) {
       if (airship.linkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
           airship.linkArg.value = "."
@@ -29,7 +29,7 @@ class {
       }
       install("main", install: true)
     } else {
-      for (package in airship.installCommand.values) {
+      for (package in airship.installCommand["installationTarget"].values) {
         install(package, install: true)
       }
     }
@@ -163,8 +163,8 @@ class {
       args.addAll(["-target", airship.target])
     }
     if (airship.targetRuntimeArg.enabled) {
-      log.trace("Adding source locations: #{airship.targetRuntimeArg.value}")
-      args.addAll(["-target-runtime", airship.targetRuntimeArg.value])
+      log.trace("Adding source locations: #{airship.targetRuntimeArg["runtime"].value}")
+      args.addAll(["-target-runtime", airship.targetRuntimeArg["runtime"].value])
     }
     if (!airship.syncArg.enabled) {
       args.add("-parallel")

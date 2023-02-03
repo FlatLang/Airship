@@ -23,10 +23,10 @@ class {
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
   public async update() {
-    if (airship.updateCommand.values.isEmpty) {
+    if (airship.updateCommand["installationTarget"].values.isEmpty) {
       updateLocalPackage("main")
     } else {
-      for (package in airship.updateCommand.values) {
+      for (package in airship.updateCommand["installationTarget"].values) {
         if (airship.getSourceForPackage(package)) {
           updateLocalPackage(package)
         } else {

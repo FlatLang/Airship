@@ -19,13 +19,11 @@ class {
 
   requireValue(String value) => value.trim().count > 0
 
-  public async init(String[] args) {
-    if (args.count == 1) {
-      init(args[0], File(args[0]))
-    } else if (args.count == 0) {
-      init(File(System.workingDirectory).name)
+  public async init(String location) {
+    if (location) {
+      init(location, File(location))
     } else {
-      throw ExecutionFailureException("Too many arguents passed to init command")
+      init(File(System.workingDirectory).name)
     }
   }
 

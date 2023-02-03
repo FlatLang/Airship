@@ -29,31 +29,53 @@ class {
   visible String target
   visible String targetRuntime
 
+  visible CliArg targetLanguageArg = CliArg(
+    name: "target",
+    description: "The language to compile the package to",
+    count: 1,
+    wildcard: true,
+    required: true
+  )
+
   visible CliArg targetArg = CliArg(
     name: "--target",
     aliases: ["-t"],
+    description: "Specify the target language to compile the package to",
+    args: [targetLanguageArg]
+  )
+
+  visible CliArg targetRuntimeValueArg = CliArg(
+    name: "runtime",
+    description: "The language runtime to compile the package for",
     count: 1,
-    description: "Specify the target language to compile the package to"
+    wildcard: true,
+    required: true
   )
 
   visible CliArg targetRuntimeArg = CliArg(
     name: "--target-runtime",
     aliases: ["--runtime", "-r"],
+    description: "Specify the target runtime the binary will build for",
+    args: [targetRuntimeValueArg]
+  )
+
+  visible CliArg fileLocationArg = CliArg(
+    name: "file",
+    description: "The flat.json file location to use",
     count: 1,
-    description: "Specify the target runtime the binary will build for"
+    wildcard: true,
+    required: true
   )
 
   visible CliArg fileArg = CliArg(
     name: "--file",
     aliases: ["-f"],
-    count: 1,
-    description: "Specify an explicit flat.json file to reference when running the Airship commands"
+    description: "Specify an explicit flat.json file to reference when running the Airship commands",
+    args: [fileLocationArg]
   )
 
   visible CliArg linkArg = CliArg(
     name: "--link",
-    minCount: 0,
-    maxCount: 1,
     description: "Link the Flat package to the location in #{flatHome}/packages"
   )
 
@@ -80,15 +102,22 @@ class {
     description: "Do not print Airship log messages"
   )
 
-  visible CliArg flatcRuntimeArg = CliArg(
-    name: "--flatc-runtime",
+  visible CliArg flatcRuntimeValueArg = CliArg(
+    name: "runtime",
+    description: "The flatc runtime to compile the package with",
     count: 1,
-    description: "Specify the Flat compiler runtime"
+    wildcard: true,
+    required: true
   )
 
-  visible CliArg versionCommand = CliArg(
+  visible CliArg flatcRuntimeArg = CliArg(
+    name: "--flatc-runtime",
+    description: "Specify the Flat compiler runtime",
+    args: [flatcRuntimeValueArg]
+  )
+
+  visible CliArg versionArg = CliArg(
     name: "--version",
-    count: 0,
     description: "Print version info and exit"
   )
 
@@ -104,7 +133,7 @@ class {
 
   visible CliArg allHelpArg = CliArg(
     name: "--all",
-    description: "Print all the help information recursively for a command or option"
+    description: "Print all the help information recursively for an argument, command, or option"
   )
 
   visible CliArg setupCommand = CliArg(
@@ -116,39 +145,75 @@ class {
     ]
   )
 
+  visible CliArg installationTargetArg = CliArg(
+    name: "installationTarget",
+    description: "The package installation target",
+    minCount: 0,
+    wildcard: true
+  )
+
   visible CliArg installCommand = CliArg(
     name: "install",
     aliases: ["i"],
-    minCount: 0,
     description: "Install a Flat package",
     args: [
+      installationTargetArg,
       linkArg,
     ]
   )
 
+  visible CliArg getDependencyArg = CliArg(
+    name: "dependency",
+    description: "The dependencies to get",
+    minCount: 1,
+    wildcard: true,
+    required: true
+  )
+
   visible CliArg getCommand = CliArg(
     name: "get",
+    description: "Install the specified dependency",
+    args: [getDependencyArg]
+  )
+
+  visible CliArg uninstallTargetArg = CliArg(
+    name: "installationTarget",
+    description: "The installation target to uninstall",
     minCount: 0,
-    description: "Install the specified dependency"
+    wildcard: true
   )
 
   visible CliArg uninstallCommand = CliArg(
     name: "uninstall",
-    minCount: 1,
-    description: "Uninstall a Flat package"
+    description: "Uninstall a Flat package",
+    args: [uninstallTargetArg]
+  )
+
+  visible CliArg reinstallTargetArg = CliArg(
+    name: "installationTarget",
+    description: "The installation target to reinstall",
+    minCount: 0,
+    wildcard: true
   )
 
   visible CliArg reinstallCommand = CliArg(
     name: "reinstall",
+    description: "Reinstall a Flat package",
+    args: [reinstallTargetArg]
+  )
+
+  visible CliArg updateTargetsArg = CliArg(
+    name: "installationTarget",
+    description: "The installation target to update the dependencies for",
     minCount: 0,
-    description: "Reinstall a Flat package"
+    wildcard: true
   )
 
   visible CliArg updateCommand = CliArg(
     name: "update",
     aliases: ["u"],
-    minCount: 0,
-    description: "Update a Flat package's dependencies"
+    description: "Update a Flat package's dependencies",
+    args: [updateTargetsArg]
   )
 
   visible CliArg cleanCommand = CliArg(
@@ -157,48 +222,113 @@ class {
     description: "Clean a Flat package's out directory"
   )
 
+  visible CliArg runScriptArg = CliArg(
+    name: "script",
+    description: "The name of the script to run",
+    minCount: 1,
+    wildcard: true,
+    required: true
+  )
+
   visible CliArg runCommand = CliArg(
     name: "run",
     aliases: ["r"],
-    minCount: 1,
-    description: "Run a script defined in a flat.json"
+    description: "Run a script defined in a flat.json",
+    args: [runScriptArg]
+  )
+
+  visible CliArg initPackageNameArg = CliArg(
+    name: "packageName",
+    description: "The name of the package to initialize",
+    wildcard: true
   )
 
   visible CliArg initCommand = CliArg(
     name: "init",
+    description: "Initialize a new Flat package, guided by a CLI prompt",
+    args: [initPackageNameArg]
+  )
+
+  visible CliArg createPipelineArg = CliArg(
+    name: "pipeline",
+    description: "The type of pipeline to create",
+    minCount: 1,
+    wildcard: true,
+    required: true
+  )
+
+  visible CliArg createPipelineArgArg = CliArg(
+    name: "pipelineArg",
+    description: "An argument to pass to the pipeline creation",
     minCount: 0,
-    maxCount: 1,
-    description: "Initialize a new Flat package, guided by a CLI prompt"
+    wildcard: true
   )
 
   visible CliArg createCommand = CliArg(
     name: "create",
-    minCount: 1,
-    description: "Create Flat package scaffoldings"
+    description: "Create Flat package scaffoldings",
+    args: [
+      createPipelineArg,
+      createPipelineArgArg,
+    ]
+  )
+
+  visible CliArg binaryArg = CliArg(
+    name: "binary",
+    description: "The name of the binary to create",
+    minCount: 0,
+    wildcard: true
   )
 
   visible CliArg binCommand = CliArg(
     name: "bin",
-    description: "Generate a Flat package binary file"
+    description: "Generate a Flat package binary file",
+    args: [binaryArg]
+  )
+
+  visible CliArg addDependencyArg = CliArg(
+    name: "dependency",
+    description: "The dependency to add",
+    minCount: 1,
+    wildcard: true,
+    required: true
   )
 
   visible CliArg addDependencyCommand = CliArg(
     name: "add",
+    description: "Add a Flat package as a dependency",
+    args: [addDependencyArg]
+  )
+
+  visible CliArg removeDependencyArg = CliArg(
+    name: "dependency",
+    description: "The dependency to remove",
     minCount: 1,
-    description: "Add a Flat package as a dependency"
+    wildcard: true,
+    required: true
   )
 
   visible CliArg removeDependencyCommand = CliArg(
     name: "remove",
-    minCount: 1,
-    description: "Remove a Flat package from the dependecies"
+    description: "Remove a Flat package from the dependecies",
+    args: [removeDependencyArg]
+  )
+
+  visible CliArg helpCommandArg = CliArg(
+    name: "name",
+    description: "The name of the argument, command, or option to get help on",
+    minCount: 0,
+    wildcard: true
   )
 
   visible CliArg helpCommand = CliArg(
     name: "help",
     aliases: ["?"],
     description: "Print help information",
-    args: [allHelpArg]
+    args: [
+      helpCommandArg,
+      allHelpArg,
+    ]
   )
 
   visible DependencyService dependencyService = DependencyService(this)
@@ -276,7 +406,7 @@ class {
           addDependencyCommand,
           removeDependencyCommand,
           helpCommand,
-          versionCommand,
+          versionArg,
           targetArg,
           targetRuntimeArg,
           fileArg,
@@ -325,9 +455,9 @@ class {
 
     log.trace("Creating Airship with CLI args: #cli")
 
-    flatJsonLocation = getFlatJsonLocation(fileArg.value)
+    flatJsonLocation = getFlatJsonLocation(fileArg["file"].value)
     debug = debugArg.enabled
-    target = targetArg.value
+    target = targetArg["target"].value
 
     flatJsonFile = File(flatJsonLocation).getCanonicalFileSync()
     packageLocation = flatJsonFile.getParent()
@@ -349,7 +479,7 @@ class {
 
         let String defaultTarget = (String)map["defaultTarget"]
         target = target ?: defaultTarget
-        targetRuntime = targetRuntimeArg.value ?: getDefaultTargetRuntime((String)map["defaultTargetRuntime"])
+        targetRuntime = targetRuntimeArg["runtime"].value ?: getDefaultTargetRuntime((String)map["defaultTargetRuntime"])
 
         let overrideFlatJsonFiles = getFlatJsonOverrides(packageLocation)
 
@@ -617,18 +747,18 @@ class {
       match (command) {
         setupCommand => setupService.setup()
         installCommand => installService.install()
-        getCommand => getPackageService.getPackages(command.values)
+        getCommand => getPackageService.getPackages(command["dependency"].values)
         uninstallCommand => uninstallService.uninstall()
         reinstallCommand => reinstallService.reinstall()
         updateCommand => updateService.update()
         cleanCommand => cleanService.clean()
-        runCommand => runScriptService.runScript(command.value)
-        initCommand => initService.init(command.values)
-        createCommand => createService.create(command.value, command.values.skip(1))
-        binCommand => binaryService.create(command.values)
-        versionCommand => versionService.getVersion()
-        addDependencyCommand => addDependencyService.addDependencies(command.values)
-        removeDependencyCommand => removeDependencyService.removeDependencies(command.values)
+        runCommand => runScriptService.runScripts(command["script"].values)
+        initCommand => initService.init(command["location"].value)
+        createCommand => createService.create(command["pipeline"].value, command["pipelineArg"].values)
+        binCommand => binaryService.create(command["binary"].values)
+        versionArg => versionService.getVersion()
+        addDependencyCommand => addDependencyService.addDependencies(command["dependency"].values)
+        removeDependencyCommand => removeDependencyService.removeDependencies(command["dependency"].values)
       }
     }
   }
@@ -677,7 +807,7 @@ class {
       args.addAll(["-t", target])
     }
     if (targetRuntimeArg.enabled) {
-      args.addAll(["-r", targetRuntimeArg.value])
+      args.addAll(["-r", targetRuntimeArg["runtime"].value])
     }
     if (quietArg.enabled) {
       args.add("-q")

@@ -13,13 +13,13 @@ class {
   public construct(private Airship airship) {}
 
   public async reinstall() {
-    if (airship.reinstallCommand.values.isEmpty) {
+    if (airship.reinstallCommand["installationTarget"].values.isEmpty) {
       airship.uninstallService.uninstall()
       airship.installService.install()
       return
     }
 
-    for (package in airship.reinstallCommand.values) {
+    for (package in airship.reinstallCommand["installationTarget"].values) {
       reinstall(package)
     }
   }
