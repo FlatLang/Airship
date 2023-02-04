@@ -448,6 +448,7 @@ class {
         let separator = "-".repeat(80)
         Console.log(
           cli.getAllHelp()
+            .filter({ _.arg.args?.isNotEmpty })
             .map((help) => {
               let sanitizedHelp = help.help.replace(flatHome, "$FLAT_HOME")
               let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""

@@ -49,28 +49,6 @@ OPTIONS:
 
 --------------------------------------------------------------------------------
 
-`airship setup --uninstall`
-
-```
-Uninstall the Airship CLI package
-
-USAGE:
-    airship setup --uninstall
-```
-
---------------------------------------------------------------------------------
-
-`airship setup --reinstall`
-
-```
-Reinstall the Airship CLI package
-
-USAGE:
-    airship setup --reinstall
-```
-
---------------------------------------------------------------------------------
-
 `airship install`
 
 ```
@@ -88,28 +66,6 @@ OPTIONS:
 
 --------------------------------------------------------------------------------
 
-`airship install <installationTarget>`
-
-```
-The package installation target
-
-USAGE:
-    airship install <installationTarget>
-```
-
---------------------------------------------------------------------------------
-
-`airship install --link`
-
-```
-Link the Flat package to the location in $FLAT_HOME/packages
-
-USAGE:
-    airship install --link
-```
-
---------------------------------------------------------------------------------
-
 `airship get`
 
 ```
@@ -120,17 +76,6 @@ USAGE:
 
 ARGUMENTS:
     <dependency>    The dependencies to get
-```
-
---------------------------------------------------------------------------------
-
-`airship get <dependency>`
-
-```
-The dependencies to get
-
-USAGE:
-    airship get <dependency>
 ```
 
 --------------------------------------------------------------------------------
@@ -152,28 +97,6 @@ OPTIONS:
 
 --------------------------------------------------------------------------------
 
-`airship uninstall <installationTarget>`
-
-```
-The installation target to uninstall
-
-USAGE:
-    airship uninstall <installationTarget>
-```
-
---------------------------------------------------------------------------------
-
-`airship uninstall --link`
-
-```
-Uninstall a symbolic link of the Flat package from the location in $FLAT_HOME/packages
-
-USAGE:
-    airship uninstall --link
-```
-
---------------------------------------------------------------------------------
-
 `airship reinstall`
 
 ```
@@ -187,28 +110,6 @@ ARGUMENTS:
 
 OPTIONS:
     --link    Link the Flat package to the location in $FLAT_HOME/packages
-```
-
---------------------------------------------------------------------------------
-
-`airship reinstall <installationTarget>`
-
-```
-The installation target to reinstall
-
-USAGE:
-    airship reinstall <installationTarget>
-```
-
---------------------------------------------------------------------------------
-
-`airship reinstall --link`
-
-```
-Link the Flat package to the location in $FLAT_HOME/packages
-
-USAGE:
-    airship reinstall --link
 ```
 
 --------------------------------------------------------------------------------
@@ -227,28 +128,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship update <installationTarget>`
-
-```
-The installation target to update the dependencies for
-
-USAGE:
-    airship update <installationTarget>
-```
-
---------------------------------------------------------------------------------
-
-`airship clean`
-
-```
-Clean a Flat package's out directory
-
-USAGE:
-    airship clean
-```
-
---------------------------------------------------------------------------------
-
 `airship run`
 
 ```
@@ -263,17 +142,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship run <script>`
-
-```
-The name of the script to run
-
-USAGE:
-    airship run <script>
-```
-
---------------------------------------------------------------------------------
-
 `airship init`
 
 ```
@@ -284,17 +152,6 @@ USAGE:
 
 ARGUMENTS:
     <packageName>    The name of the package to initialize
-```
-
---------------------------------------------------------------------------------
-
-`airship init <packageName>`
-
-```
-The name of the package to initialize
-
-USAGE:
-    airship init <packageName>
 ```
 
 --------------------------------------------------------------------------------
@@ -314,28 +171,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship create <pipeline>`
-
-```
-The type of pipeline to create
-
-USAGE:
-    airship create <pipeline>
-```
-
---------------------------------------------------------------------------------
-
-`airship create <pipelineArg>`
-
-```
-An argument to pass to the pipeline creation
-
-USAGE:
-    airship create <pipelineArg>
-```
-
---------------------------------------------------------------------------------
-
 `airship bin`
 
 ```
@@ -346,17 +181,6 @@ USAGE:
 
 ARGUMENTS:
     <binary>    The name of the binary to create
-```
-
---------------------------------------------------------------------------------
-
-`airship bin <binary>`
-
-```
-The name of the binary to create
-
-USAGE:
-    airship bin <binary>
 ```
 
 --------------------------------------------------------------------------------
@@ -375,17 +199,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship add <dependency>`
-
-```
-The dependency to add
-
-USAGE:
-    airship add <dependency>
-```
-
---------------------------------------------------------------------------------
-
 `airship remove`
 
 ```
@@ -396,17 +209,6 @@ USAGE:
 
 ARGUMENTS:
     <dependency>    The dependency to remove
-```
-
---------------------------------------------------------------------------------
-
-`airship remove <dependency>`
-
-```
-The dependency to remove
-
-USAGE:
-    airship remove <dependency>
 ```
 
 --------------------------------------------------------------------------------
@@ -428,39 +230,6 @@ OPTIONS:
 
 --------------------------------------------------------------------------------
 
-`airship help <name>`
-
-```
-The name of the argument, command, or option to get help on
-
-USAGE:
-    airship help <name>
-```
-
---------------------------------------------------------------------------------
-
-`airship help --all`
-
-```
-Print all the help information recursively for an argument, command, or option
-
-USAGE:
-    airship help --all
-```
-
---------------------------------------------------------------------------------
-
-`airship --version`
-
-```
-Print version info and exit
-
-USAGE:
-    airship --version
-```
-
---------------------------------------------------------------------------------
-
 `airship --target`
 
 ```
@@ -471,17 +240,6 @@ USAGE:
 
 ARGUMENTS:
     <target>    The language to compile the package to
-```
-
---------------------------------------------------------------------------------
-
-`airship --target <target>`
-
-```
-The language to compile the package to
-
-USAGE:
-    airship --target <target>
 ```
 
 --------------------------------------------------------------------------------
@@ -500,17 +258,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship --target-runtime <runtime>`
-
-```
-The language runtime to compile the package for
-
-USAGE:
-    airship --target-runtime <runtime>
-```
-
---------------------------------------------------------------------------------
-
 `airship --file`
 
 ```
@@ -525,61 +272,6 @@ ARGUMENTS:
 
 --------------------------------------------------------------------------------
 
-`airship --file <file>`
-
-```
-The flat.json file location to use
-
-USAGE:
-    airship --file <file>
-```
-
---------------------------------------------------------------------------------
-
-`airship --debug`
-
-```
-Print the command used to compile the package to stdout and exit
-
-USAGE:
-    airship --debug
-```
-
---------------------------------------------------------------------------------
-
-`airship --sync`
-
-```
-Run the compilation synchronously
-
-USAGE:
-    airship --sync
-```
-
---------------------------------------------------------------------------------
-
-`airship --no-replace-log-line`
-
-```
-Do not replace the logging info output after each line
-
-USAGE:
-    airship --no-replace-log-line
-```
-
---------------------------------------------------------------------------------
-
-`airship --quiet`
-
-```
-Do not print Airship log messages
-
-USAGE:
-    airship --quiet
-```
-
---------------------------------------------------------------------------------
-
 `airship --flatc-runtime`
 
 ```
@@ -590,15 +282,4 @@ USAGE:
 
 ARGUMENTS:
     <runtime>    The flatc runtime to compile the package with
-```
-
---------------------------------------------------------------------------------
-
-`airship --flatc-runtime <runtime>`
-
-```
-The flatc runtime to compile the package with
-
-USAGE:
-    airship --flatc-runtime <runtime>
 ```
