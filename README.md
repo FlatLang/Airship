@@ -1,10 +1,10 @@
 ```
 Flat's package manager
 
-Usage:
+USAGE:
     airship <command> [options]
 
-Commands:
+COMMANDS:
     setup         Setup the Airship CLI
     install, i    Install a Flat package
     get           Install the specified dependency
@@ -20,7 +20,7 @@ Commands:
     remove        Remove a Flat package from the dependecies
     help, ?       Print help information
 
-Options:
+OPTIONS:
     --version                          Print version info and exit
     --target, -t                       Specify the target language to compile the package to
     --target-runtime, --runtime, -r    Specify the target runtime the binary will build for
@@ -39,10 +39,10 @@ Options:
 ```
 Setup the Airship CLI
 
-Usage:
+USAGE:
     airship setup [options]
 
-Options:
+OPTIONS:
     --uninstall    Uninstall the Airship CLI package
     --reinstall    Reinstall the Airship CLI package
 ```
@@ -54,7 +54,7 @@ Options:
 ```
 Uninstall the Airship CLI package
 
-Usage:
+USAGE:
     airship setup --uninstall
 ```
 
@@ -65,7 +65,7 @@ Usage:
 ```
 Reinstall the Airship CLI package
 
-Usage:
+USAGE:
     airship setup --reinstall
 ```
 
@@ -76,13 +76,13 @@ Usage:
 ```
 Install a Flat package
 
-Usage:
+USAGE:
     airship install <installationTarget> [--link]
 
-Arguments:
+ARGUMENTS:
     <installationTarget>    The package installation target
 
-Options:
+OPTIONS:
     --link    Link the Flat package to the location in C:/Users/Brade/.flat/packages
 ```
 
@@ -93,7 +93,7 @@ Options:
 ```
 The package installation target
 
-Usage:
+USAGE:
     airship install <installationTarget>
 ```
 
@@ -104,7 +104,7 @@ Usage:
 ```
 Link the Flat package to the location in C:/Users/Brade/.flat/packages
 
-Usage:
+USAGE:
     airship install --link
 ```
 
@@ -115,10 +115,10 @@ Usage:
 ```
 Install the specified dependency
 
-Usage:
+USAGE:
     airship get <dependency>
 
-Arguments:
+ARGUMENTS:
     <dependency>    The dependencies to get
 ```
 
@@ -129,7 +129,7 @@ Arguments:
 ```
 The dependencies to get
 
-Usage:
+USAGE:
     airship get <dependency>
 ```
 
@@ -140,11 +140,14 @@ Usage:
 ```
 Uninstall a Flat package
 
-Usage:
-    airship uninstall <installationTarget>
+USAGE:
+    airship uninstall <installationTarget> [--link]
 
-Arguments:
+ARGUMENTS:
     <installationTarget>    The installation target to uninstall
+
+OPTIONS:
+    --link    Uninstall a symbolic link of the Flat package from the location in C:/Users/Brade/.flat/packages
 ```
 
 --------------------------------------------------------------------------------
@@ -154,8 +157,19 @@ Arguments:
 ```
 The installation target to uninstall
 
-Usage:
+USAGE:
     airship uninstall <installationTarget>
+```
+
+--------------------------------------------------------------------------------
+
+`airship uninstall --link`
+
+```
+Uninstall a symbolic link of the Flat package from the location in C:/Users/Brade/.flat/packages
+
+USAGE:
+    airship uninstall --link
 ```
 
 --------------------------------------------------------------------------------
@@ -165,11 +179,14 @@ Usage:
 ```
 Reinstall a Flat package
 
-Usage:
-    airship reinstall <installationTarget>
+USAGE:
+    airship reinstall <installationTarget> [--link]
 
-Arguments:
+ARGUMENTS:
     <installationTarget>    The installation target to reinstall
+
+OPTIONS:
+    --link    Link the Flat package to the location in C:/Users/Brade/.flat/packages
 ```
 
 --------------------------------------------------------------------------------
@@ -179,8 +196,19 @@ Arguments:
 ```
 The installation target to reinstall
 
-Usage:
+USAGE:
     airship reinstall <installationTarget>
+```
+
+--------------------------------------------------------------------------------
+
+`airship reinstall --link`
+
+```
+Link the Flat package to the location in C:/Users/Brade/.flat/packages
+
+USAGE:
+    airship reinstall --link
 ```
 
 --------------------------------------------------------------------------------
@@ -190,10 +218,10 @@ Usage:
 ```
 Update a Flat package's dependencies
 
-Usage:
+USAGE:
     airship update <installationTarget>
 
-Arguments:
+ARGUMENTS:
     <installationTarget>    The installation target to update the dependencies for
 ```
 
@@ -204,7 +232,7 @@ Arguments:
 ```
 The installation target to update the dependencies for
 
-Usage:
+USAGE:
     airship update <installationTarget>
 ```
 
@@ -215,7 +243,7 @@ Usage:
 ```
 Clean a Flat package's out directory
 
-Usage:
+USAGE:
     airship clean
 ```
 
@@ -226,10 +254,10 @@ Usage:
 ```
 Run a script defined in a flat.json
 
-Usage:
+USAGE:
     airship run <script>
 
-Arguments:
+ARGUMENTS:
     <script>    The name of the script to run
 ```
 
@@ -240,7 +268,7 @@ Arguments:
 ```
 The name of the script to run
 
-Usage:
+USAGE:
     airship run <script>
 ```
 
@@ -251,10 +279,10 @@ Usage:
 ```
 Initialize a new Flat package, guided by a CLI prompt
 
-Usage:
+USAGE:
     airship init <packageName>
 
-Arguments:
+ARGUMENTS:
     <packageName>    The name of the package to initialize
 ```
 
@@ -265,7 +293,7 @@ Arguments:
 ```
 The name of the package to initialize
 
-Usage:
+USAGE:
     airship init <packageName>
 ```
 
@@ -276,10 +304,10 @@ Usage:
 ```
 Create Flat package scaffoldings
 
-Usage:
+USAGE:
     airship create <arguments>
 
-Arguments:
+ARGUMENTS:
     <pipeline>       The type of pipeline to create
     <pipelineArg>    An argument to pass to the pipeline creation
 ```
@@ -291,7 +319,7 @@ Arguments:
 ```
 The type of pipeline to create
 
-Usage:
+USAGE:
     airship create <pipeline>
 ```
 
@@ -302,7 +330,7 @@ Usage:
 ```
 An argument to pass to the pipeline creation
 
-Usage:
+USAGE:
     airship create <pipelineArg>
 ```
 
@@ -313,10 +341,10 @@ Usage:
 ```
 Generate a Flat package binary file
 
-Usage:
+USAGE:
     airship bin <binary>
 
-Arguments:
+ARGUMENTS:
     <binary>    The name of the binary to create
 ```
 
@@ -327,7 +355,7 @@ Arguments:
 ```
 The name of the binary to create
 
-Usage:
+USAGE:
     airship bin <binary>
 ```
 
@@ -338,10 +366,10 @@ Usage:
 ```
 Add a Flat package as a dependency
 
-Usage:
+USAGE:
     airship add <dependency>
 
-Arguments:
+ARGUMENTS:
     <dependency>    The dependency to add
 ```
 
@@ -352,7 +380,7 @@ Arguments:
 ```
 The dependency to add
 
-Usage:
+USAGE:
     airship add <dependency>
 ```
 
@@ -363,10 +391,10 @@ Usage:
 ```
 Remove a Flat package from the dependecies
 
-Usage:
+USAGE:
     airship remove <dependency>
 
-Arguments:
+ARGUMENTS:
     <dependency>    The dependency to remove
 ```
 
@@ -377,7 +405,7 @@ Arguments:
 ```
 The dependency to remove
 
-Usage:
+USAGE:
     airship remove <dependency>
 ```
 
@@ -388,13 +416,13 @@ Usage:
 ```
 Print help information
 
-Usage:
+USAGE:
     airship help <name> [--all]
 
-Arguments:
+ARGUMENTS:
     <name>    The name of the argument, command, or option to get help on
 
-Options:
+OPTIONS:
     --all    Print all the help information recursively for an argument, command, or option
 ```
 
@@ -405,7 +433,7 @@ Options:
 ```
 The name of the argument, command, or option to get help on
 
-Usage:
+USAGE:
     airship help <name>
 ```
 
@@ -416,7 +444,7 @@ Usage:
 ```
 Print all the help information recursively for an argument, command, or option
 
-Usage:
+USAGE:
     airship help --all
 ```
 
@@ -427,7 +455,7 @@ Usage:
 ```
 Print version info and exit
 
-Usage:
+USAGE:
     airship --version
 ```
 
@@ -438,10 +466,10 @@ Usage:
 ```
 Specify the target language to compile the package to
 
-Usage:
+USAGE:
     airship --target <target>
 
-Arguments:
+ARGUMENTS:
     <target>    The language to compile the package to
 ```
 
@@ -452,7 +480,7 @@ Arguments:
 ```
 The language to compile the package to
 
-Usage:
+USAGE:
     airship --target <target>
 ```
 
@@ -463,10 +491,10 @@ Usage:
 ```
 Specify the target runtime the binary will build for
 
-Usage:
+USAGE:
     airship --target-runtime <runtime>
 
-Arguments:
+ARGUMENTS:
     <runtime>    The language runtime to compile the package for
 ```
 
@@ -477,7 +505,7 @@ Arguments:
 ```
 The language runtime to compile the package for
 
-Usage:
+USAGE:
     airship --target-runtime <runtime>
 ```
 
@@ -488,10 +516,10 @@ Usage:
 ```
 Specify an explicit flat.json file to reference when running the Airship commands
 
-Usage:
+USAGE:
     airship --file <file>
 
-Arguments:
+ARGUMENTS:
     <file>    The flat.json file location to use
 ```
 
@@ -502,7 +530,7 @@ Arguments:
 ```
 The flat.json file location to use
 
-Usage:
+USAGE:
     airship --file <file>
 ```
 
@@ -513,7 +541,7 @@ Usage:
 ```
 Print the command used to compile the package to stdout and exit
 
-Usage:
+USAGE:
     airship --debug
 ```
 
@@ -524,7 +552,7 @@ Usage:
 ```
 Run the compilation synchronously
 
-Usage:
+USAGE:
     airship --sync
 ```
 
@@ -535,7 +563,7 @@ Usage:
 ```
 Do not replace the logging info output after each line
 
-Usage:
+USAGE:
     airship --no-replace-log-line
 ```
 
@@ -546,7 +574,7 @@ Usage:
 ```
 Do not print Airship log messages
 
-Usage:
+USAGE:
     airship --quiet
 ```
 
@@ -557,10 +585,10 @@ Usage:
 ```
 Specify the Flat compiler runtime
 
-Usage:
+USAGE:
     airship --flatc-runtime <runtime>
 
-Arguments:
+ARGUMENTS:
     <runtime>    The flatc runtime to compile the package with
 ```
 
@@ -571,6 +599,6 @@ Arguments:
 ```
 The flatc runtime to compile the package with
 
-Usage:
+USAGE:
     airship --flatc-runtime <runtime>
 ```
