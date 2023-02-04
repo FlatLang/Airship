@@ -50,7 +50,7 @@ class {
   }
 
   async checkInstallCompiler() {
-    let runtime = airship.flatcRuntimeArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = airship.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" =>
@@ -94,7 +94,7 @@ class {
   }
 
   getFlatcExecutableCommand() -> String[] {
-    let runtime = airship.flatcRuntimeArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = airship.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" => {
@@ -126,7 +126,7 @@ class {
   }
 
   async getFlatcExecutableArguments(String installationTarget, PackageSource source) -> String[] {
-    let runtime = airship.flatcRuntimeArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = airship.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" =>
