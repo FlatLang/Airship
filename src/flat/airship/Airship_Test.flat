@@ -3,6 +3,7 @@ package flat/airship
 import flat/airship/Airship
 import flat/airship/Dependency
 import flat/fucli/FuCli.InvalidCliArgumentException
+import flat/fucli/FuCli.RequiredCliArgumentException
 import flat/airship/InvalidOutDirException
 import flat/io/File
 
@@ -97,11 +98,11 @@ testable class {
   }
 
   test `fails on invalid -f arg (only arg given, with no value)`() {
-    expect({ Airship(["-f"]) }).toThrow(InvalidCliArgumentException.class)
+    expect({ Airship(["-f"]) }).toThrow(RequiredCliArgumentException.class)
   }
 
   test `fails on invalid -f arg (last arg given, with no value)`() {
-    expect({ Airship(["--debug", "-f"]) }).toThrow(InvalidCliArgumentException.class)
+    expect({ Airship(["--debug", "-f"]) }).toThrow(RequiredCliArgumentException.class)
   }
 
   test `fails on absolute backslash outDirectory path`() {
@@ -154,9 +155,9 @@ testable class {
 
     expect(airship.target).toBe("js")
 
-    airship = Airship(["-t", "c"])
+    airship = Airship(["-t", "js"])
 
-    expect(airship.target).toBe("c")
+    expect(airship.target).toBe("js")
   }
 
   test async `can override flat.json location`() {
