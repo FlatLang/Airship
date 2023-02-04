@@ -14,6 +14,8 @@ class {
 
   public async reinstall() {
     if (airship.reinstallCommand["installationTarget"].values.isEmpty) {
+      airship.uninstallLinkArg.enabled = airship.reinstallLinkArg.enabled
+      airship.installLinkArg.enabled = airship.reinstallLinkArg.enabled
       airship.uninstallService.uninstall()
       airship.installService.install()
       return

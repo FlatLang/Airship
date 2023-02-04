@@ -17,9 +17,9 @@ class {
 
   public async uninstall() {
     if (airship.uninstallCommand["installationTarget"].values.isEmpty) {
-      if (airship.linkArg.enabled) {
+      if (airship.uninstallLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
-          airship.linkArg.value = "."
+          airship.uninstallLinkArg.value = "."
           uninstallGitPackage(gitUrl)
           return
         } else {

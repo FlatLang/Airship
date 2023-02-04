@@ -18,9 +18,9 @@ class {
 
   public async install() {
     if (airship.installCommand["installationTarget"].values.isEmpty) {
-      if (airship.linkArg.enabled) {
+      if (airship.installLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
-          airship.linkArg.value = "."
+          airship.installLinkArg.value = "."
           installAndLink(gitUrl)
           return
         } else {
@@ -40,7 +40,7 @@ class {
     Bool: install = false,
     Bool: installDependencies = true
   ) {
-    if (airship.linkArg.enabled) {
+    if (airship.installLinkArg.enabled) {
       installAndLink(package)
     } else if (package.contains(":")) {
       installDependency(Dependency.fromPackage(package), install, installDependencies)
@@ -339,7 +339,7 @@ class {
     let packageName = url.substring(start, end)
     let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
 
-    flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{airship.linkArg.value}"))
+    flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{airship.installLinkArg.value}"))
 
     postInstallPackage(flatPackageDir, install: false)
   }

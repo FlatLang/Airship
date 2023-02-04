@@ -74,11 +74,6 @@ class {
     args: [fileLocationArg]
   )
 
-  visible CliArg linkArg = CliArg(
-    name: "--link",
-    description: "Link the Flat package to the location in #{flatHome}/packages"
-  )
-
   visible CliArg debugArg = CliArg(
     name: "--debug",
     aliases: ["-d"],
@@ -152,28 +147,19 @@ class {
     wildcard: true
   )
 
+  visible CliArg installLinkArg = CliArg(
+    name: "--link",
+    description: "Link the Flat package to the location in #{flatHome}/packages"
+  )
+
   visible CliArg installCommand = CliArg(
     name: "install",
     aliases: ["i"],
     description: "Install a Flat package",
     args: [
       installationTargetArg,
-      linkArg,
+      installLinkArg,
     ]
-  )
-
-  visible CliArg getDependencyArg = CliArg(
-    name: "dependency",
-    description: "The dependencies to get",
-    minCount: 1,
-    wildcard: true,
-    required: true
-  )
-
-  visible CliArg getCommand = CliArg(
-    name: "get",
-    description: "Install the specified dependency",
-    args: [getDependencyArg]
   )
 
   visible CliArg uninstallTargetArg = CliArg(
@@ -183,10 +169,18 @@ class {
     wildcard: true
   )
 
+  visible CliArg uninstallLinkArg = CliArg(
+    name: "--link",
+    description: "Uninstall a symbolic link of the Flat package from the location in #{flatHome}/packages"
+  )
+
   visible CliArg uninstallCommand = CliArg(
     name: "uninstall",
     description: "Uninstall a Flat package",
-    args: [uninstallTargetArg]
+    args: [
+      uninstallTargetArg,
+      uninstallLinkArg,
+    ]
   )
 
   visible CliArg reinstallTargetArg = CliArg(
@@ -196,10 +190,18 @@ class {
     wildcard: true
   )
 
+  visible CliArg reinstallLinkArg = CliArg(
+    name: "--link",
+    description: "Link the Flat package to the location in #{flatHome}/packages"
+  )
+
   visible CliArg reinstallCommand = CliArg(
     name: "reinstall",
     description: "Reinstall a Flat package",
-    args: [reinstallTargetArg]
+    args: [
+      reinstallTargetArg,
+      reinstallLinkArg,
+    ]
   )
 
   visible CliArg updateTargetsArg = CliArg(
@@ -214,6 +216,20 @@ class {
     aliases: ["u"],
     description: "Update a Flat package's dependencies",
     args: [updateTargetsArg]
+  )
+
+  visible CliArg getDependencyArg = CliArg(
+    name: "dependency",
+    description: "The dependencies to get",
+    minCount: 1,
+    wildcard: true,
+    required: true
+  )
+
+  visible CliArg getCommand = CliArg(
+    name: "get",
+    description: "Install the specified dependency",
+    args: [getDependencyArg]
   )
 
   visible CliArg cleanCommand = CliArg(
