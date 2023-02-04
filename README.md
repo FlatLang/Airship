@@ -83,7 +83,7 @@ ARGUMENTS:
     <installationTarget>    The package installation target
 
 OPTIONS:
-    --link    Link the Flat package to the location in C:/Users/Brade/.flat/packages
+    --link    Link the Flat package to the location in $FLAT_HOME/packages
 ```
 
 --------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ USAGE:
 `airship install --link`
 
 ```
-Link the Flat package to the location in C:/Users/Brade/.flat/packages
+Link the Flat package to the location in $FLAT_HOME/packages
 
 USAGE:
     airship install --link
@@ -147,7 +147,7 @@ ARGUMENTS:
     <installationTarget>    The installation target to uninstall
 
 OPTIONS:
-    --link    Uninstall a symbolic link of the Flat package from the location in C:/Users/Brade/.flat/packages
+    --link    Uninstall a symbolic link of the Flat package from the location in $FLAT_HOME/packages
 ```
 
 --------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ USAGE:
 `airship uninstall --link`
 
 ```
-Uninstall a symbolic link of the Flat package from the location in C:/Users/Brade/.flat/packages
+Uninstall a symbolic link of the Flat package from the location in $FLAT_HOME/packages
 
 USAGE:
     airship uninstall --link
@@ -186,7 +186,7 @@ ARGUMENTS:
     <installationTarget>    The installation target to reinstall
 
 OPTIONS:
-    --link    Link the Flat package to the location in C:/Users/Brade/.flat/packages
+    --link    Link the Flat package to the location in $FLAT_HOME/packages
 ```
 
 --------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ USAGE:
 `airship reinstall --link`
 
 ```
-Link the Flat package to the location in C:/Users/Brade/.flat/packages
+Link the Flat package to the location in $FLAT_HOME/packages
 
 USAGE:
     airship reinstall --link

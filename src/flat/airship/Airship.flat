@@ -449,8 +449,9 @@ class {
         Console.log(
           cli.getAllHelp()
             .map((help) => {
+              let sanitizedHelp = help.help.replace(flatHome, "$FLAT_HOME")
               let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""
-              return "#{header}```\n#{help.help}\n```"
+              return "#{header}```\n#{sanitizedHelp}\n```"
             })
             .join("\n\n#{separator}\n\n")
         )
