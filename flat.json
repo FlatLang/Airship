@@ -23,7 +23,8 @@
         "github:FlatLang/RegEdit": "master",
         "github:FlatLang/Path": "master",
         "github:FlatLang/Npm-Client": "master",
-        "github:FlatLang/Stream": "master"
+        "github:FlatLang/Stream": "master",
+        "github:FlatLang/TerminalSize": "master"
       }
     },
     "test": {
