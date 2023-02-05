@@ -348,6 +348,11 @@ class {
     ]
   )
 
+  visible CliArg readmeCommand = CliArg(
+    name: "readme",
+    hidden: true
+  )
+
   visible DependencyService dependencyService = DependencyService(this)
   visible AssetService assetService = AssetService(this, dependencyService)
   visible BinaryService binaryService = BinaryService(this, assetService)
@@ -423,6 +428,7 @@ class {
           addDependencyCommand,
           removeDependencyCommand,
           helpCommand,
+          readmeCommand,
           versionArg,
           targetArg,
           targetRuntimeArg,
@@ -443,12 +449,13 @@ class {
     visible FuCli cli,
     visible Airship parent = null
   ) {
-    if (helpCommand.enabled) {
+    if (helpCommand.enabled || readmeCommand.enabled) {
       let dimensions = TerminalSize.getTerminalSize()
-      let columns = dimensions?.columns ?: 80
+      let columns = readmeCommand.enabled ? 80 : (dimensions?.columns ?: 80)
 
-      if (allHelpArg.enabled) {
+      if (allHelpArg.enabled || readmeCommand.enabled) {
         cli.usedArgs.removeFirstWhere({ _ == allHelpArg })
+        cli.usedArgs.removeWhere({ _ == readmeCommand })
 
         let separator = "-".repeat(Math.min(80, columns))
 
@@ -456,7 +463,12 @@ class {
           cli.getAllHelp(lineLength: columns)
             .filter({ _.arg.args?.isNotEmpty })
             .map((help) => {
-              let sanitizedHelp = help.help.replace(flatHome, "$FLAT_HOME")
+              var sanitizedHelp = help.help
+
+              if (readmeCommand.enabled) {
+                sanitizedHelp = sanitizedHelp.replace(flatHome, "$FLAT_HOME")
+              }
+
               let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""
               return "#{header}```\n#{sanitizedHelp}\n```"
             })
