@@ -450,8 +450,9 @@ class {
     visible Airship parent = null
   ) {
     if (helpCommand.enabled || readmeCommand.enabled) {
-      let dimensions = TerminalSize.getTerminalSize()
-      let columns = readmeCommand.enabled ? 80 : (dimensions?.columns ?: 80)
+      let columns = readmeCommand.enabled
+        ? 80
+        : TerminalSize.getTerminalSize(80, 0).columns
 
       if (allHelpArg.enabled || readmeCommand.enabled) {
         cli.usedArgs.removeFirstWhere({ _ == allHelpArg })
