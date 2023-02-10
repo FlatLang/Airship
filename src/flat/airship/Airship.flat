@@ -530,6 +530,8 @@ class {
         package = Package(map)
 
         loadSources()
+      } else {
+        log.debug("No flat.json file at location \"#{flatJsonFile.nativeLocation}\"")
       }
 
       packageCache[flatJsonFile.normalizedLocation] = this
