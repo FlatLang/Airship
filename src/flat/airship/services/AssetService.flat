@@ -27,6 +27,7 @@ class {
       })
 
     dependencyService.getDependenciesForSource(target, target, source).dependencies
+      .filter({ _.isFlatPackage() })
       .map({ _.airship })
       .filter({ _.package?.assets.isNotEmpty })
       .flatMap(airship => airship.package.assets.map({ File(airship.packageLocation, _) }))
