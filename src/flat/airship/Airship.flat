@@ -254,10 +254,9 @@ class {
     args: [runScriptArg]
   )
 
-  visible CliArg initPackageNameArg = CliArg(
+  visible CliArg initPackageNameArg = CliArg.wildcard(
     name: "packageName",
-    description: "The name of the package to initialize",
-    wildcard: true
+    description: "The name of the package to initialize"
   )
 
   visible CliArg initCommand = CliArg(
@@ -790,7 +789,7 @@ class {
         updateCommand => updateService.update()
         cleanCommand => cleanService.clean()
         runCommand => runScriptService.runScripts(command["script"].values)
-        initCommand => initService.init(command["location"].value)
+        initCommand => initService.init(command["packageName"].value)
         createCommand => createService.create(command["pipeline"].value, command["pipelineArg"].values)
         binCommand => binaryService.create(command["binary"].values)
         versionArg => versionService.getVersion()
