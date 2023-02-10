@@ -777,7 +777,10 @@ class {
       return
     }
 
-    let commands = cli.args.filter({ _.enabled })
+    let commands = cli.usedArgs.stream()
+      .filter({ !_.wildcard })
+      .filter({ !_.name.startsWith("-") })
+      .toArray()
 
     for (command in commands) {
       log.debug("Running command \"#command\"")
