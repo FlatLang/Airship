@@ -35,6 +35,7 @@ class {
     }
 
     for (target in targets) {
+      log.info("Generating binary for installation target: #{target}")
       log.debug("Creating bin structure in #{binDirectory.nativeLocation} for package #{airship.package.name} installation target \"#{target}\"")
 
       let source = airship.getSourceForPackage(target)
