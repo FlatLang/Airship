@@ -303,6 +303,8 @@ class {
     if (source.binaries.count > 0) {
       binaryService.create(package)
     }
+
+    log.debug("Successful installation")
   }
 
   public async installDependency(
