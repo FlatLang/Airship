@@ -35,7 +35,6 @@ class {
     }
 
     for (target in targets) {
-      log.info("Generating binary for installation target: #{target}")
       log.debug("Creating bin structure in #{binDirectory.nativeLocation} for package #{airship.package.name} installation target \"#{target}\"")
 
       let source = airship.getSourceForPackage(target)
@@ -46,6 +45,7 @@ class {
       }
 
       for (bin in source.binaries) {
+        log.info("Generating binary: #{bin.name}")
         let distDirectory = File(Airship.flatHome + "/bin/.dist/#{bin.name}"):mkdirs()
         let targetFile = File(airship.packageLocation, bin.value)
         let distFile = File(distDirectory, targetFile.name)
