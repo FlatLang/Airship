@@ -25,7 +25,8 @@
         "github:FlatLang/Npm-Client": "master",
         "github:FlatLang/Stream": "master",
         "github:FlatLang/TerminalSize": "master",
-        "github:FlatLang/Future": "master"
+        "github:FlatLang/Future": "master",
+        "github:FlatLang/Thread": "master"
       }
     },
     "test": {
