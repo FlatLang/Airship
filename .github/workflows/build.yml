@@ -87,7 +87,7 @@ jobs:
       - name: Run Airship Tests
         working-directory: Airship
         run: |
-          node dist/airship.js run test
+          node dist/airship.js run test -t ${{ matrix.target }}
 
       - name: Checkout Stability-Test
         uses: actions/checkout@master
