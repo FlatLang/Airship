@@ -23,10 +23,10 @@ class {
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
   public async update() {
-    if (airship.updateCommand["installationTarget"].values.isEmpty) {
+    if (airship.cliArgs.updateCommand["installationTarget"].values.isEmpty) {
       updateLocalPackage("main")
     } else {
-      for (package in airship.updateCommand["installationTarget"].values) {
+      for (package in airship.cliArgs.updateCommand["installationTarget"].values) {
         if (airship.getSourceForPackage(package)) {
           updateLocalPackage(package)
         } else {
@@ -76,7 +76,7 @@ class {
     GitHubDependency dependency,
     Bool: build = true
   ) -> Bool {
-    if (!airship.quietArg.enabled) {
+    if (!airship.cliArgs.quietArg.enabled) {
       log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})...")
     }
 

@@ -1,11 +1,8 @@
 package flat/airship/services
 
+import flat/airship
 import flat/log/Logger
 import flat/io/File
-
-import flat/airship/Airship
-import flat/airship/InvalidCommandException
-import flat/airship/Dependency
 
 class {
   static Logger log = Logger(UninstallService.class)
@@ -16,10 +13,10 @@ class {
   ) {}
 
   public async uninstall() {
-    if (airship.uninstallCommand["installationTarget"].values.isEmpty) {
-      if (airship.uninstallLinkArg.enabled) {
+    if (airship.cliArgs.uninstallCommand["installationTarget"].values.isEmpty) {
+      if (airship.cliArgs.uninstallLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
-          airship.uninstallLinkArg.value = "."
+          airship.cliArgs.uninstallLinkArg.value = "."
           uninstallGitPackage(gitUrl)
           return
         } else {
@@ -30,7 +27,7 @@ class {
       throw InvalidCommandException("Invalid uninstall command without a value")
     }
 
-    for (package in airship.uninstallCommand["installationTarget"].values) {
+    for (package in airship.cliArgs.uninstallCommand["installationTarget"].values) {
       uninstall(package)
     }
   }

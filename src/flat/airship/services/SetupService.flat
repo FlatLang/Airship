@@ -32,9 +32,9 @@ class {
   ) {}
 
   public async setup() {
-    if (airship.reinstallArg.enabled) {
+    if (airship.cliArgs.reinstallArg.enabled) {
       reinstall()
-    } else if (airship.uninstallArg.enabled) {
+    } else if (airship.cliArgs.uninstallArg.enabled) {
       uninstall()
     } else {
       install()
@@ -235,7 +235,7 @@ class {
       force: true
     )
 
-    if (airship.reinstallArg.enabled) {
+    if (airship.cliArgs.reinstallArg.enabled) {
       setupLog.info("Flat is uninstalled now.")
     } else {
       setupLog.info("Flat is uninstalled now. :(")
