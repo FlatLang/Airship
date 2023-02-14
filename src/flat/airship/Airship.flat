@@ -124,39 +124,7 @@ class {
     visible FuCli cli,
     visible Airship parent = null
   ) {
-    if (cliArgs.helpCommand.enabled || cliArgs.readmeCommand.enabled) {
-      let readmeColumnCount = 95
-      let columns = cliArgs.readmeCommand.enabled
-        ? readmeColumnCount
-        : TerminalSize.getTerminalSize(80, 0).columns
-
-      if (cliArgs.allHelpArg.enabled || cliArgs.readmeCommand.enabled) {
-        cli.usedArgs.removeFirstWhere({ _ == cliArgs.allHelpArg })
-        cli.usedArgs.removeWhere({ _ == cliArgs.readmeCommand })
-
-        let separator = "-".repeat(Math.min(readmeColumnCount, columns))
-
-        Console.log(
-          cli.getAllHelp(lineLength: columns)
-            .filter({ _.arg.args?.isNotEmpty })
-            .map((help) => {
-              var sanitizedHelp = help.help
-
-              if (cliArgs.readmeCommand.enabled) {
-                sanitizedHelp = sanitizedHelp.replace(flatHome, "$FLAT_HOME")
-              }
-
-              let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""
-              return "#{header}```\n#{sanitizedHelp}\n```"
-            })
-            .join("\n\n#{separator}\n\n")
-        )
-      } else {
-        Console.log(cli.getHelp(lineLength: columns).help)
-      }
-
-      System.exit(0)
-    }
+    checkHelpCommand()
 
     if (cliArgs.debugArg.enabled) {
       cliArgs.quietArg.enabled = true
@@ -236,6 +204,42 @@ class {
 
   public static clearCache(Airship airship) {
     packageCache.removeWhere({ _.key == airship.flatJsonLocation })
+  }
+
+  checkHelpCommand() {
+    if (cliArgs.helpCommand.enabled || cliArgs.readmeCommand.enabled) {
+      let readmeColumnCount = 95
+      let columns = cliArgs.readmeCommand.enabled
+        ? readmeColumnCount
+        : TerminalSize.getTerminalSize(80, 0).columns
+
+      if (cliArgs.allHelpArg.enabled || cliArgs.readmeCommand.enabled) {
+        cli.usedArgs.removeFirstWhere({ _ == cliArgs.allHelpArg })
+        cli.usedArgs.removeWhere({ _ == cliArgs.readmeCommand })
+
+        let separator = "-".repeat(Math.min(readmeColumnCount, columns))
+
+        Console.log(
+          cli.getAllHelp(lineLength: columns)
+            .filter({ _.arg.args?.isNotEmpty })
+            .map((help) => {
+              var sanitizedHelp = help.help
+
+              if (cliArgs.readmeCommand.enabled) {
+                sanitizedHelp = sanitizedHelp.replace(flatHome, "$FLAT_HOME")
+              }
+
+              let header = help.breadcrumbs.count > 1 ? "`#{help.breadcrumbs.join(" ")}`\n\n" : ""
+              return "#{header}```\n#{sanitizedHelp}\n```"
+            })
+            .join("\n\n#{separator}\n\n")
+        )
+      } else {
+        Console.log(cli.getHelp(lineLength: columns).help)
+      }
+
+      System.exit(0)
+    }
   }
 
   getDefaultTargetRuntime(String configDefaultRuntime) -> String => null {
