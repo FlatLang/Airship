@@ -128,7 +128,6 @@ class {
 
   visible CliArg installCommand = CliArg(
     name: "install",
-    aliases: ["i"],
     description: "Install a Flat package",
     args: [
       installationTargetArg,
@@ -187,7 +186,6 @@ class {
 
   visible CliArg updateCommand = CliArg(
     name: "update",
-    aliases: ["u"],
     description: "Update a Flat package's dependencies",
     args: [updateTargetsArg]
   )
@@ -208,7 +206,6 @@ class {
 
   visible CliArg cleanCommand = CliArg(
     name: "clean",
-    aliases: ["c"],
     description: "Clean a Flat package's out directory"
   )
 
@@ -222,7 +219,6 @@ class {
 
   visible CliArg runCommand = CliArg(
     name: "run",
-    aliases: ["r"],
     description: "Run a script defined in a flat.json",
     args: [runScriptArg]
   )
