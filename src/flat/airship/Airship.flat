@@ -125,7 +125,7 @@ class {
     visible Airship parent = null
   ) {
     if (cliArgs.helpCommand.enabled || cliArgs.readmeCommand.enabled) {
-      let readmeColumnCount = 100
+      let readmeColumnCount = 95
       let columns = cliArgs.readmeCommand.enabled
         ? readmeColumnCount
         : TerminalSize.getTerminalSize(80, 0).columns
