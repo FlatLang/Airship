@@ -1,16 +1,16 @@
 package flat/airship/services
 
-import flat/log/Logger
-import flat/io/File
-
-import flat/airship/Airship
-import flat/airship/InvalidScriptException
-import flat/airship/ExecutionFailureException
+import flat/airship
+import flat/log
+import flat/io
 
 class {
   static Logger log = Logger(RunScriptService.class)
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private AirshipCli cliArgs
+  ) {}
 
   public async runScripts(String[] scripts) {
     scripts.forEachAsync({ runScript(_) })
@@ -38,7 +38,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c[0] + " " + c.skip(1).map({ "\"#{_}\"" }).join(" "))
           } else {
-            let response = System.execute(c, workingDirectory, silent: airship.cliArgs.quietArg.enabled)
+            let response = System.execute(c, workingDirectory, silent: cliArgs.quietArg.enabled)
 
             if (response.exitCode != 0) {
               throw ExecutionFailureException("Script exited with exit code #response.exitCode")
@@ -50,7 +50,7 @@ class {
           if (airship.debug) {
             Console.writeLine(c)
           } else {
-            let response = System.execute(c, workingDirectory, silent: airship.cliArgs.quietArg.enabled)
+            let response = System.execute(c, workingDirectory, silent: cliArgs.quietArg.enabled)
 
             if (response.exitCode != 0) {
               throw ExecutionFailureException("Script exited with exit code #response.exitCode")
@@ -67,7 +67,7 @@ class {
       return
     }
 
-    let response = System.execute(cmd.toString(), workingDirectory, silent: airship.cliArgs.quietArg.enabled)
+    let response = System.execute(cmd.toString(), workingDirectory, silent: cliArgs.quietArg.enabled)
 
     if (response.exitCode != 0) {
       throw ExecutionFailureException("Script exited with exit code #response.exitCode")

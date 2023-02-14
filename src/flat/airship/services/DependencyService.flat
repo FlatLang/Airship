@@ -11,7 +11,8 @@ class {
   static Logger log = Logger(DependencyService.class)
 
   public construct(
-    private Airship airship
+    private Airship airship,
+    private AirshipCli cliArgs
   ) {}
 
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
@@ -222,7 +223,7 @@ class {
     let response = Npm.install(
       packageToInstall,
       workingDirectory: airship.packageLocation.location,
-      silent: airship.cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+      silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
     )
 
     if (response.exitCode != 0) {
@@ -249,7 +250,7 @@ class {
       depth: 1,
       branch,
       outputDirectory: flatPackageDir.normalizedLocation,
-      silent: airship.cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+      silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
     )
 
     if (response.exitCode != 0) {
@@ -280,7 +281,7 @@ class {
     let response = Npm.uninstall(
       dependency.packageName,
       workingDirectory: airship.packageLocation.location,
-      silent: airship.cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+      silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
     )
 
     if (response.exitCode != 0) {

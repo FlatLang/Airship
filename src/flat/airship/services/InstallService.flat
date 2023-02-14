@@ -11,16 +11,17 @@ class {
 
   public construct(
     private Airship airship,
+    private AirshipCli cliArgs,
     private DependencyService dependencyService,
     private BinaryService binaryService,
     private AssetService assetService
   ) {}
 
   public async install() {
-    if (airship.cliArgs.installCommand["installationTarget"].values.isEmpty) {
-      if (airship.cliArgs.installLinkArg.enabled) {
+    if (cliArgs.installCommand["installationTarget"].values.isEmpty) {
+      if (cliArgs.installLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
-          airship.cliArgs.installLinkArg.value = "."
+          cliArgs.installLinkArg.value = "."
           installAndLink(gitUrl)
           return
         } else {
@@ -29,7 +30,7 @@ class {
       }
       install("main", install: true)
     } else {
-      for (package in airship.cliArgs.installCommand["installationTarget"].values) {
+      for (package in cliArgs.installCommand["installationTarget"].values) {
         install(package, install: true)
       }
     }
@@ -40,7 +41,7 @@ class {
     Bool: install = false,
     Bool: installDependencies = true
   ) {
-    if (airship.cliArgs.installLinkArg.enabled) {
+    if (cliArgs.installLinkArg.enabled) {
       installAndLink(package)
     } else if (package.contains(":")) {
       installDependency(Dependency.fromPackage(package), install, installDependencies)
@@ -50,7 +51,7 @@ class {
   }
 
   async checkInstallCompiler() {
-    let runtime = airship.cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" =>
@@ -94,7 +95,7 @@ class {
   }
 
   getFlatcExecutableCommand() -> String[] {
-    let runtime = airship.cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" => {
@@ -126,7 +127,7 @@ class {
   }
 
   async getFlatcExecutableArguments(String installationTarget, PackageSource source) -> String[] {
-    let runtime = airship.cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
+    let runtime = cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
     match runtime {
       "native" =>
@@ -162,14 +163,14 @@ class {
       log.trace("Adding target: #{airship.target}")
       args.addAll(["-target", airship.target])
     }
-    if (airship.cliArgs.targetRuntimeArg.enabled) {
-      log.trace("Adding source locations: #{airship.cliArgs.targetRuntimeArg["runtime"].value}")
-      args.addAll(["-target-runtime", airship.cliArgs.targetRuntimeArg["runtime"].value])
+    if (cliArgs.targetRuntimeArg.enabled) {
+      log.trace("Adding source locations: #{cliArgs.targetRuntimeArg["runtime"].value}")
+      args.addAll(["-target-runtime", cliArgs.targetRuntimeArg["runtime"].value])
     }
-    if (!airship.cliArgs.syncArg.enabled) {
+    if (!cliArgs.syncArg.enabled) {
       args.add("-parallel")
     }
-    if (airship.cliArgs.noReplaceLogLineArg.enabled) {
+    if (cliArgs.noReplaceLogLineArg.enabled) {
       args.add("-no-replace-log-line")
     }
 
@@ -292,7 +293,7 @@ class {
 
     log.debug("Executing command: #cmd")
 
-    let response = System.execute(cmd, silent: airship.cliArgs.quietArg.enabled)
+    let response = System.execute(cmd, silent: cliArgs.quietArg.enabled)
 
     if (response.exitCode != 0) {
       throw FlatInstallationFailureException("Compilation failed: exit code #{response.exitCode}")
@@ -341,7 +342,7 @@ class {
     let packageName = url.substring(start, end)
     let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
 
-    flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{airship.cliArgs.installLinkArg.value}"))
+    flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{cliArgs.installLinkArg.value}"))
 
     postInstallPackage(flatPackageDir, install: false)
   }

@@ -1,21 +1,16 @@
 package flat/airship/services
 
-import flat/log/Logger
-import flat/io/File
-import flat/git/Git
-
-import flat/airship/Airship
-import flat/airship/ExecutionFailureException
-import flat/airship/Dependency
-import flat/airship/GitHubDependency
-import flat/airship/NpmDependency
-import flat/airship/LocalDependency
+import flat/airship
+import flat/log
+import flat/io
+import flat/git
 
 class {
   static Logger log = Logger(UpdateService.class)
 
   public construct(
     private Airship airship,
+    private AirshipCli cliArgs,
     private DependencyService dependencyService,
     private InstallService installService
   ) {}
@@ -23,10 +18,10 @@ class {
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
   public async update() {
-    if (airship.cliArgs.updateCommand["installationTarget"].values.isEmpty) {
+    if (cliArgs.updateCommand["installationTarget"].values.isEmpty) {
       updateLocalPackage("main")
     } else {
-      for (package in airship.cliArgs.updateCommand["installationTarget"].values) {
+      for (package in cliArgs.updateCommand["installationTarget"].values) {
         if (airship.getSourceForPackage(package)) {
           updateLocalPackage(package)
         } else {
@@ -76,7 +71,7 @@ class {
     GitHubDependency dependency,
     Bool: build = true
   ) -> Bool {
-    if (!airship.cliArgs.quietArg.enabled) {
+    if (!cliArgs.quietArg.enabled) {
       log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})...")
     }
 

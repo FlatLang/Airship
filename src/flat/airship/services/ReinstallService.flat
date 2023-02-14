@@ -1,27 +1,27 @@
 package flat/airship/services
 
-import flat/log/Logger
-import flat/io/File
-
-import flat/airship/Airship
-import flat/airship/InvalidCommandException
-import flat/airship/GitHubDependency
+import flat/airship
+import flat/log
+import flat/io
 
 class {
   static Logger log = Logger(ReinstallService.class)
 
-  public construct(private Airship airship) {}
+  public construct(
+    private Airship airship,
+    private AirshipCli cliArgs
+  ) {}
 
   public async reinstall() {
-    if (airship.cliArgs.reinstallCommand["installationTarget"].values.isEmpty) {
-      airship.cliArgs.uninstallLinkArg.enabled = airship.cliArgs.reinstallLinkArg.enabled
-      airship.cliArgs.installLinkArg.enabled = airship.cliArgs.reinstallLinkArg.enabled
+    if (cliArgs.reinstallCommand["installationTarget"].values.isEmpty) {
+      cliArgs.uninstallLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
+      cliArgs.installLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
       airship.uninstallService.uninstall()
       airship.installService.install()
       return
     }
 
-    for (package in airship.cliArgs.reinstallCommand["installationTarget"].values) {
+    for (package in cliArgs.reinstallCommand["installationTarget"].values) {
       reinstall(package)
     }
   }
