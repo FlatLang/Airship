@@ -125,15 +125,16 @@ class {
     visible Airship parent = null
   ) {
     if (cliArgs.helpCommand.enabled || cliArgs.readmeCommand.enabled) {
+      let readmeColumnCount = 100
       let columns = cliArgs.readmeCommand.enabled
-        ? 80
+        ? readmeColumnCount
         : TerminalSize.getTerminalSize(80, 0).columns
 
       if (cliArgs.allHelpArg.enabled || cliArgs.readmeCommand.enabled) {
         cli.usedArgs.removeFirstWhere({ _ == cliArgs.allHelpArg })
         cli.usedArgs.removeWhere({ _ == cliArgs.readmeCommand })
 
-        let separator = "-".repeat(Math.min(80, columns))
+        let separator = "-".repeat(Math.min(readmeColumnCount, columns))
 
         Console.log(
           cli.getAllHelp(lineLength: columns)
