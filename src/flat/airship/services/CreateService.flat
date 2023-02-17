@@ -118,7 +118,7 @@ class {
 
               - name: Run #{airship.package.name} Test
                 run: |
-                  node airship.js run test
+                  node airship.js run test#{target ? " -t #target" : ""}
         |")
       :close()
 
