@@ -14,7 +14,7 @@ class {
   ) {}
 
   public async uninstall() {
-    if (cliArgs.uninstallCommand["installationTarget"].values.isEmpty) {
+    if (cliArgs.uninstallTargetArg.values.isEmpty) {
       if (cliArgs.uninstallLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
           cliArgs.uninstallLinkArg.value = "."
@@ -28,7 +28,7 @@ class {
       throw InvalidCommandException("Invalid uninstall command without a value")
     }
 
-    for (package in cliArgs.uninstallCommand["installationTarget"].values) {
+    for (package in cliArgs.uninstallTargetArg.values) {
       uninstall(package)
     }
   }

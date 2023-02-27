@@ -13,7 +13,7 @@ class {
   ) {}
 
   public async reinstall() {
-    if (cliArgs.reinstallCommand["installationTarget"].values.isEmpty) {
+    if (cliArgs.reinstallTargetArg.values.isEmpty) {
       cliArgs.uninstallLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
       cliArgs.installLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
       airship.uninstallService.uninstall()
@@ -21,7 +21,7 @@ class {
       return
     }
 
-    for (package in cliArgs.reinstallCommand["installationTarget"].values) {
+    for (package in cliArgs.reinstallTargetArg.values) {
       reinstall(package)
     }
   }

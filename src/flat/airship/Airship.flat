@@ -469,18 +469,18 @@ class {
       match (command) {
         cliArgs.setupCommand => setupService.setup()
         cliArgs.installCommand => installService.install()
-        cliArgs.getCommand => getPackageService.getPackages(command["dependency"].values)
+        cliArgs.getCommand => getPackageService.getPackages(cliArgs.getDependencyArg.values)
         cliArgs.uninstallCommand => uninstallService.uninstall()
         cliArgs.reinstallCommand => reinstallService.reinstall()
         cliArgs.updateCommand => updateService.update()
         cliArgs.cleanCommand => cleanService.clean()
-        cliArgs.runCommand => runScriptService.runScripts(command["script"].values)
-        cliArgs.initCommand => initService.init(command["packageName"].value)
-        cliArgs.createCommand => createService.create(command["pipeline"].value, command["pipelineArg"].values)
-        cliArgs.binCommand => binaryService.create(command["binary"].values)
+        cliArgs.runCommand => runScriptService.runScripts(cliArgs.runScriptArg.values)
+        cliArgs.initCommand => initService.init(cliArgs.initPackageNameArg.value)
+        cliArgs.createCommand => createService.create(cliArgs.createPipelineArg.value, cliArgs.createPipelineArgArg.values)
+        cliArgs.binCommand => binaryService.create(cliArgs.binaryArg.values)
         cliArgs.versionArg => versionService.getVersion()
-        cliArgs.addDependencyCommand => addDependencyService.addDependencies(command["dependency"].values)
-        cliArgs.removeDependencyCommand => removeDependencyService.removeDependencies(command["dependency"].values)
+        cliArgs.addDependencyCommand => addDependencyService.addDependencies(cliArgs.addDependencyArg.values)
+        cliArgs.removeDependencyCommand => removeDependencyService.removeDependencies(cliArgs.removeDependencyArg.values)
       }
     }
   }

@@ -18,10 +18,10 @@ class {
   getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
 
   public async update() {
-    if (cliArgs.updateCommand["installationTarget"].values.isEmpty) {
+    if (cliArgs.updateTargetsArg.values.isEmpty) {
       updateLocalPackage("main")
     } else {
-      for (package in cliArgs.updateCommand["installationTarget"].values) {
+      for (package in cliArgs.updateTargetsArg.values) {
         if (airship.getSourceForPackage(package)) {
           updateLocalPackage(package)
         } else {

@@ -18,7 +18,7 @@ class {
   ) {}
 
   public async install() {
-    if (cliArgs.installCommand["installationTarget"].values.isEmpty) {
+    if (cliArgs.installationTargetArg.values.isEmpty) {
       if (cliArgs.installLinkArg.enabled) {
         if (let gitUrl = airship.getGitOriginUrl()) {
           cliArgs.installLinkArg.value = "."
@@ -30,7 +30,7 @@ class {
       }
       install("main", install: true)
     } else {
-      for (package in cliArgs.installCommand["installationTarget"].values) {
+      for (package in cliArgs.installationTargetArg.values) {
         install(package, install: true)
       }
     }
