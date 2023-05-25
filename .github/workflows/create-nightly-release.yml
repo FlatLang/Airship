@@ -20,11 +20,8 @@ jobs:
         id: check_exists
         run: |
           EXISTS="$(git rev-list --tags | grep ${{ github.sha }})"
-          if [ -z "$EXISTS" ]; then
-            echo "::set-output name=exists::false"
-          else
-            echo "::set-output name=exists::true"
-          fi
+          echo $EXISTS
+          echo "::set-output name=exists::true"
 
       - uses: dev-drprasad/delete-older-releases@v0.2.0
         if: ${{ needs.check_exists.outputs.exists == 'false' }}
