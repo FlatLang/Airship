@@ -22,7 +22,7 @@ jobs:
         run: |
           echo one
           TAGS="$(git rev-list --tags)"
-          EXISTS="$(echo $TAGS | grep ${{ github.sha }})"
+          EXISTS="$(echo $TAGS)"
           echo two
           if [ -z "$EXISTS" ]; then
             echo three
