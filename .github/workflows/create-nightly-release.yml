@@ -21,7 +21,7 @@ jobs:
         id: check_exists
         run: |
           echo one
-          EXISTS="true"
+          EXISTS="$(git rev-list --tags)"
           echo two
           if [ -z "$EXISTS" ]; then
             echo three
