@@ -21,7 +21,9 @@ jobs:
         id: check_exists
         run: |
           echo one
-          EXISTS="$(git rev-list --tags)"
+          TAGS="$(git rev-list --tags)"
+          echo $TAGS
+          EXISTS="$($TAGS | grep ${{ github.sha }})"
           echo two
           if [ -z "$EXISTS" ]; then
             echo three
