@@ -14,7 +14,18 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
+      - name: Check tag exists for SHA
+        id: check_exists
+        run: |
+          EXISTS="$(git rev-list --tags | grep ${{ github.sha }})"
+          if [ -z "$EXISTS" ]; then
+            echo "::set-output name=exists::false"
+          else
+            echo "::set-output name=exists::true"
+          fi
+
       - uses: dev-drprasad/delete-older-releases@v0.2.0
+        if: ${{ needs.check_exists.outputs.exists == 'false' }}
         with:
           keep_latest: 2
           delete_tag_pattern: -nightly-
@@ -22,11 +33,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
 
       - name: Get Tag Name
+        if: ${{ needs.check_exists.outputs.exists == 'false' }}
         id: tag_name
         run: |
           echo "::set-output name=TAG_NAME::${GITHUB_REF##*/}-nightly-$(date +%Y-%m-%d)"
 
       - name: Create and push tag
+        if: ${{ needs.check_exists.outputs.exists == 'false' }}
         run: |
           git tag ${{ steps.tag_name.outputs.TAG_NAME }}
           git push origin ${{ steps.tag_name.outputs.TAG_NAME }}
