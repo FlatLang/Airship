@@ -20,7 +20,7 @@ jobs:
       - name: Check tag exists for SHA
         id: check_exists
         run: |
-          EXISTS="$(git rev-list --tags | grep ${{ github.sha }})"
+          EXISTS=$(git rev-list --tags | grep ${{ github.sha }})
           if [ -z "$EXISTS" ]; then
             echo "exists=false" >> $GITHUB_OUTPUT
           else
