@@ -15,13 +15,17 @@ jobs:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.WORKFLOW_MANAGEMENT_TOKEN }}
+          fetch-depth: 0
 
       - name: Check tag exists for SHA
         id: check_exists
         run: |
           EXISTS="$(git rev-list --tags | grep ${{ github.sha }})"
-          echo $EXISTS
-          echo "::set-output name=exists::true"
+          if [ -z "$EXISTS" ]; then
+            echo "::set-output name=exists::false"
+          else
+            echo "::set-output name=exists::true"
+          fi
 
       - uses: dev-drprasad/delete-older-releases@v0.2.0
         if: ${{ needs.check_exists.outputs.exists == 'false' }}
