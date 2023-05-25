@@ -20,7 +20,7 @@ jobs:
       - name: Check tag exists for SHA
         id: check_exists
         run: |
-          $([[ $(git rev-list --tags) =~ "${{ github.sha }}" ]] && echo "exists=true" >> $GITHUB_OUTPUT) || echo "does not exist"
+          $([[ $(git rev-list --tags) =~ "dc617d0a8495b2239358aaaf2e4aee2ccb682e11" ]] && echo "exists=true" >> $GITHUB_OUTPUT) || echo "does not exist"
 
       - uses: dev-drprasad/delete-older-releases@v0.2.0
         if: ${{ needs.check_exists.outputs.exists == 'false' }}
