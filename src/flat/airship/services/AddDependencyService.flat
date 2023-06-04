@@ -1,14 +1,10 @@
 package flat/airship/services
 
 import flat/airship
+import flat/airship/util
 import flat/log/Logger
 import flat/npm/Npm
-import flat/io/File
-import flat/io/FileReader
-import flat/io/FileWriter
 import flat/git/Git
-
-import flat/extensions/SyntaxStringFunctions
 
 class {
   static Logger log = Logger(AddDependencyService.class)
@@ -37,46 +33,10 @@ class {
 
     log.debug("Installing dependency #{dependency}...")
 
-    let contents = FileReader(airship.flatJsonFile).readAllContents()
-
-    let sourcesIndex = contents.findStringOnTopLevel("\"sources\"", start: contents.indexOf("{") + 1)
-    let sourceIndex = contents.findStringOnTopLevel("\"#{source.name}\"", start: contents.indexOf("{", start: sourcesIndex) + 1)
-    let dependenciesIndex = contents.findStringOnTopLevel("\"dependencies\"", start: contents.indexOf("{", start: sourceIndex) + 1)
-    let startingBrace = contents.indexOf("{", start: dependenciesIndex)
-    let endingBrace = contents.findEndingMatch(startingBrace, '{', '}')
-    let lastContentIndex = contents.nextNonWhitespaceIndex(start: endingBrace - 1, direction: -1) + 1
-    let dependenciesContent = contents.substring(startingBrace + 1, endingBrace)
-    let containsExistingDependencies = dependenciesContent.trim().count > 0
-    let existingEndingWhitespace = contents.substring(lastContentIndex, endingBrace)
-
-    let firstTabLineIndex = contents.indexOf("\n", contents.indexOf("{") + 1) + 1
-    let tab = contents.substring(firstTabLineIndex, contents.nextNonWhitespaceIndex(firstTabLineIndex))
-    let depth = 4
-
-    let startingWhitespace = if (containsExistingDependencies) {
-      let litestart = contents.lastIndexOf("\n", start: lastContentIndex - 1) + 1
-      contents.substring(litestart, contents.nextNonWhitespaceIndex(litestart))
-    } else {
-      tab.repeat(depth)
-    }
-
-    let endingWhitespace = if (!existingEndingWhitespace.contains("\n")) {
-      "\n#{tab.repeat(depth - 1)}"
-    } else {
-      existingEndingWhitespace
-    }
-
-    let updatedContents = contents.substring(end: lastContentIndex) +
-      (containsExistingDependencies ? "," : "") + "\n" +
-      startingWhitespace + dependency.toJsonEntry()  + endingWhitespace +
-      contents.substring(endingBrace)
-
     getPackageService.getPackage(dependencyName)
     Airship.clearCache(dependency.airship)
     installService.installDependency(dependency)
 
-    FileWriter(airship.flatJsonFile)
-      :write(updatedContents)
-      :close()
+    PackageFileUtil.appendJsonValue(airship.flatJsonFile, "sources.#{source.name}.dependencies", dependency.toJsonEntry())
   }
 }
