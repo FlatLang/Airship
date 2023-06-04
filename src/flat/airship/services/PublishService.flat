@@ -87,6 +87,6 @@ class {
     Git.commit("v#{version}")
     Git.tag("v#{version}")
     Git.push()
-    Git.pushTags()
+    Git.pushTag("v#{version}")
   }
 }
