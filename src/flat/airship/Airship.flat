@@ -30,6 +30,7 @@ class {
 
   visible DependencyService dependencyService = DependencyService(this, cliArgs)
   visible AssetService assetService = AssetService(this, dependencyService)
+  visible PublishService publishService = PublishService(this)
   visible BinaryService binaryService = BinaryService(this, assetService)
   visible InstallService installService = InstallService(this, cliArgs, dependencyService, binaryService, assetService)
   visible UninstallService uninstallService = UninstallService(this, cliArgs, dependencyService)
@@ -58,7 +59,9 @@ class {
       Airship(args.skip(1)):run()
     } catch (Exception e) {
       log.error(e.message)
-      if (!e.class.isOfType(FlatInstallationFailureException.class)) {
+      if (
+        !e.class.isOfType(FlatInstallationFailureException.class) &&
+        !e.class.isOfType(InvalidCommandException.class)) {
         external {
           console.error(#{e}.error);
         }
@@ -113,6 +116,7 @@ class {
           cliArgs.noReplaceLogLineArg,
           cliArgs.quietArg,
           cliArgs.flatcRuntimeArg,
+          cliArgs.publishCommand,
         ],
         description: "Flat's package manager"
       ):parse(args),
@@ -481,6 +485,7 @@ class {
         cliArgs.versionArg => versionService.getVersion()
         cliArgs.addDependencyCommand => addDependencyService.addDependencies(cliArgs.addDependencyArg.values)
         cliArgs.removeDependencyCommand => removeDependencyService.removeDependencies(cliArgs.removeDependencyArg.values)
+        cliArgs.publishCommand => publishService.publish()
       }
     }
   }

@@ -20,6 +20,7 @@ COMMANDS:
     remove       Remove a Flat package from the dependecies
     help, ?      Print help information
     readme
+    publish      Publish a new release
 
 OPTIONS:
     --version                          Print version info and exit
@@ -286,4 +287,35 @@ USAGE:
 
 ARGUMENTS:
     <runtime>    The flatc runtime to compile the package with
+```
+
+-----------------------------------------------------------------------------------------------
+
+`airship publish`
+
+```
+Publish a new release
+
+USAGE:
+    airship publish <--version> [--bump]
+
+ARGUMENTS:
+    <--version>    Specify the version to publish
+
+OPTIONS:
+    --bump    Bump the version number
+```
+
+-----------------------------------------------------------------------------------------------
+
+`airship publish --bump`
+
+```
+Bump the version number
+
+USAGE:
+    airship publish --bump <bumpType>
+
+ARGUMENTS:
+    <bumpType>    Specify to bump major/minor/patch number
 ```

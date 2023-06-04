@@ -1,0 +1,91 @@
+package flat/airship/services
+
+import flat/airship
+import flat/airship/util
+import flat/log
+import flat/io
+import flat/regex
+import flat/git
+
+import static flat/readline/ReadLine
+import static flat/colorizer/Colorizer
+
+class {
+  static Logger log = Logger(PublishService.class)
+
+  static String MAJOR = "major"
+  static String MINOR = "minor"
+  static String PATCH = "patch"
+
+  public construct(
+    private Airship airship
+  ) {}
+
+  public async publish() {
+    if (airship.cliArgs.bumpTypeArg.enabled) {
+      bump(airship.cliArgs.bumpTypeArg.value.toLowerCase())
+      return
+    }
+    if (airship.cliArgs.bumpArg.enabled) {
+      bump(PATCH)
+      return
+    }
+    if (airship.cliArgs.publishVersionArg.enabled) {
+      let version = formatVersion(airship.cliArgs.publishVersionArg.value)
+      publishVersion(version)
+      return
+    }
+
+    throw InvalidCommandException("publish command requires #{airship.cliArgs.publishVersionArg.name} or #{airship.cliArgs.bumpArg.name} argument")
+  }
+
+  static formatVersion(var String version) -> String {
+    version = version.toLowerCase()
+    if (version.startsWith("v")) version = version.substring(1)
+    validateVersion(version)
+    return version
+  }
+
+  static validateVersion(String version) {
+    if (!Regex.containsMatch(/^\d+\.\d+\.\d+$/, version)) {
+      throw InvalidCommandException("Invalid version pattern. Must be patterned after semver structure, e.g. 'v0.0.0'")
+    }
+  }
+
+  async bump(String bumpType) {
+    log.debug("Bumping: #{bumpType}")
+    let currentVersion = airship.package.version
+    log.debug("Current version: #{currentVersion}")
+    let parts = currentVersion.split(".").map({ Int.parseInt(_) })
+
+    match bumpType {
+      MAJOR => {
+        parts[0] = parts[0] + 1
+        parts[1] = 0
+        parts[2] = 0
+      }
+      MINOR => {
+        parts[1] = parts[1] + 1
+        parts[2] = 0
+      }
+      PATCH => {
+        parts[2] = parts[2] + 1
+      }
+    }
+
+    let newVersion = parts.join(".")
+    log.debug("New version: #{newVersion}")
+    publishVersion(newVersion)
+  }
+
+  async publishVersion(String version) {
+    log.info("Publishing version: #{version}")
+
+    PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
+
+    Git.add(".")
+    Git.commit("v#{version}")
+    Git.tag("v#{version}")
+    Git.push()
+  }
+}
