@@ -320,4 +320,34 @@ class {
     name: "readme",
     hidden: true
   )
+
+  visible CliArg publishVersionArg = CliArg(
+    name: "--version",
+    description: "Specify the version to publish",
+    count: 1,
+    wildcard: true
+  )
+
+  visible CliArg bumpTypeArg = CliArg(
+    name: "bumpType",
+    description: "Specify to bump major/minor/patch number",
+    count: 1,
+    wildcard: true
+  )
+
+  visible CliArg bumpArg = CliArg(
+    name: "--bump",
+    description: "Bump the version number",
+    minCount: 0,
+    args: [bumpTypeArg]
+  )
+
+  visible CliArg publishCommand = CliArg(
+    name: "publish",
+    description: "Publish a new release",
+    args: [
+      bumpArg,
+      publishVersionArg,
+    ]
+  )
 }
