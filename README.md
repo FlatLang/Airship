@@ -19,7 +19,6 @@ COMMANDS:
     add          Add a Flat package as a dependency
     remove       Remove a Flat package from the dependecies
     help, ?      Print help information
-    readme
     publish      Publish a new release
 
 OPTIONS:
