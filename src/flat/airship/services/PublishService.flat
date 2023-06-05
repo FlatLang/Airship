@@ -100,6 +100,8 @@ class {
     Git.commit(tagName)
     Git.tag(tagName)
     
+    if (!boolQuestion(cyan("Release tag \"#{tagName}\" has been created. Do you want to push the release now? (Y/n): "))) return
+    
     pushRelease(tagName)
   }
 
