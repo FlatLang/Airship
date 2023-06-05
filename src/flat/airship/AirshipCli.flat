@@ -342,12 +342,18 @@ class {
     args: [bumpTypeArg]
   )
 
+  visible CliArg pushReleaseArg = CliArg(
+    name: "--push",
+    description: "Push the release commit and tag"
+  )
+
   visible CliArg publishCommand = CliArg(
     name: "publish",
     description: "Publish a new release",
     args: [
       bumpArg,
       publishVersionArg,
+      pushReleaseArg,
     ]
   )
 }

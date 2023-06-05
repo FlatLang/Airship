@@ -297,13 +297,14 @@ ARGUMENTS:
 Publish a new release
 
 USAGE:
-    airship publish <--version> [--bump]
+    airship publish <--version> [options]
 
 ARGUMENTS:
     <--version>    Specify the version to publish
 
 OPTIONS:
     --bump    Bump the version number
+    --push    Push the release commit and tag
 ```
 
 -----------------------------------------------------------------------------------------------

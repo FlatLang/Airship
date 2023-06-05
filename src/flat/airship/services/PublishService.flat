@@ -35,6 +35,10 @@ class {
       publishVersion(version)
       return
     }
+    if (airship.cliArgs.pushReleaseArg.enabled) {
+      pushRelease("v#{airship.package.version}")
+      return
+    }
 
     throw InvalidCommandException("publish command requires #{airship.cliArgs.publishVersionArg.name} or #{airship.cliArgs.bumpArg.name} argument")
   }
@@ -83,10 +87,17 @@ class {
 
     PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
 
+    let tagName = "v#{version}"
+
     Git.add(".")
-    Git.commit("v#{version}")
-    Git.tag("v#{version}")
+    Git.commit(tagName)
+    Git.tag(tagName)
+    
+    pushRelease(tagName)
+  }
+
+  async pushRelease(String tagName) {
     Git.push()
-    Git.pushTag("v#{version}")
+    Git.pushTag(tagName)
   }
 }
