@@ -83,6 +83,13 @@ class {
   }
 
   async publishVersion(String version) {
+    let status = Git.status(silent: true)
+
+    if (!status.nothingToCommit) {
+      log.error("You have uncommitted changes. Please commit or stash them before publishing.")
+      return
+    }
+
     log.info("Publishing version: #{version}")
 
     PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
