@@ -33,10 +33,17 @@ class {
 
     log.debug("Installing dependency #{dependency}...")
 
-    getPackageService.getPackage(dependencyName)
+    getPackageService.getPackage(dependencyName, false)
     Airship.clearCache(dependency.airship)
-    installService.installDependency(dependency)
+    installService.installDependency(
+      dependency,
+      build: false,
+      install: false,
+      installDependencies: false
+    )
 
     PackageFileUtil.appendJsonValue(airship.flatJsonFile, "sources.#{source.name}.dependencies", dependency.toJsonEntry())
+
+    log.info("Added dependency #{dependencyName}")
   }
 }
