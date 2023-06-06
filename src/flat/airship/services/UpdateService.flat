@@ -15,8 +15,6 @@ class {
     private InstallService installService
   ) {}
 
-  getPackageNameFromGitUrl(String url) => url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-
   public async update() {
     if (cliArgs.updateTargetsArg.values.isEmpty) {
       updateLocalPackage("main")
