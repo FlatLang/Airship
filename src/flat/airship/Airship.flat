@@ -441,7 +441,7 @@ class {
     if (!isCoreLibrary()) {
       log.trace("Adding Flat-Core implicit dependency")
 
-      package.sources.forEach({ _.value.dependencies.unshift(GitHubDependency("github:FlatLang/Flat-Core", "master")) })
+      package.sources.forEach({ _.value.dependencies.unshift(GitDependency("git@github.com:FlatLang/Flat-Core", "master")) })
     } else {
       log.trace("Skipping Flat-Core implicit dependency")
     }

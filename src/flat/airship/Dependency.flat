@@ -9,17 +9,7 @@ abstract data class {
   visible let lazy Airship airship => Airship(getLocation())
 
   public static fromPackage(String package) -> Dependency {
-    return if (package.toLowerCase().startsWith("github:")) {
-      let gitHubUrl = package.contains("@") ?
-        package.substring(end: package.indexOf("@")) :
-        package
-
-      let branch = package.contains("@") ?
-        package.substring(package.indexOf("@") + 1) :
-        "master"
-
-      GitHubDependency(gitHubUrl, branch)
-    } else if (package.toLowerCase().startsWith("npm:")) {
+    return if (package.toLowerCase().startsWith("npm:")) {
       let packageName = package.contains("@") ?
         package.substring("npm:".count, package.indexOf("@")) :
         package.substring("npm:".count)
@@ -31,24 +21,23 @@ abstract data class {
       NpmDependency(packageName, version)
     } else if (package.toLowerCase().startsWith("local:")) {
       LocalDependency(package.substring("local:".count))
+    } else {
+      GitDependency(package)
     }
 
     throw Exception("Invalid dependency \"#package\"")
   }
 
   public static fromKeyValue(String key, String value) -> Dependency {
-    return if (key.toLowerCase().startsWith("github:")) {
-      GitHubDependency(
-        gitHubUrl: key,
-        branch: value
-      )
-    } else if (key.toLowerCase().startsWith("npm:")) {
+    return if (key.toLowerCase().startsWith("npm:")) {
       NpmDependency(
         packageName: key.substring("npm:".count),
         version: value
       )
     } else if (value == "local") {
       LocalDependency(key)
+    } else {
+      GitDependency("#{key}@#{value}")
     }
 
     throw Exception("Invalid dependency {\"#key\": \"#value\"}")

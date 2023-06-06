@@ -1,0 +1,63 @@
+package flat/airship
+
+data class extends Dependency {
+  visible Bool isSsh
+  visible String? ownerName
+  visible String repoName
+  visible String packageLocation
+
+  public construct(String url) {
+    let lower = url.toLowerCase()
+
+    if (lower.startsWith("github:")) {
+      this("git@github.com:#{url.substring(7)}")
+    } else if (lower.startsWith("git@")) {
+      let branchStart = url.indexOf('@', start: 5) + 1
+
+      if (branchStart > 0) {
+        this(url.substring(end: branchStart - 1), url.substring(branchStart))
+      } else {
+        this(url, "master")
+      }
+    } else if (lower.startsWith("https://")) {
+      let branchStart = url.indexOf('@', start: 9) + 1
+
+      if (branchStart > 0) {
+        this(url.substring(end: branchStart - 1), url.substring(branchStart))
+      } else {
+        this(url, "master")
+      }
+    } else {
+      throw Exception("Invalid Git dependency url: #{url}")
+    }
+  }
+
+  public construct(
+    visible String url,
+    visible String branch
+  ) {
+    super()
+
+    let lower = url.toLowerCase()
+    let containsExtension = lower.endsWith(".git")
+    let repoDetails = url.substring(url.lastIndexOf(':') + 1, url.count - (containsExtension ? 4 : 0))
+
+    isSsh = lower.startsWith("git@")
+
+    let slash = repoDetails.lastIndexOf('/')
+
+    ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
+    repoName = repoDetails.substring(slash + 1)
+    packageLocation = "#{Airship.flatHome}/packages/#{repoName}"
+  }
+
+  override public getLocation() => packageLocation
+
+  override public toJsonKey() -> String {
+    return "\"#{url}\""
+  }
+
+  override public toJsonValue() -> String {
+    return "\"#{branch}\""
+  }
+}

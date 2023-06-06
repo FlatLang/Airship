@@ -57,7 +57,7 @@ class {
       "native" =>
       "java" => return
       "flat" => {
-        let package = "github:FlatLang/Flat-Compiler"
+        let package = "git@github.com:FlatLang/Flat-Compiler"
         let dependency = Dependency.fromPackage(package)
 
         if (!dependencyService.isDependencyInstalled(dependency)) {
@@ -80,7 +80,7 @@ class {
       default => airship.target
     }
 
-    let package = "github:FlatLang/Flat-#{target}"
+    let package = "git@github.com:FlatLang/Flat-#{target}"
     let dependency = Dependency.fromPackage(package)
 
     if (!dependencyService.isDependencyInstalled(dependency)) {

@@ -47,8 +47,8 @@ class {
   }
 
   async verifyDependencyExists(Dependency dependency) {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
-      verifyGitHubDependencyExists((GitHubDependency)dependency)
+    if (dependency.class.isOfType(GitDependency.class)) {
+      verifyGitDependencyExists((GitDependency)dependency)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       verifyNpmDependencyExists((NpmDependency)dependency)
     } else if (dependency.class.isOfType(LocalDependency.class)) {
@@ -56,11 +56,11 @@ class {
     }
   }
 
-  async verifyGitHubDependencyExists(GitHubDependency dependency) {
-    let response = Git.lsRemote(dependency.getGitUrl(), silent: true)
+  async verifyGitDependencyExists(GitDependency dependency) {
+    let response = Git.lsRemote(dependency.url, silent: true)
 
     if (response.exitCode == 128) {
-      throw ExecutionFailureException("Dependency GitHub url does not exist \"#{dependency.getGitUrl()}\"")
+      throw ExecutionFailureException("Dependency GitHub url does not exist \"#{dependency.url}\"")
     } else if (response.exitCode != 0) {
       throw ExecutionFailureException("Unknown error ocurred: #{response}")
     }

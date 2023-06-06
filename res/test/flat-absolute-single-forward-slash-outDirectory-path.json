@@ -9,8 +9,8 @@
       "outFile": "airship.js",
       "source": "src",
       "dependencies": {
-        "github:FlatLang/Json": "master",
-        "github:FlatLang/Compiler-String-Extensions": "master"
+        "git@github.com:FlatLang/Json": "master",
+        "git@github.com:FlatLang/Compiler-String-Extensions": "master"
       }
     }
   },

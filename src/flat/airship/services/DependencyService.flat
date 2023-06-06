@@ -171,8 +171,8 @@ class {
   }
 
   public isDependencyInstalled(Dependency dependency) -> Bool {
-    return if (dependency.class.isOfType(GitHubDependency.class)) {
-      isGitHubDependencyInstalled((GitHubDependency)dependency)
+    return if (dependency.class.isOfType(GitDependency.class)) {
+      isGitDependencyInstalled((GitDependency)dependency)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       isNpmDependencyInstalled((NpmDependency)dependency)
     } else if (dependency.class.isOfType(LocalDependency.class)) {
@@ -180,7 +180,7 @@ class {
     }
   }
 
-  isGitHubDependencyInstalled(GitHubDependency dependency) -> Bool {
+  isGitDependencyInstalled(GitDependency dependency) -> Bool {
     let exists = File(dependency.getLocation()).getChild(".git").exists
     log.trace("GitHub dependency #{dependency} is installed: #exists")
     return exists
@@ -199,8 +199,8 @@ class {
   }
 
   public async installDependency(Dependency dependency) {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
-      cloneGitHubDependency((GitHubDependency)dependency)
+    if (dependency.class.isOfType(GitDependency.class)) {
+      cloneGitDependency((GitDependency)dependency)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       installNpmDependency((NpmDependency)dependency)
     } else if (dependency.class.isOfType(LocalDependency.class)) {
@@ -234,8 +234,8 @@ class {
     }
   }
 
-  public async cloneGitHubDependency(GitHubDependency dependency) {
-    let url = dependency.getGitUrl()
+  public async cloneGitDependency(GitDependency dependency) {
+    let url = dependency.url
     let branch = dependency.branch
     let flatPackageDir = File(dependency.getLocation()):mkdirs()
 
@@ -243,7 +243,7 @@ class {
       return
     }
 
-    log.info("Cloning dependency #url (#branch) into '#{flatPackageDir.normalizedLocation}'...")
+    log.info("Cloning dependency #{url}@#{branch} into '#{flatPackageDir.normalizedLocation}'...")
 
     let response = Git.clone(
       url,
@@ -262,8 +262,8 @@ class {
   }
 
   public async uninstallDependency(Dependency dependency) {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
-      uninstallGitHubDependency((GitHubDependency)dependency)
+    if (dependency.class.isOfType(GitDependency.class)) {
+      uninstallGitDependency((GitDependency)dependency)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       uninstallNpmDependency((NpmDependency)dependency)
     } else if (dependency.class.isOfType(LocalDependency.class)) {
@@ -273,7 +273,7 @@ class {
     }
   }
 
-  async uninstallGitHubDependency(GitHubDependency dependency) {
+  async uninstallGitDependency(GitDependency dependency) {
     uninstallPackageDirectory(dependency.getFlatPackageDirectory())
   }
 

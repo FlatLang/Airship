@@ -151,15 +151,15 @@ class {
           \"main\": {
             #mainClassProperty\"source\": \"src\",
             \"dependencies\": {
-              \"github:FlatLang/System\": \"master\",
-              \"github:FlatLang/IO\": \"master\",
-              \"github:FlatLang/Stream\": \"master\"
+              \"git@github.com:FlatLang/System\": \"master\",
+              \"git@github.com:FlatLang/IO\": \"master\",
+              \"git@github.com:FlatLang/Stream\": \"master\"
             }
           },
           \"test\": {
             #testMainClassProperty\"source\": \"src/**/*_Test*.flat\",
             \"dependencies\": {
-              \"github:FlatLang/Test\": \"master\"
+              \"git@github.com:FlatLang/Test\": \"master\"
             }
           }
         }

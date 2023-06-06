@@ -35,7 +35,7 @@ class {
   }
 
   async install() {
-    let existingDependency = GitHubDependency("github:FlatLang/Airship", "master")
+    let existingDependency = GitDependency("git@github.com:FlatLang/Airship", "master")
 
     if (existingDependency.isFlatPackage() && existingDependency.getFlatPackageDirectory().exists) {
       Airship.clearCache(existingDependency.airship)
@@ -165,7 +165,7 @@ class {
   }
 
   async uninstall() {
-    let airshipDependency = GitHubDependency("github:FlatLang/Airship", "master")
+    let airshipDependency = GitDependency("git@github.com:FlatLang/Airship", "master")
 
     let flatHome = File(Airship.flatHome)
     let pathValue = File(flatHome, "bin").nativeLocation

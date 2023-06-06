@@ -54,8 +54,8 @@ class {
     Dependency dependency,
     Bool: build = true
   ) -> Bool {
-    if (dependency.class.isOfType(GitHubDependency.class)) {
-      return updateGitPackage((GitHubDependency)dependency, build)
+    if (dependency.class.isOfType(GitDependency.class)) {
+      return updateGitPackage((GitDependency)dependency, build)
     } else if (dependency.class.isOfType(NpmDependency.class)) {
       log.trace("No need to update node package")
       return false
@@ -68,17 +68,17 @@ class {
   }
 
   public async updateGitPackage(
-    GitHubDependency dependency,
+    GitDependency dependency,
     Bool: build = true
   ) -> Bool {
     if (!cliArgs.quietArg.enabled) {
-      log.info("Updating dependency #{dependency.getGitUrl()} (#{dependency.branch})...")
+      log.info("Updating dependency #{dependency.url}@#{dependency.branch}...")
     }
 
     let packageLocation = File(dependency.getLocation())
 
     if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
-      throw ExecutionFailureException("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) is not installed")
+      throw ExecutionFailureException("Dependency #{dependency.url}@#{dependency.branch} is not installed")
     }
 
     let git = Git(packageLocation.location)
@@ -88,9 +88,9 @@ class {
     let pullResponse = git.pull(silent: true)
 
     if (pullResponse.upToDate) {
-      log.info("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) already up to date")
+      log.info("Dependency #{dependency.url}@#{dependency.branch} already up to date")
     } else {
-      log.info("Dependency #{dependency.getGitUrl()} (#{dependency.branch}) updated")
+      log.info("Dependency #{dependency.url}@#{dependency.branch} updated")
     }
 
     return !pullResponse.upToDate

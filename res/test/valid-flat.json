@@ -12,16 +12,16 @@
       "mainClass": "flat/airship/Airship",
       "source": "src",
       "dependencies": {
-        "github:FlatLang/FuCli": "master",
-        "github:FlatLang/Json": "master",
-        "github:FlatLang/Compiler-String-Extensions": "master"
+        "git@github.com:FlatLang/FuCli": "master",
+        "git@github.com:FlatLang/Json": "master",
+        "git@github.com:FlatLang/Compiler-String-Extensions": "master"
       }
     },
     "test": {
       "mainClass": "flat/airship/Airship_TestSuite",
       "source": "src/**/*_Test*.flat",
       "dependencies": {
-        "github:FlatLang/Test": "master"
+        "git@github.com:FlatLang/Test": "master"
       }
     }
   }
