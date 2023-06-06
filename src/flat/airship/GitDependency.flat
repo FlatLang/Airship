@@ -2,6 +2,11 @@ package flat/airship
 
 data class extends Dependency {
   visible Bool isSsh
+  visible String host
+  visible String sshUrl
+  visible String httpsUrl
+  visible String repoDetails
+  visible String branch
   visible String? ownerName
   visible String repoName
   visible String packageLocation
@@ -33,28 +38,35 @@ data class extends Dependency {
   }
 
   public construct(
-    visible String url,
-    visible String branch
+    String url,
+    this String branch
   ) {
     super()
 
     let lower = url.toLowerCase()
     let containsExtension = lower.endsWith(".git")
-    let repoDetails = url.substring(url.lastIndexOf(':') + 1, url.count - (containsExtension ? 4 : 0))
 
     isSsh = lower.startsWith("git@")
+    
+    let detailsStart = (isSsh ? url.indexOf(':', start: 4) : url.indexOf('/', start: 7)) + 1
+    let detailsEnd = url.count - (containsExtension ? 4 : 0)
 
+    repoDetails = url.substring(detailsStart, detailsEnd)
     let slash = repoDetails.lastIndexOf('/')
-
+    host = url.substring(isSsh ? 4 : 7, detailsStart - 1)
     ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
     repoName = repoDetails.substring(slash + 1)
     packageLocation = "#{Airship.flatHome}/packages/#{repoName}"
+    sshUrl = "git@#{host}:#{repoDetails}.git"
+    httpsUrl = "https://#{host}/#{repoDetails}.git"
   }
+
+  public getUrl(Bool ssh = false) => ssh ? sshUrl : httpsUrl
 
   override public getLocation() => packageLocation
 
   override public toJsonKey() -> String {
-    return "\"#{url}\""
+    return "\"#{httpsUrl}\""
   }
 
   override public toJsonValue() -> String {

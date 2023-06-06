@@ -70,13 +70,13 @@ class {
     Bool: build = true
   ) -> Bool {
     if (!cliArgs.quietArg.enabled) {
-      log.info("Updating dependency #{dependency.url}@#{dependency.branch}...")
+      log.info("Updating dependency #{dependency.getUrl()}@#{dependency.branch}...")
     }
 
     let packageLocation = File(dependency.getLocation())
 
     if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
-      throw ExecutionFailureException("Dependency #{dependency.url}@#{dependency.branch} is not installed")
+      throw ExecutionFailureException("Dependency #{dependency.getUrl()}@#{dependency.branch} is not installed")
     }
 
     let git = Git(packageLocation.location)
@@ -86,9 +86,9 @@ class {
     let pullResponse = git.pull(silent: true)
 
     if (pullResponse.upToDate) {
-      log.info("Dependency #{dependency.url}@#{dependency.branch} already up to date")
+      log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} already up to date")
     } else {
-      log.info("Dependency #{dependency.url}@#{dependency.branch} updated")
+      log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} updated")
     }
 
     return !pullResponse.upToDate

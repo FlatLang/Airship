@@ -57,10 +57,10 @@ class {
   }
 
   async verifyGitDependencyExists(GitDependency dependency) {
-    let response = Git.lsRemote(dependency.url, silent: true)
+    let response = Git.lsRemote(dependency.httpsUrl, silent: true)
 
     if (response.exitCode == 128) {
-      throw ExecutionFailureException("Dependency GitHub url does not exist \"#{dependency.url}\"")
+      throw ExecutionFailureException("Dependency GitHub url does not exist \"#{dependency.httpsUrl}\"")
     } else if (response.exitCode != 0) {
       throw ExecutionFailureException("Unknown error ocurred: #{response}")
     }
