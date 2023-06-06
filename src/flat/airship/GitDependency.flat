@@ -48,12 +48,12 @@ data class extends Dependency {
 
     isSsh = lower.startsWith("git@")
     
-    let detailsStart = (isSsh ? url.indexOf(':', start: 4) : url.indexOf('/', start: 7)) + 1
+    let detailsStart = (isSsh ? url.indexOf(':', start: 4) : url.indexOf('/', start: 8)) + 1
     let detailsEnd = url.count - (containsExtension ? 4 : 0)
 
     repoDetails = url.substring(detailsStart, detailsEnd)
     let slash = repoDetails.lastIndexOf('/')
-    host = url.substring(isSsh ? 4 : 7, detailsStart - 1)
+    host = url.substring(isSsh ? 4 : 8, detailsStart - 1)
     ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
     repoName = repoDetails.substring(slash + 1)
     packageLocation = "#{Airship.flatHome}/packages/#{repoName}"
