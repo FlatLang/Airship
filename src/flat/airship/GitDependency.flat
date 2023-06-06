@@ -1,75 +1,75 @@
 package flat/airship
 
 data class extends Dependency {
-  visible Bool isSsh
-  visible String host
-  visible String sshUrl
-  visible String httpsUrl
-  visible String repoDetails
-  visible String branch
-  visible String? ownerName
-  visible String repoName
-  visible String packageLocation
+    visible Bool isSsh
+    visible String host
+    visible String sshUrl
+    visible String httpsUrl
+    visible String repoDetails
+    visible String branch
+    visible String? ownerName
+    visible String repoName
+    visible String packageLocation
 
-  public construct(String url) {
-    let lower = url.toLowerCase()
+    public construct(String url) {
+        let lower = url.toLowerCase()
 
-    if (lower.startsWith("github:")) {
-      this("git@github.com:#{url.substring(7)}")
-    } else if (lower.startsWith("git@")) {
-      let branchStart = url.indexOf('@', start: 5) + 1
+        if (lower.startsWith("github:")) {
+            this("git@github.com:#{url.substring(7)}")
+        } else if (lower.startsWith("git@")) {
+            let branchStart = url.indexOf('@', start: 5) + 1
 
-      if (branchStart > 0) {
-        this(url.substring(end: branchStart - 1), url.substring(branchStart))
-      } else {
-        this(url, "master")
-      }
-    } else if (lower.startsWith("https://")) {
-      let branchStart = url.indexOf('@', start: 9) + 1
+            if (branchStart > 0) {
+                this(url.substring(end: branchStart - 1), url.substring(branchStart))
+            } else {
+                this(url, "master")
+            }
+        } else if (lower.startsWith("https://")) {
+            let branchStart = url.indexOf('@', start: 9) + 1
 
-      if (branchStart > 0) {
-        this(url.substring(end: branchStart - 1), url.substring(branchStart))
-      } else {
-        this(url, "master")
-      }
-    } else {
-      throw Exception("Invalid Git dependency url: #{url}")
+            if (branchStart > 0) {
+                this(url.substring(end: branchStart - 1), url.substring(branchStart))
+            } else {
+                this(url, "master")
+            }
+        } else {
+            throw Exception("Invalid Git dependency url: #{url}")
+        }
     }
-  }
 
-  public construct(
-    String url,
-    this String branch
-  ) {
-    super()
+    public construct(
+        String url,
+        this String branch
+    ) {
+        super()
 
-    let lower = url.toLowerCase()
-    let containsExtension = lower.endsWith(".git")
+        let lower = url.toLowerCase()
+        let containsExtension = lower.endsWith(".git")
 
-    isSsh = lower.startsWith("git@")
-    
-    let detailsStart = (isSsh ? url.indexOf(':', start: 4) : url.indexOf('/', start: 8)) + 1
-    let detailsEnd = url.count - (containsExtension ? 4 : 0)
+        isSsh = lower.startsWith("git@")
+        
+        let detailsStart = (isSsh ? url.indexOf(':', start: 4) : url.indexOf('/', start: 8)) + 1
+        let detailsEnd = url.count - (containsExtension ? 4 : 0)
 
-    repoDetails = url.substring(detailsStart, detailsEnd)
-    let slash = repoDetails.lastIndexOf('/')
-    host = url.substring(isSsh ? 4 : 8, detailsStart - 1)
-    ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
-    repoName = repoDetails.substring(slash + 1)
-    packageLocation = "#{Airship.flatHome}/packages/#{repoName}"
-    sshUrl = "git@#{host}:#{repoDetails}.git"
-    httpsUrl = "https://#{host}/#{repoDetails}.git"
-  }
+        repoDetails = url.substring(detailsStart, detailsEnd)
+        let slash = repoDetails.lastIndexOf('/')
+        host = url.substring(isSsh ? 4 : 8, detailsStart - 1)
+        ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
+        repoName = repoDetails.substring(slash + 1)
+        packageLocation = "#{Airship.flatHome}/packages/#{repoName}"
+        sshUrl = "git@#{host}:#{repoDetails}.git"
+        httpsUrl = "https://#{host}/#{repoDetails}.git"
+    }
 
-  public getUrl(Bool ssh = false) => ssh ? sshUrl : httpsUrl
+    public getUrl(Bool ssh = false) => ssh ? sshUrl : httpsUrl
 
-  override public getLocation() => packageLocation
+    override public getLocation() => packageLocation
 
-  override public toJsonKey() -> String {
-    return "\"#{httpsUrl}\""
-  }
+    override public toJsonKey() -> String {
+        return "\"#{httpsUrl}\""
+    }
 
-  override public toJsonValue() -> String {
-    return "\"#{branch}\""
-  }
+    override public toJsonValue() -> String {
+        return "\"#{branch}\""
+    }
 }

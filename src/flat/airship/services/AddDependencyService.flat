@@ -7,43 +7,43 @@ import flat/npm/Npm
 import flat/git/Git
 
 class {
-  static Logger log = Logger(AddDependencyService.class)
+    static Logger log = Logger(AddDependencyService.class)
 
-  public construct(
-    private Airship airship,
-    private GetPackageService getPackageService,
-    private InstallService installService
-  ) {}
+    public construct(
+        private Airship airship,
+        private GetPackageService getPackageService,
+        private InstallService installService
+    ) {}
 
-  public async addDependencies(String[] dependencyNames) {
-    for (dependency in dependencyNames) {
-      addDependency(dependency)
-    }
-  }
-
-  public async addDependency(String dependencyName) {
-    let dependency = Dependency.fromPackage(dependencyName)
-    let source = airship.package.defaultSource
-
-    if (source.dependencies.contains(dependency)) {
-      log.info("Dependency \"#{dependencyName}\" already installed")
-
-      return
+    public async addDependencies(String[] dependencyNames) {
+        for (dependency in dependencyNames) {
+            addDependency(dependency)
+        }
     }
 
-    log.debug("Installing dependency #{dependency}...")
+    public async addDependency(String dependencyName) {
+        let dependency = Dependency.fromPackage(dependencyName)
+        let source = airship.package.defaultSource
 
-    getPackageService.getPackage(dependencyName, false)
-    Airship.clearCache(dependency.airship)
-    installService.installDependency(
-      dependency,
-      build: false,
-      install: false,
-      installDependencies: false
-    )
+        if (source.dependencies.contains(dependency)) {
+            log.info("Dependency \"#{dependencyName}\" already installed")
 
-    PackageFileUtil.appendJsonValue(airship.flatJsonFile, "sources.#{source.name}.dependencies", dependency.toJsonEntry())
+            return
+        }
 
-    log.info("Added dependency #{dependencyName}")
-  }
+        log.debug("Installing dependency #{dependency}...")
+
+        getPackageService.getPackage(dependencyName, false)
+        Airship.clearCache(dependency.airship)
+        installService.installDependency(
+            dependency,
+            build: false,
+            install: false,
+            installDependencies: false
+        )
+
+        PackageFileUtil.appendJsonValue(airship.flatJsonFile, "sources.#{source.name}.dependencies", dependency.toJsonEntry())
+
+        log.info("Added dependency #{dependencyName}")
+    }
 }

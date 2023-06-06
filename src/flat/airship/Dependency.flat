@@ -6,59 +6,59 @@ import flat/datastruct/HashMap
 import flat/airship/PackageSource
 
 abstract data class {
-  visible let lazy Airship airship => Airship(getLocation())
+    visible let lazy Airship airship => Airship(getLocation())
 
-  public static fromPackage(String package) -> Dependency {
-    return if (package.toLowerCase().startsWith("npm:")) {
-      let packageName = package.contains("@") ?
-        package.substring("npm:".count, package.indexOf("@")) :
-        package.substring("npm:".count)
+    public static fromPackage(String package) -> Dependency {
+        return if (package.toLowerCase().startsWith("npm:")) {
+            let packageName = package.contains("@") ?
+                package.substring("npm:".count, package.indexOf("@")) :
+                package.substring("npm:".count)
 
-      let version = package.contains("@") ?
-        package.substring(package.indexOf("@") + 1) :
-        "latest"
+            let version = package.contains("@") ?
+                package.substring(package.indexOf("@") + 1) :
+                "latest"
 
-      NpmDependency(packageName, version)
-    } else if (package.toLowerCase().startsWith("local:")) {
-      LocalDependency(package.substring("local:".count))
-    } else {
-      GitDependency(package)
+            NpmDependency(packageName, version)
+        } else if (package.toLowerCase().startsWith("local:")) {
+            LocalDependency(package.substring("local:".count))
+        } else {
+            GitDependency(package)
+        }
+
+        throw Exception("Invalid dependency \"#package\"")
     }
 
-    throw Exception("Invalid dependency \"#package\"")
-  }
+    public static fromKeyValue(String key, String value) -> Dependency {
+        return if (key.toLowerCase().startsWith("npm:")) {
+            NpmDependency(
+                packageName: key.substring("npm:".count),
+                version: value
+            )
+        } else if (value == "local") {
+            LocalDependency(key)
+        } else {
+            GitDependency("#{key}@#{value}")
+        }
 
-  public static fromKeyValue(String key, String value) -> Dependency {
-    return if (key.toLowerCase().startsWith("npm:")) {
-      NpmDependency(
-        packageName: key.substring("npm:".count),
-        version: value
-      )
-    } else if (value == "local") {
-      LocalDependency(key)
-    } else {
-      GitDependency("#{key}@#{value}")
+        throw Exception("Invalid dependency {\"#key\": \"#value\"}")
     }
 
-    throw Exception("Invalid dependency {\"#key\": \"#value\"}")
-  }
+    public abstract getLocation() -> String
+    public abstract toJsonKey() -> String
+    public abstract toJsonValue() -> String
 
-  public abstract getLocation() -> String
-  public abstract toJsonKey() -> String
-  public abstract toJsonValue() -> String
+    public toJsonEntry() => "#{toJsonKey()}: #{toJsonValue()}"
 
-  public toJsonEntry() => "#{toJsonKey()}: #{toJsonValue()}"
+    public isFlatPackage() => File(File(getLocation()), "flat.json").isFile
 
-  public isFlatPackage() => File(File(getLocation()), "flat.json").isFile
+    public getFlatPackageDirectory() => isFlatPackage() ? File(getLocation()) : null
 
-  public getFlatPackageDirectory() => isFlatPackage() ? File(getLocation()) : null
-
-  public getSourcesForInstallation(
-    String installationTarget
-  ) -> PackageSource[] {
-    return Array<PackageSource>()
-      :add(airship.package.mainSource)
-      :add(airship.getSourceForPackage(installationTarget))
-      .unique()
-  }
+    public getSourcesForInstallation(
+        String installationTarget
+    ) -> PackageSource[] {
+        return Array<PackageSource>()
+            :add(airship.package.mainSource)
+            :add(airship.getSourceForPackage(installationTarget))
+            .unique()
+    }
 }

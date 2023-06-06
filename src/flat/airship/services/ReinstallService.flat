@@ -5,37 +5,37 @@ import flat/log
 import flat/io
 
 class {
-  static Logger log = Logger(ReinstallService.class)
+    static Logger log = Logger(ReinstallService.class)
 
-  public construct(
-    private Airship airship,
-    private AirshipCli cliArgs
-  ) {}
+    public construct(
+        private Airship airship,
+        private AirshipCli cliArgs
+    ) {}
 
-  public async reinstall() {
-    if (cliArgs.reinstallTargetArg.values.isEmpty) {
-      cliArgs.uninstallLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
-      cliArgs.installLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
-      airship.uninstallService.uninstall()
-      airship.installService.install()
-      return
+    public async reinstall() {
+        if (cliArgs.reinstallTargetArg.values.isEmpty) {
+            cliArgs.uninstallLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
+            cliArgs.installLinkArg.enabled = cliArgs.reinstallLinkArg.enabled
+            airship.uninstallService.uninstall()
+            airship.installService.install()
+            return
+        }
+
+        for (package in cliArgs.reinstallTargetArg.values) {
+            reinstall(package)
+        }
     }
 
-    for (package in cliArgs.reinstallTargetArg.values) {
-      reinstall(package)
+    async reinstall(String package) {
+        if (package.endsWith(".git")) {
+            reinstallGitPackage(package)
+        } else {
+            throw InvalidCommandException("Cannot reinstall package '#package'")
+        }
     }
-  }
 
-  async reinstall(String package) {
-    if (package.endsWith(".git")) {
-      reinstallGitPackage(package)
-    } else {
-      throw InvalidCommandException("Cannot reinstall package '#package'")
+    async reinstallGitPackage(String url) {
+        airship.uninstallService.uninstallGitPackage(url)
+        airship.installService.installDependency(GitDependency(url, "master"))
     }
-  }
-
-  async reinstallGitPackage(String url) {
-    airship.uninstallService.uninstallGitPackage(url)
-    airship.installService.installDependency(GitDependency(url, "master"))
-  }
 }

@@ -7,28 +7,28 @@ import flat/airship/Airship
 import flat/airship/PackageSource
 
 class {
-  static Logger log = Logger(CleanService.class)
+    static Logger log = Logger(CleanService.class)
 
-  public construct(private Airship airship) {}
+    public construct(private Airship airship) {}
 
-  public async clean() {
-    let directories = airship.package.sources
-      .map({ _.value.outDirectory })
-      .filterNull()
-      .map({ "#{airship.packageLocation.normalizedLocation}/#_" })
-      .unique()
-      .map({ File(_) })
+    public async clean() {
+        let directories = airship.package.sources
+            .map({ _.value.outDirectory })
+            .filterNull()
+            .map({ "#{airship.packageLocation.normalizedLocation}/#_" })
+            .unique()
+            .map({ File(_) })
 
-    for (directory in directories) {
-      clean(directory)
+        for (directory in directories) {
+            clean(directory)
+        }
     }
-  }
 
-  async clean(File directory) {
-    try {
-      directory.delete(recursive: true)
-    } catch (Exception e) {
-      throw Exception("Failed to clean directory '#{directory.normalizedLocation}'")
+    async clean(File directory) {
+        try {
+            directory.delete(recursive: true)
+        } catch (Exception e) {
+            throw Exception("Failed to clean directory '#{directory.normalizedLocation}'")
+        }
     }
-  }
 }

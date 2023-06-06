@@ -12,79 +12,79 @@ import flat/airship/Dependency
 import flat/extensions/SyntaxStringFunctions
 
 class {
-  static Logger log = Logger(RemoveDependencyService.class)
+    static Logger log = Logger(RemoveDependencyService.class)
 
-  public construct(
-    private Airship airship,
-    private UninstallService uninstallService
-  ) {}
+    public construct(
+        private Airship airship,
+        private UninstallService uninstallService
+    ) {}
 
-  public async removeDependencies(String[] dependencyNames) {
-    for (dependency in dependencyNames) {
-      removeDependency(dependency)
-    }
-  }
-
-  public async removeDependency(String dependencyName) {
-    let dependency = Dependency.fromPackage(dependencyName)
-    let source = airship.package.defaultSource
-
-    if (!source.dependencies.contains(dependency)) {
-      log.info("Dependency \"#{dependencyName}\" not installed")
-
-      return
+    public async removeDependencies(String[] dependencyNames) {
+        for (dependency in dependencyNames) {
+            removeDependency(dependency)
+        }
     }
 
-    log.debug("Removing dependency #{dependency}...")
+    public async removeDependency(String dependencyName) {
+        let dependency = Dependency.fromPackage(dependencyName)
+        let source = airship.package.defaultSource
 
-    let contents = FileReader(airship.flatJsonFile).readAllContents()
+        if (!source.dependencies.contains(dependency)) {
+            log.info("Dependency \"#{dependencyName}\" not installed")
 
-    let firstTabLineIndex = contents.indexOf("\n", contents.indexOf("{") + 1) + 1
-    let tab = contents.substring(firstTabLineIndex, contents.nextNonWhitespaceIndex(firstTabLineIndex))
-    let depth = 4
+            return
+        }
 
-    let sourcesIndex = contents.findStringOnTopLevel("\"sources\"", start: contents.indexOf("{") + 1)
-    let sourceIndex = contents.findStringOnTopLevel("\"#{source.name}\"", start: contents.indexOf("{", start: sourcesIndex) + 1)
-    let dependenciesIndex = contents.findStringOnTopLevel("\"dependencies\"", start: contents.indexOf("{", start: sourceIndex) + 1)
-    let startingBrace = contents.indexOf("{", start: dependenciesIndex)
-    let endingBrace = contents.findEndingMatch(startingBrace, '{', '}')
-    let lastContentIndex = contents.nextNonWhitespaceIndex(start: endingBrace - 1, direction: -1) + 1
-    let dependenciesContent = contents.substring(startingBrace + 1, endingBrace)
-    let containsExistingDependencies = dependenciesContent.trim().count > 0
-    let existingEndingWhitespace = contents.substring(lastContentIndex, endingBrace)
+        log.debug("Removing dependency #{dependency}...")
 
-    let dependencyIndex = contents.findStringOnTopLevel("#{dependency.toJsonKey()}", start: startingBrace + 1)
+        let contents = FileReader(airship.flatJsonFile).readAllContents()
 
-    log.debug("Searched for #{dependency.toJsonKey()} and got index: #dependencyIndex")
+        let firstTabLineIndex = contents.indexOf("\n", contents.indexOf("{") + 1) + 1
+        let tab = contents.substring(firstTabLineIndex, contents.nextNonWhitespaceIndex(firstTabLineIndex))
+        let depth = 4
 
-    if (dependencyIndex == -1 || dependencyIndex > endingBrace) {
-      log.info("Dependency \"#{dependencyName}\" not formatted correctly in flat.json file")
+        let sourcesIndex = contents.findStringOnTopLevel("\"sources\"", start: contents.indexOf("{") + 1)
+        let sourceIndex = contents.findStringOnTopLevel("\"#{source.name}\"", start: contents.indexOf("{", start: sourcesIndex) + 1)
+        let dependenciesIndex = contents.findStringOnTopLevel("\"dependencies\"", start: contents.indexOf("{", start: sourceIndex) + 1)
+        let startingBrace = contents.indexOf("{", start: dependenciesIndex)
+        let endingBrace = contents.findEndingMatch(startingBrace, '{', '}')
+        let lastContentIndex = contents.nextNonWhitespaceIndex(start: endingBrace - 1, direction: -1) + 1
+        let dependenciesContent = contents.substring(startingBrace + 1, endingBrace)
+        let containsExistingDependencies = dependenciesContent.trim().count > 0
+        let existingEndingWhitespace = contents.substring(lastContentIndex, endingBrace)
 
-      return
+        let dependencyIndex = contents.findStringOnTopLevel("#{dependency.toJsonKey()}", start: startingBrace + 1)
+
+        log.debug("Searched for #{dependency.toJsonKey()} and got index: #dependencyIndex")
+
+        if (dependencyIndex == -1 || dependencyIndex > endingBrace) {
+            log.info("Dependency \"#{dependencyName}\" not formatted correctly in flat.json file")
+
+            return
+        }
+
+        let dependencyLitestart = contents.lastIndexOf("\n", dependencyIndex)
+        let dependencyLineEnd = contents.indexOf("\n", dependencyIndex)
+        let dependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLineEnd - 1, direction: -1)
+        let prevDependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLitestart - 1, direction: -1)
+
+        var Int removeStart = dependencyLitestart
+        var Int removeEnd = dependencyEndIndex + 1
+
+        if (contents[prevDependencyEndIndex] == ',') {
+            removeStart = prevDependencyEndIndex
+
+            if (contents[dependencyEndIndex] == ',') {
+                removeEnd = dependencyEndIndex
+            }
+        }
+
+        let updatedContents = contents.substring(end: removeStart) + contents.substring(removeEnd)
+
+        uninstallService.uninstallDependency(dependency)
+
+        FileWriter(airship.flatJsonFile)
+            :write(updatedContents)
+            :close()
     }
-
-    let dependencyLitestart = contents.lastIndexOf("\n", dependencyIndex)
-    let dependencyLineEnd = contents.indexOf("\n", dependencyIndex)
-    let dependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLineEnd - 1, direction: -1)
-    let prevDependencyEndIndex = contents.nextNonWhitespaceIndex(start: dependencyLitestart - 1, direction: -1)
-
-    var Int removeStart = dependencyLitestart
-    var Int removeEnd = dependencyEndIndex + 1
-
-    if (contents[prevDependencyEndIndex] == ',') {
-      removeStart = prevDependencyEndIndex
-
-      if (contents[dependencyEndIndex] == ',') {
-        removeEnd = dependencyEndIndex
-      }
-    }
-
-    let updatedContents = contents.substring(end: removeStart) + contents.substring(removeEnd)
-
-    uninstallService.uninstallDependency(dependency)
-
-    FileWriter(airship.flatJsonFile)
-      :write(updatedContents)
-      :close()
-  }
 }

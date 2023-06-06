@@ -1,7 +1,7 @@
 package flat/airship
 
 class extends Exception {
-  public construct(String message) {
-    super(message)
-  }
+    public construct(String message) {
+        super(message)
+    }
 }

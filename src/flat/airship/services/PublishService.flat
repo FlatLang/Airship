@@ -11,102 +11,102 @@ import static flat/readline/ReadLine
 import static flat/colorizer/Colorizer
 
 class {
-  static Logger log = Logger(PublishService.class)
+    static Logger log = Logger(PublishService.class)
 
-  static String MAJOR = "major"
-  static String MINOR = "minor"
-  static String PATCH = "patch"
+    static String MAJOR = "major"
+    static String MINOR = "minor"
+    static String PATCH = "patch"
 
-  public construct(
-    private Airship airship
-  ) {}
+    public construct(
+        private Airship airship
+    ) {}
 
-  public async publish() {
-    if (airship.cliArgs.bumpTypeArg.enabled) {
-      bump(airship.cliArgs.bumpTypeArg.value.toLowerCase())
-      return
-    }
-    if (airship.cliArgs.bumpArg.enabled) {
-      bump(PATCH)
-      return
-    }
-    if (airship.cliArgs.publishVersionArg.enabled) {
-      let version = formatVersion(airship.cliArgs.publishVersionArg.value)
-      publishVersion(version)
-      return
-    }
-    if (airship.cliArgs.pushReleaseArg.enabled) {
-      pushRelease("v#{airship.package.version}")
-      return
-    }
+    public async publish() {
+        if (airship.cliArgs.bumpTypeArg.enabled) {
+            bump(airship.cliArgs.bumpTypeArg.value.toLowerCase())
+            return
+        }
+        if (airship.cliArgs.bumpArg.enabled) {
+            bump(PATCH)
+            return
+        }
+        if (airship.cliArgs.publishVersionArg.enabled) {
+            let version = formatVersion(airship.cliArgs.publishVersionArg.value)
+            publishVersion(version)
+            return
+        }
+        if (airship.cliArgs.pushReleaseArg.enabled) {
+            pushRelease("v#{airship.package.version}")
+            return
+        }
 
-    throw InvalidCommandException("publish command requires #{airship.cliArgs.publishVersionArg.name} or #{airship.cliArgs.bumpArg.name} argument")
-  }
-
-  static formatVersion(var String version) -> String {
-    version = version.toLowerCase()
-    if (version.startsWith("v")) version = version.substring(1)
-    validateVersion(version)
-    return version
-  }
-
-  static validateVersion(String version) {
-    if (!Regex.containsMatch(/^\d+\.\d+\.\d+$/, version)) {
-      throw InvalidCommandException("Invalid version pattern. Must be patterned after semver structure, e.g. 'v0.0.0'")
-    }
-  }
-
-  async bump(String bumpType) {
-    log.debug("Bumping: #{bumpType}")
-    let currentVersion = airship.package.version
-    log.debug("Current version: #{currentVersion}")
-    let parts = currentVersion.split(".").map({ Int.parseInt(_) })
-
-    match bumpType {
-      MAJOR => {
-        parts[0] = parts[0] + 1
-        parts[1] = 0
-        parts[2] = 0
-      }
-      MINOR => {
-        parts[1] = parts[1] + 1
-        parts[2] = 0
-      }
-      PATCH => {
-        parts[2] = parts[2] + 1
-      }
+        throw InvalidCommandException("publish command requires #{airship.cliArgs.publishVersionArg.name} or #{airship.cliArgs.bumpArg.name} argument")
     }
 
-    let newVersion = parts.join(".")
-    log.debug("New version: #{newVersion}")
-    publishVersion(newVersion)
-  }
-
-  async publishVersion(String version) {
-    let status = Git.status(silent: true)
-
-    if (!status.nothingToCommit) {
-      log.error("You have uncommitted changes. Please commit or stash them before publishing.")
-      return
+    static formatVersion(var String version) -> String {
+        version = version.toLowerCase()
+        if (version.startsWith("v")) version = version.substring(1)
+        validateVersion(version)
+        return version
     }
 
-    log.info("Publishing version: #{version}")
+    static validateVersion(String version) {
+        if (!Regex.containsMatch(/^\d+\.\d+\.\d+$/, version)) {
+            throw InvalidCommandException("Invalid version pattern. Must be patterned after semver structure, e.g. 'v0.0.0'")
+        }
+    }
 
-    PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
+    async bump(String bumpType) {
+        log.debug("Bumping: #{bumpType}")
+        let currentVersion = airship.package.version
+        log.debug("Current version: #{currentVersion}")
+        let parts = currentVersion.split(".").map({ Int.parseInt(_) })
 
-    let tagName = "v#{version}"
+        match bumpType {
+            MAJOR => {
+                parts[0] = parts[0] + 1
+                parts[1] = 0
+                parts[2] = 0
+            }
+            MINOR => {
+                parts[1] = parts[1] + 1
+                parts[2] = 0
+            }
+            PATCH => {
+                parts[2] = parts[2] + 1
+            }
+        }
 
-    Git.add(".")
-    Git.commit(tagName)
-    Git.tag(tagName)
-    
-    if (!boolQuestion(cyan("Release tag \"#{tagName}\" has been created. Do you want to push the release now? (Y/n): "))) return
-    
-    pushRelease(tagName)
-  }
+        let newVersion = parts.join(".")
+        log.debug("New version: #{newVersion}")
+        publishVersion(newVersion)
+    }
 
-  async pushRelease(String tagName) {
-    Git.push()
-    Git.pushTag(tagName)
-  }
+    async publishVersion(String version) {
+        let status = Git.status(silent: true)
+
+        if (!status.nothingToCommit) {
+            log.error("You have uncommitted changes. Please commit or stash them before publishing.")
+            return
+        }
+
+        log.info("Publishing version: #{version}")
+
+        PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
+
+        let tagName = "v#{version}"
+
+        Git.add(".")
+        Git.commit(tagName)
+        Git.tag(tagName)
+        
+        if (!boolQuestion(cyan("Release tag \"#{tagName}\" has been created. Do you want to push the release now? (Y/n): "))) return
+        
+        pushRelease(tagName)
+    }
+
+    async pushRelease(String tagName) {
+        Git.push()
+        Git.pushTag(tagName)
+    }
 }

@@ -6,91 +6,91 @@ import flat/io
 import flat/git
 
 class {
-  static Logger log = Logger(UpdateService.class)
+    static Logger log = Logger(UpdateService.class)
 
-  public construct(
-    private Airship airship,
-    private AirshipCli cliArgs,
-    private DependencyService dependencyService,
-    private InstallService installService
-  ) {}
+    public construct(
+        private Airship airship,
+        private AirshipCli cliArgs,
+        private DependencyService dependencyService,
+        private InstallService installService
+    ) {}
 
-  public async update() {
-    if (cliArgs.updateTargetsArg.values.isEmpty) {
-      updateLocalPackage("main")
-    } else {
-      for (package in cliArgs.updateTargetsArg.values) {
-        if (airship.getSourceForPackage(package)) {
-          updateLocalPackage(package)
+    public async update() {
+        if (cliArgs.updateTargetsArg.values.isEmpty) {
+            updateLocalPackage("main")
         } else {
-          updatePackage(package)
+            for (package in cliArgs.updateTargetsArg.values) {
+                if (airship.getSourceForPackage(package)) {
+                    updateLocalPackage(package)
+                } else {
+                    updatePackage(package)
+                }
+            }
         }
-      }
-    }
-  }
-
-  public async updateLocalPackage(String package) -> Dependency[] {
-    log.info("Updating dependencies for #{package}...")
-
-    let source = airship.getSourceForPackage(package)
-    let response = dependencyService.getDependenciesForSource(package, package, source)
-
-    return response.dependencies
-      .filterParallel({ updatePackage(_) })
-      :forEach({ Airship.clearCache(_.airship) })
-      .map({ _.copy() })
-      :forEachAsync({ installService.installDependency(_) })
-  }
-
-  public async updatePackage(
-    String package,
-    Bool: build = true
-  ) =>
-    updatePackage(Dependency.fromPackage(package), build)
-
-  public async updatePackage(
-    Dependency dependency,
-    Bool: build = true
-  ) -> Bool {
-    if (dependency.class.isOfType(GitDependency.class)) {
-      return updateGitPackage((GitDependency)dependency, build)
-    } else if (dependency.class.isOfType(NpmDependency.class)) {
-      log.trace("No need to update node package")
-      return false
-    } else if (dependency.class.isOfType(LocalDependency.class)) {
-      log.trace("No need to update local package")
-      return false
-    } else {
-      throw Exception("Cannot update package: #dependency")
-    }
-  }
-
-  public async updateGitPackage(
-    GitDependency dependency,
-    Bool: build = true
-  ) -> Bool {
-    if (!cliArgs.quietArg.enabled) {
-      log.info("Updating dependency #{dependency.getUrl()}@#{dependency.branch}...")
     }
 
-    let packageLocation = File(dependency.getLocation())
+    public async updateLocalPackage(String package) -> Dependency[] {
+        log.info("Updating dependencies for #{package}...")
 
-    if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
-      throw ExecutionFailureException("Dependency #{dependency.getUrl()}@#{dependency.branch} is not installed")
+        let source = airship.getSourceForPackage(package)
+        let response = dependencyService.getDependenciesForSource(package, package, source)
+
+        return response.dependencies
+            .filterParallel({ updatePackage(_) })
+            :forEach({ Airship.clearCache(_.airship) })
+            .map({ _.copy() })
+            :forEachAsync({ installService.installDependency(_) })
     }
 
-    let git = Git(packageLocation.location)
+    public async updatePackage(
+        String package,
+        Bool: build = true
+    ) =>
+        updatePackage(Dependency.fromPackage(package), build)
 
-    git.checkout(dependency.branch, silent: true)
-
-    let pullResponse = git.pull(silent: true)
-
-    if (pullResponse.upToDate) {
-      log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} already up to date")
-    } else {
-      log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} updated")
+    public async updatePackage(
+        Dependency dependency,
+        Bool: build = true
+    ) -> Bool {
+        if (dependency.class.isOfType(GitDependency.class)) {
+            return updateGitPackage((GitDependency)dependency, build)
+        } else if (dependency.class.isOfType(NpmDependency.class)) {
+            log.trace("No need to update node package")
+            return false
+        } else if (dependency.class.isOfType(LocalDependency.class)) {
+            log.trace("No need to update local package")
+            return false
+        } else {
+            throw Exception("Cannot update package: #dependency")
+        }
     }
 
-    return !pullResponse.upToDate
-  }
+    public async updateGitPackage(
+        GitDependency dependency,
+        Bool: build = true
+    ) -> Bool {
+        if (!cliArgs.quietArg.enabled) {
+            log.info("Updating dependency #{dependency.getUrl()}@#{dependency.branch}...")
+        }
+
+        let packageLocation = File(dependency.getLocation())
+
+        if (!packageLocation.isDirectory && !packageLocation.isSymbolicLink) {
+            throw ExecutionFailureException("Dependency #{dependency.getUrl()}@#{dependency.branch} is not installed")
+        }
+
+        let git = Git(packageLocation.location)
+
+        git.checkout(dependency.branch, silent: true)
+
+        let pullResponse = git.pull(silent: true)
+
+        if (pullResponse.upToDate) {
+            log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} already up to date")
+        } else {
+            log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} updated")
+        }
+
+        return !pullResponse.upToDate
+    }
 }

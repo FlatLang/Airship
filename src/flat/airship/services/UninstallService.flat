@@ -5,55 +5,55 @@ import flat/log
 import flat/io
 
 class {
-  static Logger log = Logger(UninstallService.class)
+    static Logger log = Logger(UninstallService.class)
 
-  public construct(
-    private Airship airship,
-    private AirshipCli cliArgs,
-    private DependencyService dependencyService
-  ) {}
+    public construct(
+        private Airship airship,
+        private AirshipCli cliArgs,
+        private DependencyService dependencyService
+    ) {}
 
-  public async uninstall() {
-    if (cliArgs.uninstallTargetArg.values.isEmpty) {
-      if (cliArgs.uninstallLinkArg.enabled) {
-        if (let gitUrl = airship.getGitOriginUrl()) {
-          cliArgs.uninstallLinkArg.value = "."
-          uninstallGitPackage(gitUrl)
-          return
-        } else {
-          throw InvalidCommandException("#{System.workingDirectory} is not a git repository")
+    public async uninstall() {
+        if (cliArgs.uninstallTargetArg.values.isEmpty) {
+            if (cliArgs.uninstallLinkArg.enabled) {
+                if (let gitUrl = airship.getGitOriginUrl()) {
+                    cliArgs.uninstallLinkArg.value = "."
+                    uninstallGitPackage(gitUrl)
+                    return
+                } else {
+                    throw InvalidCommandException("#{System.workingDirectory} is not a git repository")
+                }
+            }
+
+            throw InvalidCommandException("Invalid uninstall command without a value")
         }
-      }
 
-      throw InvalidCommandException("Invalid uninstall command without a value")
+        for (package in cliArgs.uninstallTargetArg.values) {
+            uninstall(package)
+        }
     }
 
-    for (package in cliArgs.uninstallTargetArg.values) {
-      uninstall(package)
-    }
-  }
-
-  public async uninstall(String package) {
-    uninstallDependency(Dependency.fromPackage(package))
-  }
-
-  public async uninstallDependency(Dependency dependency) {
-    if (dependencyService.isDependencyInstalled(dependency)) {
-      log.debug("Uninstalling dependency #{dependency}")
-      dependencyService.uninstallDependency(dependency)
-    } else {
-      log.debug("Dependency #{dependency} not installed")
-    }
-  }
-
-  public async uninstallGitPackage(String url) {
-    let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-    let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
-
-    if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
-      throw InvalidCommandException("Package '#packageName' is not installed")
+    public async uninstall(String package) {
+        uninstallDependency(Dependency.fromPackage(package))
     }
 
-    flatPackageDir.delete(recursive: true)
-  }
+    public async uninstallDependency(Dependency dependency) {
+        if (dependencyService.isDependencyInstalled(dependency)) {
+            log.debug("Uninstalling dependency #{dependency}")
+            dependencyService.uninstallDependency(dependency)
+        } else {
+            log.debug("Dependency #{dependency} not installed")
+        }
+    }
+
+    public async uninstallGitPackage(String url) {
+        let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
+        let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
+
+        if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
+            throw InvalidCommandException("Package '#packageName' is not installed")
+        }
+
+        flatPackageDir.delete(recursive: true)
+    }
 }
