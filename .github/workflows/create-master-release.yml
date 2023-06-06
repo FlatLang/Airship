@@ -17,6 +17,9 @@ jobs:
       - name: Check tag exists for SHA
         id: check_exists
         run: |
+          git fetch --unshallow --tags
+          echo $?
+          git tag --list
           if [[ $(git show-ref --tags -d | grep "${{ github.sha }}") =~ "v" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "exists"
