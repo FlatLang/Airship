@@ -332,15 +332,9 @@ class {
     }
 
     async installAndLink(String url) {
-        let start = url.lastIndexOf('/') + 1
-        let end = url.lastIndexOf('.')
-
-        if (start > end) {
-            throw InvalidFlatJsonException("Invalid repo url '#url'")
-        }
-
-        let packageName = url.substring(start, end)
-        let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
+        let dependency = GitDependency(url, "[link]")
+        let flatPackageDir = File(dependency.getLocation())
+        flatPackageDir.getParent().mkdirs()
 
         flatPackageDir.symbolicLinkTo(File("#{System.workingDirectory}/#{cliArgs.installLinkArg.value}"))
 

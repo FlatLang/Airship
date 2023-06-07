@@ -18,7 +18,7 @@ class {
             if (cliArgs.uninstallLinkArg.enabled) {
                 if (let gitUrl = airship.getGitOriginUrl()) {
                     cliArgs.uninstallLinkArg.value = "."
-                    uninstallGitPackage(gitUrl)
+                    uninstallDependency(GitDependency(gitUrl, "[link]"))
                     return
                 } else {
                     throw InvalidCommandException("#{System.workingDirectory} is not a git repository")
@@ -44,16 +44,5 @@ class {
         } else {
             log.debug("Dependency #{dependency} not installed")
         }
-    }
-
-    public async uninstallGitPackage(String url) {
-        let packageName = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
-        let flatPackageDir = File("#{Airship.flatHome}/packages/#{packageName}")
-
-        if (!flatPackageDir.isDirectory && !flatPackageDir.isSymbolicLink) {
-            throw InvalidCommandException("Package '#packageName' is not installed")
-        }
-
-        flatPackageDir.delete(recursive: true)
     }
 }

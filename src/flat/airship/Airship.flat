@@ -16,6 +16,7 @@ import flat/regex/RegexStringExtensions
 
 class {
     visible static String flatHome = getFlatHome()
+    visible static Bool useLinks = false
 
     visible Package package
     visible String outFile
@@ -117,6 +118,7 @@ class {
                     cliArgs.quietArg,
                     cliArgs.flatcRuntimeArg,
                     cliArgs.publishCommand,
+                    cliArgs.useLinksArg,
                 ],
                 description: "Flat's package manager"
             ):parse(args),
@@ -129,6 +131,8 @@ class {
         visible Airship parent = null
     ) {
         checkHelpCommand()
+
+        useLinks = cliArgs.useLinksArg.enabled
 
         if (cliArgs.debugArg.enabled) {
             cliArgs.quietArg.enabled = true
@@ -530,6 +534,9 @@ class {
     isCoreLibrary() => getRootParent().packageLocation.normalizedLocation.endsWith("/Flat-Core")
 
     public propagateArgs(String[] args) {
+        if (cliArgs.useLinksArg.enabled) {
+            args.add("--use-links")
+        }
         if (target) {
             args.addAll(["-t", target])
         }

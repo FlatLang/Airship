@@ -105,6 +105,11 @@ class {
         description: "Print all the help information recursively for an argument, command, or option"
     )
 
+    visible CliArg useLinksArg = CliArg(
+        name: "--use-links",
+        description: "Use packages installed as symbolic links where possible in favor of any version defined in a flat.json file"
+    )
+
     visible CliArg setupCommand = CliArg(
         name: "setup",
         description: "Setup the Airship CLI",

@@ -27,15 +27,11 @@ class {
     }
 
     async reinstall(String package) {
-        if (package.endsWith(".git")) {
-            reinstallGitPackage(package)
-        } else {
-            throw InvalidCommandException("Cannot reinstall package '#package'")
-        }
+        reinstallGitPackage(GitDependency(package))
     }
 
-    async reinstallGitPackage(String url) {
-        airship.uninstallService.uninstallGitPackage(url)
-        airship.installService.installDependency(GitDependency(url, "master"))
+    async reinstallGitPackage(GitDependency dependency) {
+        airship.uninstallService.uninstallDependency(dependency)
+        airship.installService.installDependency(dependency)
     }
 }
