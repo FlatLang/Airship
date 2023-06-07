@@ -35,6 +35,15 @@ class {
             publishVersion(version)
             return
         }
+        let tagNames = Git.lsRemoteTags().tags.map({ _.name })
+        log.debug("|
+            Checking tag names for v#{airship.package.version}:
+                #{tagNames.join("\n  ")}
+            |")
+        if (!tagNames.contains("v#{airship.package.version}")) {
+            publishVersion(airship.package.version)
+            return
+        }
         if (airship.cliArgs.pushReleaseArg.enabled) {
             pushRelease("v#{airship.package.version}")
             return
@@ -92,12 +101,15 @@ class {
 
         log.info("Publishing version: #{version}")
 
-        PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
-
         let tagName = "v#{version}"
 
-        Git.add(".")
-        Git.commit(tagName)
+        if (airship.package.version != version) {
+            PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
+
+            Git.add(".")
+            Git.commit(tagName)
+        }
+
         Git.tag(tagName)
         
         if (!boolQuestion(cyan("Release tag \"#{tagName}\" has been created. Do you want to push the release now? (Y/n): "))) return
