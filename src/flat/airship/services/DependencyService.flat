@@ -105,12 +105,6 @@ class {
         DependenciesResponse response,
         HashSet<String> dependenciesAdded
     ) -> DependenciesResponse {
-        if (dependenciesAdded.contains(package)) {
-            return response
-        }
-
-        dependenciesAdded.add(package)
-
         if (!source?.dependencies) {
             return response
         }
@@ -132,20 +126,27 @@ class {
                     return true
                 }
             })
-            :forEachParallel({
+            .mapParallel({
                 let dependencyPackageFile = File(_x.getLocation())
 
                 if (download && !dependencyPackageFile.exists) {
                     installDependency(_x)
                     response.dependenciesDownloaded.add(_x)
                 }
-            })
-            :forEachAsync({
-                let dependencyPackageFile = File(_x.getLocation())
 
-                let args = [
-                    "-f", dependencyPackageFile.normalizedLocation
-                ]
+                return dependencyPackageFile
+            })
+            :forEachAsync((dependencyPackageFile) => {
+                let location = dependencyPackageFile.normalizedLocation
+
+                if (dependenciesAdded.contains(location)) {
+                    log.debug("Dependency already added #{location}")
+                    return
+                }
+
+                dependenciesAdded.add(location)
+
+                let args = ["-f", location]
 
                 airship.propagateArgs(args)
 
