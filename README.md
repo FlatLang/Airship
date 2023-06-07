@@ -33,6 +33,8 @@ OPTIONS:
     --no-replace-log-line              Do not replace the logging info output after each line
     --quiet, -q                        Do not print Airship log messages
     --flatc-runtime                    Specify the Flat compiler runtime
+    --use-links                        Use packages installed as symbolic links where possible
+                                       in favor of any version defined in a flat.json file
 ```
 
 -----------------------------------------------------------------------------------------------
