@@ -23,7 +23,7 @@ testable class {
 
         let allOutput = Console.out.captureOutput({ airship.installService.install() })
 
-        expect(allOutput.count).toBe(1, "Extaneous output: #allOutput")
+        expect(allOutput.count).toBe(1, "Extraneous output: #allOutput")
 
         let output = allOutput[0]
         let cmdOutput = output.splitOnTopLevel(' ')
