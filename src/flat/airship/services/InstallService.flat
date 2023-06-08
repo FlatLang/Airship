@@ -147,7 +147,8 @@ class {
     public async getLegacyInstallArguments(String installationTarget, PackageSource source) -> String[] {
         let args = String[]
 
-        let currentDependency = Dependency.fromPackage("local:#{airship.packageLocation.normalizedLocation}")
+        let currentDependencyCanonicalLocation = airship.packageLocation.getCanonicalFile().normalizedLocation
+        let currentDependency = Dependency.fromPackage("local:#{currentDependencyCanonicalLocation}")
         let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
         let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
         let excludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
