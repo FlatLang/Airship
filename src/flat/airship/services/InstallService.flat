@@ -276,7 +276,12 @@ class {
             ? ((GitDependency)d2).sshUrl
             : Git.getOriginUrl(workingDirectory: d2.getLocation(), silent: true).value
 
-        if (d1Origin != d2Origin) return false
+        if (d1Origin != d2Origin) {
+            log.debug("#{d1Origin} (#{d1.getLocation()}) != #{d2Origin} (#{d2.getLocation()})")
+            return false
+        }
+
+        log.debug("#{d1Origin} (#{d1.getLocation()}) == #{d2Origin} (#{d2.getLocation()})")
 
         return true
     }
