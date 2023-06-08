@@ -35,7 +35,7 @@ class {
             publishVersion(version)
             return
         }
-        let tagNames = Git.lsRemoteTags().tags.map({ _.name })
+        let tagNames = Git.lsRemoteTags(silent: true).tags.map({ _.name })
         log.debug("|
             Checking tag names for v#{airship.package.version}:
                 #{tagNames.join("\n  ")}
