@@ -33,6 +33,7 @@ testable class {
         let source = airship.getSourceForPackage(package)
 
         let currentDependency = Dependency.fromPackage("local:#{airship.packageLocation.normalizedLocation}")
+        let flatjsDependency = Dependency.fromPackage("git@github.com:FlatLang/Flat-JS")
         let excludeSources = airship.dependencyService.getDependencyExclusions(currentDependency, package)
         let excludeSource = package == "test" ? null : airship.dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
 
@@ -47,6 +48,7 @@ testable class {
             "-install-dir", "#{flatHome}/packages",
             "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
             "-target", "js",
+            "-engine-jar", "#{flatjsDependency.getLocation()}/target/flat-js.jar",
             "-parallel",
         ]
 
