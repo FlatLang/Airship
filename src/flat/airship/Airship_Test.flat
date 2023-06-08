@@ -6,6 +6,7 @@ import flat/fucli/FuCli.InvalidCliArgumentException
 import flat/fucli/FuCli.RequiredCliArgumentException
 import flat/airship/InvalidOutDirException
 import flat/io/File
+import flat/datastruct
 
 import flat/extensions/SyntaxStringFunctions
 
@@ -89,6 +90,16 @@ testable class {
         cmd.addAll([
             "-main", "flat/airship/Airship"
         ])
+
+        let appProps = HashMap()
+            :add("name", airship.package.name)
+            :add("version", airship.package.version)
+            :add("description", airship.package.description)
+            :add("author", airship.package.author)
+            :add("license", airship.package.license)
+            :add("defaultTarget", airship.package.defaultTarget)
+
+        cmd.addAll(["-app-props", appProps.toJson()])
 
         let expected = cmd.map({
             if (_i > 0) {
