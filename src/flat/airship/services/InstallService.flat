@@ -70,7 +70,17 @@ class {
     }
 
     async checkInstallTarget() {
-        if (!airship.target) return
+        let dependency = getInstallTargetDependency()
+
+        if (!dependency) return
+
+        if (!dependencyService.isDependencyInstalled(dependency)) {
+            installDependency(dependency)
+        }
+    }
+
+    async getInstallTargetDependency() -> Dependency {
+        if (!airship.target) return null
 
         let target = match airship.target.toLowerCase() {
             "es6" => "ES6"
@@ -81,20 +91,17 @@ class {
         }
 
         let package = "git@github.com:FlatLang/Flat-#{target}"
-        let dependency = Dependency.fromPackage(package)
-
-        if (!dependencyService.isDependencyInstalled(dependency)) {
-            Airship(["install", package, "--flatc-runtime", "java"]):run()
-        }
+        return Dependency.fromPackage(package)
     }
 
     getOutputDirectory(PackageSource source) => File("#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}")
 
-    public async getInstallCommand(String installationTarget, PackageSource source) -> String[] {
-        return getFlatcExecutableCommand().plus(getFlatcExecutableArguments(installationTarget, source))
+    public async getInstallCommand(String installationTarget, PackageSource source, Dependency[] dependencies) -> String[] {
+        return getFlatcExecutableCommand(dependencies).plus(getFlatcExecutableArguments(installationTarget, source))
     }
 
-    getFlatcExecutableCommand() -> String[] {
+    getFlatcExecutableCommand(Dependency[] dependencies) -> String[] {
+        let flat = dependencies.firstWhere({ _.name == "Flat" })
         let runtime = cliArgs.flatcRuntimeValueArg.value?.toLowerCase()?.trim() ?: "java"
 
         match runtime {
@@ -105,14 +112,14 @@ class {
                 }
 
                 return [
-                    "#{Airship.flatHome}/packages/Flat/target/#{nativeFileName}",
+                    "#{flat.getLocation()}/target/#{nativeFileName}",
                 ]
             }
             "java" => {
                 return [
                     "java",
                     "-jar",
-                    "#{Airship.flatHome}/packages/Flat/target/flatc.jar",
+                    "#{flat.getLocation()}/target/flatc.jar",
                 ]
             }
             "flat" => {
@@ -162,6 +169,9 @@ class {
         if (airship.target) {
             log.trace("Adding target: #{airship.target}")
             args.addAll(["-target", airship.target])
+            args.addAll([
+                "-engine-jar", "#{getInstallTargetDependency().getLocation()}/target/flat-#{airship.target.toLowerCase()}.jar",
+            ])
         }
         if (cliArgs.targetRuntimeArg.enabled) {
             log.trace("Adding source locations: #{cliArgs.targetRuntimeArg["runtime"].value}")
@@ -284,7 +294,7 @@ class {
         checkInstallTarget()
         checkInstallCompiler()
 
-        let cmd = getInstallCommand(package, source)
+        let cmd = getInstallCommand(package, source, dependencies)
 
         if (airship.debug) {
             Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ '"' + _.trimStart('"').trimEnd('"') + '"' }).join(" "))

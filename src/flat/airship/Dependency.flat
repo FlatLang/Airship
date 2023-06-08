@@ -6,7 +6,8 @@ import flat/datastruct/HashMap
 import flat/airship/PackageSource
 
 abstract data class {
-    visible let lazy Airship airship => Airship(getLocation())
+    visible lazy Airship airship => Airship(getLocation())
+    visible lazy String name => File(getLocation()).name
 
     public static fromPackage(String package) -> Dependency {
         return if (package.toLowerCase().startsWith("npm:")) {

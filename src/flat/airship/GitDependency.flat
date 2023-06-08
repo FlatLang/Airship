@@ -14,6 +14,8 @@ data class extends Dependency {
     visible String packageRootLocation
     visible String packageLocation
 
+    visible lazy String name => repoName
+
     public construct(String url) {
         let lower = url.toLowerCase()
 
