@@ -265,6 +265,8 @@ class {
             args.add("-library")
         }
 
+        args.addAll(airship.cliArgs.propagationArgs.values)
+
         return args
     }
 
@@ -301,6 +303,7 @@ class {
 
         log.trace("Adding source locations: #{sourceLocations}")
         args.addAll(sourceLocations.map({ "\"#_\"" }))
+        args.addAll(airship.cliArgs.propagationArgs.values)
 
         return args
     }

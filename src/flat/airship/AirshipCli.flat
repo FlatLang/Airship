@@ -361,4 +361,22 @@ class {
             pushReleaseArg,
         ]
     )
+
+    visible CliArg propagationArgs = CliArg(
+        name: "wildcardArg",
+        description: "An argument to propagate to the flat compiler binary",
+        minCount: 1,
+        wildcard: true,
+        hidden: true,
+        required: true
+    )
+
+    visible CliArg propagateArg = CliArg(
+        name: "--",
+        description: "Pass-through arguments to the flat compiler binary",
+        minCount: 1,
+        eager: true,
+        hidden: true,
+        args: [propagationArgs]
+    )
 }

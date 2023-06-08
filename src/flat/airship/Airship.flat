@@ -119,6 +119,7 @@ class {
                     cliArgs.flatcRuntimeArg,
                     cliArgs.publishCommand,
                     cliArgs.useLinksArg,
+                    cliArgs.propagateArg,
                 ],
                 description: "Flat's package manager"
             ):parse(args),
