@@ -216,7 +216,7 @@ class {
         })
 
         response.dependencies
-            .filter({ _.getLocation() != gitDependency.getLocation() })
+            .filterParallel({ !areDependencySourcesEquivalent(_, gitDependency) })
             .filter({ _.isFlatPackage() })
             .filter({ dependencyLocations[_].none({ canonicalSourceLocations.contains(_) }) })
             .forEach({
@@ -266,6 +266,19 @@ class {
         }
 
         return args
+    }
+
+    public async areDependencySourcesEquivalent(Dependency d1, Dependency d2) -> Bool {
+        let d1Origin = d1.class.isOfType(GitDependency.class)
+            ? ((GitDependency)d1).sshUrl
+            : Git.getOriginUrl(workingDirectory: d1.getLocation(), silent: true).value
+        let d2Origin = d2.class.isOfType(GitDependency.class)
+            ? ((GitDependency)d2).sshUrl
+            : Git.getOriginUrl(workingDirectory: d2.getLocation(), silent: true).value
+
+        if (d1Origin != d2Origin) return false
+
+        return true
     }
 
     public async getFlatcInstallArguments(String installationTarget, PackageSource source) -> String[] {
