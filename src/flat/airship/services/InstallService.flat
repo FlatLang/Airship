@@ -268,13 +268,17 @@ class {
         return args
     }
 
-    public async areDependencySourcesEquivalent(Dependency d1, Dependency d2) -> Bool {
-        let d1Origin = d1.class.isOfType(GitDependency.class)
-            ? ((GitDependency)d1).sshUrl
-            : Git.getOriginUrl(workingDirectory: d1.getLocation(), silent: true).value
-        let d2Origin = d2.class.isOfType(GitDependency.class)
-            ? ((GitDependency)d2).sshUrl
-            : Git.getOriginUrl(workingDirectory: d2.getLocation(), silent: true).value
+    async getGitDependency(Dependency d) -> GitDependency? => null {
+        if (d.class.isOfType(GitDependency.class)) return (GitDependency)d
+
+        let url = Git.getOriginUrl(workingDirectory: d.getLocation(), silent: true).value
+
+        return url ? GitDependency(url) : null
+    }
+
+    async areDependencySourcesEquivalent(Dependency d1, Dependency d2) -> Bool {
+        let d1Origin = getGitDependency(d1)?.sshUrl
+        let d2Origin = getGitDependency(d2)?.sshUrl
 
         if (d1Origin != d2Origin) {
             log.debug("#{d1Origin} (#{d1.getLocation()}) != #{d2Origin} (#{d2.getLocation()})")
