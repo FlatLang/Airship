@@ -469,7 +469,6 @@ class {
 
         let commands = cli.usedArgs.stream()
             .filter({ !_.wildcard })
-            .filter({ !_.name.startsWith("-") })
             .toArray()
 
         for (command in commands) {
