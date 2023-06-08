@@ -147,6 +147,8 @@ class {
     public async getLegacyInstallArguments(String installationTarget, PackageSource source) -> String[] {
         let args = String[]
 
+        let originUrl = airship.getGitOriginUrl()
+        let gitDependency = originUrl ? GitDependency(originUrl) : null
         let currentDependencyCanonicalLocation = airship.packageLocation.getCanonicalFile().normalizedLocation
         let currentDependency = Dependency.fromPackage("local:#{currentDependencyCanonicalLocation}")
         let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
@@ -214,6 +216,7 @@ class {
         })
 
         response.dependencies
+            .filter({ _.getLocation() != gitDependency.getLocation() })
             .filter({ _.isFlatPackage() })
             .filter({ dependencyLocations[_].none({ canonicalSourceLocations.contains(_) }) })
             .forEach({
