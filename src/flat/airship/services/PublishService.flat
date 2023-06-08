@@ -22,8 +22,8 @@ class {
     ) {}
 
     public async publish() {
-        if (airship.cliArgs.bumpTypeArg.enabled) {
-            bump(airship.cliArgs.bumpTypeArg.value.toLowerCase())
+        if (airship.cliArgs.bumpArg.values.isNotEmpty) {
+            bump(airship.cliArgs.bumpArg.value.toLowerCase())
             return
         }
         if (airship.cliArgs.bumpArg.enabled) {

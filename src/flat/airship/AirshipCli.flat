@@ -333,18 +333,34 @@ class {
         wildcard: true
     )
 
-    visible CliArg bumpTypeArg = CliArg(
-        name: "bumpType",
-        description: "Specify to bump major/minor/patch number",
-        count: 1,
-        wildcard: true
+    visible CliArg majorBumpArg = CliArg(
+        name: "major",
+        description: "Bump the version by a major version. e.g. from v1.2.3 to v2.0.0",
+        count: 0
+    )
+
+    visible CliArg minorBumpArg = CliArg(
+        name: "minor",
+        description: "Bump the version by a minor version. e.g. from v1.2.3 to v1.3.0",
+        count: 0
+    )
+
+    visible CliArg patchBumpArg = CliArg(
+        name: "patch",
+        description: "Bump the version by a patch version. e.g. from v1.2.3 to v1.2.4",
+        count: 0
     )
 
     visible CliArg bumpArg = CliArg(
         name: "--bump",
         description: "Bump the version number",
         minCount: 0,
-        args: [bumpTypeArg]
+        maxCount: 1,
+        args: [
+            majorBumpArg,
+            minorBumpArg,
+            patchBumpArg,
+        ]
     )
 
     visible CliArg pushReleaseArg = CliArg(
