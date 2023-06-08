@@ -103,7 +103,7 @@ testable class {
 
         let expected = cmd.map({
             if (_i > 0) {
-                return '"' + _x.trimStart('"').trimEnd('"') + '"'
+                return '"' + _x.trimStart('"').trimEnd('"').replace("\"", "\\\"") + '"'
             } else {
                 return _x
             }

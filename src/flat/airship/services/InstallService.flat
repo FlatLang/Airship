@@ -336,7 +336,7 @@ class {
         let cmd = getInstallCommand(package, source, dependencies)
 
         if (airship.debug) {
-            Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ '"' + _.trimStart('"').trimEnd('"') + '"' }).join(" "))
+            Console.writeLine(cmd[0] + " " + cmd.skip(1).map({ '"' + _.trimStart('"').trimEnd('"').replace("\"", "\\\"") + '"' }).join(" "))
             return
         }
 
