@@ -124,7 +124,7 @@ class {
             }
             "flat" => {
                 return [
-                    "flatc",
+                    "#{Airship.flatHome}/bin/flatc",
                 ]
             }
             default => {
