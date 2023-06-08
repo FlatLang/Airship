@@ -1,5 +1,6 @@
 package flat/airship/services
 
+import flat
 import flat/log/Logger
 import flat/io/File
 import flat/io/FileWriter
@@ -17,7 +18,7 @@ class {
 
     public construct(private Airship airship) {}
 
-    public async getVersion() {
-        log.info("v#{airship.package.version}")
+    public getVersion() {
+        log.info("v#{App.version}")
     }
 }

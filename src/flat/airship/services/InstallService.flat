@@ -265,6 +265,16 @@ class {
             args.add("-library")
         }
 
+        let appProps = HashMap()
+            :add("name", airship.package.name)
+            :add("version", airship.package.version)
+            :add("description", airship.package.description)
+            :add("author", airship.package.author)
+            :add("license", airship.package.license)
+            :add("defaultTarget", airship.package.defaultTarget)
+
+        args.addAll(["-app-props", appProps.toJson()])
+
         args.addAll(airship.cliArgs.propagationArgs.values)
 
         return args
