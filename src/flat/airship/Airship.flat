@@ -512,7 +512,7 @@ class {
     }
 
     public async getGitOriginUrl() -> String => null {
-        let response = Git.getOriginUrl(silent: true)
+        let response = Git.getOriginUrl(workingDirectory: packageLocation.location, silent: true)
 
         if (response.success) {
             let url = response.value
