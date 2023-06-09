@@ -29,7 +29,7 @@ class {
         let dependency = Dependency.fromPackage(dependencyName, useLinks: false)
 
         if (dependencyService.isDependencyInstalled(dependency)) {
-            if (logIfExists) log.info("Package already exists")
+            if (logIfExists) log.info("Package already exists at #{dependency.getLocation()}")
 
             return
         }
