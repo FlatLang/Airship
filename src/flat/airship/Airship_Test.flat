@@ -7,8 +7,10 @@ import flat/fucli/FuCli.RequiredCliArgumentException
 import flat/airship/InvalidOutDirException
 import flat/io/File
 import flat/datastruct
+import flat/regex
 
 import flat/extensions/SyntaxStringFunctions
+import flat/regex/RegexStringExtensions
 
 testable class {
     test `can create`() {
@@ -45,7 +47,7 @@ testable class {
 
         let cmd = [
             "java", "-jar", "#{flat.getLocation()}/target/flatc.jar",
-            "\"#{airship.packageLocation.normalizedLocation}/src\"",
+            "#{airship.packageLocation.normalizedLocation}/src",
             "-install-dir", "#{flatHome}/packages",
             "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
             "-target", "js",
@@ -53,24 +55,24 @@ testable class {
             "-parallel",
         ]
 
-        excludeSources.forEach({ cmd.addAll(["-x", "\"#_\""]) })
+        excludeSources.forEach({ cmd.addAll(["-x", _]) })
 
         if (excludeSource) {
-            cmd.addAll(["-x", "\"#excludeSource\""])
+            cmd.addAll(["-x", excludeSource])
         }
 
         response.dependencies.forEach((dependency) => {
             airship.dependencyService.getDependencySourceLocations(dependency).forEach({
-                cmd.addAll(["-l", "\"#_\""])
+                cmd.addAll(["-l", _])
             })
             airship.dependencyService.getDependencyExclusions(dependency, package).forEach({
-                cmd.addAll(["-x", "\"#_\""])
+                cmd.addAll(["-x", _])
             })
 
             let dependencyExcludeSource = airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
             if (dependencyExcludeSource) {
-                cmd.addAll(["-x", "\"#dependencyExcludeSource\""])
+                cmd.addAll(["-x", dependencyExcludeSource])
             }
         })
 
@@ -80,11 +82,11 @@ testable class {
 
             dependencySource?.defaultExports
                 .filter({ !_.staticImport })
-                .forEach({ cmd.addAll(["-default-import", "\"#{_.location}\""]) })
+                .forEach({ cmd.addAll(["-default-import", _.location]) })
 
             dependencySource?.defaultExports
                 .filter({ _.staticImport })
-                .forEach({ cmd.addAll(["-default-static-import", "\"#{_.location}\""]) })
+                .forEach({ cmd.addAll(["-default-static-import", _.location]) })
         })
 
         cmd.addAll([
@@ -101,15 +103,12 @@ testable class {
 
         cmd.addAll(["-app-props", appProps.toJson()])
 
-        let expected = cmd.map({
-            if (_i > 0) {
-                return '"' + _x.trimStart('"').trimEnd('"').replace("\"", "\\\"") + '"'
-            } else {
-                return _x
-            }
-        })
+        let sanitizedCmd = cmd.stream()
+            .map({ _.replace("\"", "\\\"") })
+            .map({ _x.contains(/\s/) ? "\"#{_x}\"" : _x })
+            .toArray()
 
-        expect(cmdOutput).toBe(expected)
+        expect(cmdOutput).toBe(sanitizedCmd)
     }
 
     test `fails on invalid -f arg (only arg given, with no value)`() {
