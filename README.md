@@ -35,6 +35,7 @@ OPTIONS:
     --flatc-runtime                    Specify the Flat compiler runtime
     --use-links                        Use packages installed as symbolic links where possible
                                        in favor of any version defined in a flat.json file
+    --purge                            Uninstall the dependency from the disk
 ```
 
 -----------------------------------------------------------------------------------------------
@@ -316,8 +317,10 @@ OPTIONS:
 Bump the version number
 
 USAGE:
-    airship publish --bump <bumpType>
+    airship publish --bump <major|minor|patch>
 
-ARGUMENTS:
-    <bumpType>    Specify to bump major/minor/patch number
+COMMANDS:
+    major    Bump the version by a major version. e.g. from v1.2.3 to v2.0.0
+    minor    Bump the version by a minor version. e.g. from v1.2.3 to v1.3.0
+    patch    Bump the version by a patch version. e.g. from v1.2.3 to v1.2.4
 ```

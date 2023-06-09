@@ -365,7 +365,8 @@ class {
             majorBumpArg,
             minorBumpArg,
             patchBumpArg,
-        ]
+        ],
+        commandHelpDisplay: "major|minor|patch"
     )
 
     visible CliArg pushReleaseArg = CliArg(
