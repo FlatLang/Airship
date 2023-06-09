@@ -246,7 +246,7 @@ class {
 
         log.info("Cloning dependency #{url}@#{branch} into '#{flatPackageDir.normalizedLocation}'...")
 
-        let response = Git.clone(
+        let clone = Git.clone(
             url,
             depth: 1,
             branch,
@@ -254,10 +254,54 @@ class {
             silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
         )
 
-        if (response.exitCode != 0) {
+        if (clone.exitCode != 0) {
             throw ExecutionFailureException("|
-                Failed to install git repo:
-                #{response.stderr.join("\n")}
+                Failed to clone git repo:
+                    #{clone.stderr.join("\n   ")}
+                |")
+        }
+
+        let lsRemote = Git.lsRemoteTags(
+            remote: dependency.httpsUrl,
+            silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+        )
+
+        if (!lsRemote.success) {
+            throw ExecutionFailureException("|
+                Failed to fetch ls-remote repo:
+                    #{lsRemote.executionResponse.stderr.join("\n   ")}
+                |")
+        }
+
+        if (lsRemote.tags.map({ _.name }).none({ _ == branch })) {
+            log.debug("There are no tags with name #{branch}, so sticking with the branch.")
+            return
+        }
+
+        let fetch = Git.fetch(
+            ref: "refs/tags/#{branch}",
+            depth: 1,
+            workingDirectory: flatPackageDir.normalizedLocation,
+            silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+        )
+
+        if (fetch.exitCode != 0) {
+            throw ExecutionFailureException("|
+                Failed to fetch git repo:
+                    #{fetch.stderr.join("\n   ")}
+                |")
+        }
+
+        let checkout = Git.checkout(
+            ref: "refs/tags/#{branch}",
+            workingDirectory: flatPackageDir.normalizedLocation,
+            silent: cliArgs.quietArg.enabled || log.loggingLevel < Logger.DEBUG
+        )
+
+        if (checkout.exitCode != 0) {
+            throw ExecutionFailureException("|
+                Failed to checkout git repo:
+                    #{checkout.stderr.join("\n   ")}
                 |")
         }
     }
