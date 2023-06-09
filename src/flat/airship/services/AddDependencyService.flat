@@ -44,6 +44,6 @@ class {
 
         PackageFileUtil.appendJsonValue(airship.flatJsonFile, "sources.#{source.name}.dependencies", dependency.toJsonEntry())
 
-        log.info("Added dependency #{dependencyName}")
+        log.info("Added dependency #{dependency.toJsonKey()}")
     }
 }
