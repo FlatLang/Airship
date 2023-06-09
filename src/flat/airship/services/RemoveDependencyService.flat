@@ -61,7 +61,7 @@ class {
             log.info("|
                 Dependency \"#{dependencyName}\" not formatted correctly in flat.json file
                     Could not find dependency with key \"#{dependency.toJsonKey()}\"
-            |")
+                |")
 
             return
         }
