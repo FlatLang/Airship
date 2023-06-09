@@ -9,7 +9,7 @@ abstract data class {
     visible lazy Airship airship => Airship(getLocation())
     visible lazy String name => File(getLocation()).name
 
-    public static fromPackage(String package) -> Dependency {
+    public static fromPackage(String package, Bool useLinks = true) -> Dependency {
         return if (package.toLowerCase().startsWith("npm:")) {
             let packageName = package.contains("@") ?
                 package.substring("npm:".count, package.indexOf("@")) :
@@ -23,7 +23,7 @@ abstract data class {
         } else if (package.toLowerCase().startsWith("local:")) {
             LocalDependency(package.substring("local:".count))
         } else {
-            GitDependency(package)
+            GitDependency(package, useLinks)
         }
 
         throw Exception("Invalid dependency \"#package\"")

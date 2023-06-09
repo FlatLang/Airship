@@ -26,7 +26,7 @@ class {
     }
 
     public async getPackage(String dependencyName, Bool logIfExists = true) {
-        let dependency = Dependency.fromPackage(dependencyName)
+        let dependency = Dependency.fromPackage(dependencyName, useLinks: false)
 
         if (dependencyService.isDependencyInstalled(dependency)) {
             if (logIfExists) log.info("Package already exists")

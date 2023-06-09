@@ -16,7 +16,10 @@ data class extends Dependency {
 
     visible lazy String name => repoName
 
-    public construct(String url) {
+    public construct(
+        String url,
+        Bool useLinks = true
+    ) {
         let lower = url.toLowerCase()
 
         if (lower.startsWith("github:")) {
@@ -25,17 +28,17 @@ data class extends Dependency {
             let branchStart = url.indexOf('@', start: 5) + 1
 
             if (branchStart > 0) {
-                this(url.substring(end: branchStart - 1), url.substring(branchStart))
+                this(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
             } else {
-                this(url, "master")
+                this(url, "master", useLinks)
             }
         } else if (lower.startsWith("https://")) {
             let branchStart = url.indexOf('@', start: 9) + 1
 
             if (branchStart > 0) {
-                this(url.substring(end: branchStart - 1), url.substring(branchStart))
+                this(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
             } else {
-                this(url, "master")
+                this(url, "master", useLinks)
             }
         } else {
             throw Exception("Invalid Git dependency url: #{url}")
@@ -44,7 +47,8 @@ data class extends Dependency {
 
     public construct(
         String url,
-        this String branch
+        this String branch,
+        Bool useLinks = true
     ) {
         super()
 
@@ -66,7 +70,7 @@ data class extends Dependency {
         sshUrl = "git@#{host}:#{repoDetails}.git"
         httpsUrl = "https://#{host}/#{repoDetails}.git"
 
-        if (Airship.useLinks && File("#{packageRootLocation}/[link]").exists) {
+        if (useLinks && Airship.useLinks && File("#{packageRootLocation}/[link]").exists) {
             packageLocation = "#{packageRootLocation}/[link]"
         }
     }
