@@ -119,6 +119,7 @@ class {
                     cliArgs.flatcRuntimeArg,
                     cliArgs.publishCommand,
                     cliArgs.useLinksArg,
+                    cliArgs.purgeArg,
                     cliArgs.propagateArg,
                 ],
                 description: "Flat's package manager"
@@ -488,7 +489,7 @@ class {
                 cliArgs.binCommand => binaryService.create(cliArgs.binaryArg.values)
                 cliArgs.versionArg => versionService.getVersion()
                 cliArgs.addDependencyCommand => addDependencyService.addDependencies(cliArgs.addDependencyArg.values)
-                cliArgs.removeDependencyCommand => removeDependencyService.removeDependencies(cliArgs.removeDependencyArg.values)
+                cliArgs.removeDependencyCommand => removeDependencyService.removeDependencies(cliArgs.removeDependencyArg.values, cliArgs.purgeArg.enabled)
                 cliArgs.publishCommand => publishService.publish()
             }
         }

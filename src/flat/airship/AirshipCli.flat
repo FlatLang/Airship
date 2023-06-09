@@ -290,6 +290,11 @@ class {
         args: [addDependencyArg]
     )
 
+    visible CliArg purgeArg = CliArg(
+        name: "--purge",
+        description: "Uninstall the dependency from the disk"
+    )
+
     visible CliArg removeDependencyArg = CliArg(
         name: "dependency",
         description: "The dependency to remove",

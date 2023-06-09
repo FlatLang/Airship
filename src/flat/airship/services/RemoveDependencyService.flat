@@ -19,13 +19,13 @@ class {
         private UninstallService uninstallService
     ) {}
 
-    public async removeDependencies(String[] dependencyNames) {
+    public async removeDependencies(String[] dependencyNames, Bool purge = false) {
         for (dependency in dependencyNames) {
-            removeDependency(dependency)
+            removeDependency(dependency, purge)
         }
     }
 
-    public async removeDependency(String dependencyName) {
+    public async removeDependency(String dependencyName, Bool purge = false) {
         let dependency = Dependency.fromPackage(dependencyName)
         let source = airship.package.defaultSource
 
@@ -58,7 +58,10 @@ class {
         log.debug("Searched for #{dependency.toJsonKey()} and got index: #dependencyIndex")
 
         if (dependencyIndex == -1 || dependencyIndex > endingBrace) {
-            log.info("Dependency \"#{dependencyName}\" not formatted correctly in flat.json file")
+            log.info("|
+                Dependency \"#{dependencyName}\" not formatted correctly in flat.json file
+                    Could not find dependency with key \"#{dependency.toJsonKey()}\"
+            |")
 
             return
         }
@@ -81,10 +84,15 @@ class {
 
         let updatedContents = contents.substring(end: removeStart) + contents.substring(removeEnd)
 
-        uninstallService.uninstallDependency(dependency)
+        if (purge) {
+            log.info("Uninstalling dependency from #{dependency.getLocation()}")
+            uninstallService.uninstallDependency(dependency)
+        }
 
         FileWriter(airship.flatJsonFile)
             :write(updatedContents)
             :close()
+
+        log.info("Removed dependency #{dependency.toJsonKey()}")
     }
 }
