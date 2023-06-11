@@ -71,6 +71,32 @@ class {
         return source.excludedSources.map({ "#{baseLocation}/#{_.location}" })
     }
 
+    public async addDependencyToSource(PackageSource source, Dependency dependency) {
+        source.dependencies.add(dependency)
+
+        if (source == airship.package.defaultSource) {
+            airship.package.sources
+                .toArray()
+                .stream()
+                .map({ _.value })
+                .filter({ _ != source })
+                .forEach({ _.dependencies.add(dependency) })
+        }
+    }
+
+    public async removeDependencyFromSource(PackageSource source, Dependency dependency) {
+        source.dependencies.remove(dependency)
+
+        if (source == airship.package.defaultSource) {
+            airship.package.sources
+                .toArray()
+                .stream()
+                .map({ _.value })
+                .filter({ _ != source })
+                .forEach({ _.dependencies.remove(dependency) })
+        }
+    }
+
     class DependenciesResponse {
         construct(
             visible Array<Dependency> dependencies = Array(),
