@@ -6,6 +6,8 @@ import flat/datastruct/HashMap
 import flat/airship/PackageSource
 
 abstract data class {
+    visible Bool isLink
+
     visible lazy Airship airship => Airship(getLocation())
     visible lazy String name => File(getLocation()).name
 

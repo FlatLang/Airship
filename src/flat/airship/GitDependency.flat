@@ -9,6 +9,7 @@ data class extends Dependency {
     visible String httpsUrl
     visible String repoDetails
     visible String branch
+    visible String version
     visible String? ownerName
     visible String repoName
     visible String packageRootLocation
@@ -66,13 +67,11 @@ data class extends Dependency {
         ownerName = slash == -1 ? null : repoDetails.substring(end: slash)
         repoName = repoDetails.substring(slash + 1)
         packageRootLocation = "#{Airship.flatHome}/packages/#{host}/#{ownerName}/#{repoName}"
-        packageLocation = "#{packageRootLocation}/#{branch}"
         sshUrl = "git@#{host}:#{repoDetails}.git"
         httpsUrl = "https://#{host}/#{repoDetails}.git"
-
-        if (useLinks && Airship.useLinks && File("#{packageRootLocation}/[link]").exists) {
-            packageLocation = "#{packageRootLocation}/[link]"
-        }
+        isLink = useLinks && Airship.useLinks && File("#{packageRootLocation}/[link]").exists
+        version = isLink ? "[link]" : branch
+        packageLocation = "#{packageRootLocation}/#{version}"
     }
 
     public getUrl(Bool ssh = false) => ssh ? sshUrl : httpsUrl
