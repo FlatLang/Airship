@@ -112,6 +112,7 @@ class {
                     cliArgs.targetArg,
                     cliArgs.targetRuntimeArg,
                     cliArgs.fileArg,
+                    cliArgs.sourceArg,
                     cliArgs.debugArg,
                     cliArgs.syncArg,
                     cliArgs.noReplaceLogLineArg,
