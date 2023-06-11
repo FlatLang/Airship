@@ -135,7 +135,7 @@ class {
     ) {
         checkHelpCommand()
 
-        useLinks = cliArgs.useLinksArg.enabled
+        useLinks = useLinks || cliArgs.useLinksArg.enabled
 
         if (cliArgs.debugArg.enabled) {
             cliArgs.quietArg.enabled = true
