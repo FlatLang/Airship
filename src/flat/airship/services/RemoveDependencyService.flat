@@ -27,7 +27,9 @@ class {
 
     public async removeDependency(String dependencyName, Bool purge = false) {
         let dependency = Dependency.fromPackage(dependencyName, useLinks: false)
-        let source = airship.package.defaultSource
+        let source = airship.cliArgs.sourceArg.enabled
+            ? airship.package.sources[airship.cliArgs.sourceValueArg.value]
+            : airship.package.defaultSource
 
         if (!source.dependencies.contains(dependency)) {
             log.info("Dependency \"#{dependencyName}\" not installed")

@@ -27,6 +27,8 @@ OPTIONS:
     --target-runtime, --runtime, -r    Specify the target runtime the binary will build for
     --file, -f                         Specify an explicit flat.json file to reference when
                                        running the Airship commands
+    --source, -s                       Specify an explicit package source to reference when
+                                       running the Airship commands
     --debug, -d                        Print the command used to compile the package to stdout
                                        and exit
     --sync, -s                         Run the compilation synchronously
@@ -275,6 +277,20 @@ USAGE:
 
 ARGUMENTS:
     <file>    The flat.json file location to use
+```
+
+-----------------------------------------------------------------------------------------------
+
+`airship --source`
+
+```
+Specify an explicit package source to reference when running the Airship commands
+
+USAGE:
+    airship --source <sourceValue>
+
+ARGUMENTS:
+    <sourceValue>    The source to target. e.g. main/test
 ```
 
 -----------------------------------------------------------------------------------------------

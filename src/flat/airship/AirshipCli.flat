@@ -33,6 +33,22 @@ class {
         args: [targetRuntimeValueArg]
     )
 
+    visible CliArg sourceValueArg = CliArg(
+        name: "sourceValue",
+        description: "The source to target. e.g. main/test",
+        count: 1,
+        wildcard: true,
+        required: true
+    )
+
+    visible CliArg sourceArg = CliArg(
+        name: "--source",
+        aliases: ["-s"],
+        description: "Specify an explicit package source to reference when running the Airship commands",
+        args: [sourceValueArg],
+        commandHelpDisplay: "main, test, etc..."
+    )
+
     visible CliArg fileLocationArg = CliArg(
         name: "file",
         description: "The flat.json file location to use",
