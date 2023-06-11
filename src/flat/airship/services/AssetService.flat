@@ -26,7 +26,7 @@ class {
                 asset.copy(targetFile)
             })
 
-        dependencyService.getDependenciesForSource(target, target, source).dependencies
+        dependencyService.getDependenciesForSource(target, source).dependencies
             .filter({ _.isFlatPackage() })
             .map({ _.airship })
             .filter({ _.package?.assets.isNotEmpty })

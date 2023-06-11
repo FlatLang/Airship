@@ -197,10 +197,10 @@ class {
             args.addAll(["-x", excludeSource])
         }
 
-        let response = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source)
+        let response = dependencyService.getDependenciesForSource(installationTarget, source)
         log.trace("All dependencies for \"#installationTarget\": #response.dependencies")
 
-        let topLevelDependencies = dependencyService.getDependenciesForSource(installationTarget, installationTarget, source, recursive: false)
+        let topLevelDependencies = dependencyService.getDependenciesForSource(installationTarget, source, recursive: false)
         log.trace("Tep-level dependencies for \"#installationTarget\": #topLevelDependencies.dependencies")
 
         let dependencyLocations = HashMap<Dependency, Array<String>>()
@@ -402,7 +402,7 @@ class {
         PackageSource source,
         Bool install = false
     ) -> Dependency[] {
-        let response = dependencyService.getDependenciesForSource(package, package, source)
+        let response = dependencyService.getDependenciesForSource(package, source)
 
         log.trace("Installing dependencies for source #{source}")
         log.trace("Dependencies #{response.dependencies}")

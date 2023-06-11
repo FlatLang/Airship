@@ -33,7 +33,7 @@ class {
         log.info("Updating dependencies for #{package}...")
 
         let source = airship.getSourceForPackage(package)
-        let response = dependencyService.getDependenciesForSource(package, package, source)
+        let response = dependencyService.getDependenciesForSource(package, source)
 
         return response.dependencies
             .filterParallel({ updatePackage(_) })

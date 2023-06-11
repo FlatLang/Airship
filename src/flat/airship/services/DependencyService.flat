@@ -79,14 +79,12 @@ class {
     }
 
     public async getDependenciesForSource(
-        String package,
         String installationTarget,
         PackageSource source,
         Bool: download = true,
         Bool: recursive = true
     ) -> DependenciesResponse {
         return getDependenciesForSource(
-            package,
             installationTarget,
             source,
             download,
@@ -97,7 +95,6 @@ class {
     }
 
     async getDependenciesForSource(
-        String package,
         String installationTarget,
         PackageSource source,
         Bool download = true,
@@ -157,7 +154,6 @@ class {
 
                 if (packageSource && recursive) {
                     getDependenciesForSource(
-                        dependencyPackageFile.name,
                         installationTarget,
                         packageSource,
                         download,
