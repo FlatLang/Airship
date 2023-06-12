@@ -94,7 +94,8 @@ class {
     }
 
     async publishVersion(String version) {
-        let status = Git.status(silent: true)
+        let git = Git(airship.packageLocation)
+        let status = git.status(silent: true)
 
         if (!status.nothingToCommit) {
             log.error("You have uncommitted changes. Please commit or stash them before publishing.")
@@ -108,11 +109,11 @@ class {
         if (airship.package.version != version) {
             PackageFileUtil.setJsonValue(airship.flatJsonFile, "version", version)
 
-            Git.add(".")
-            Git.commit(tagName)
+            git.add(".")
+            git.commit(tagName)
         }
 
-        Git.tag(tagName)
+        git.tag(tagName)
         
         if (!airship.cliArgs.pushReleaseArg.enabled && !boolQuestion(cyan("Release tag \"#{tagName}\" has been created. Do you want to push the release now? (Y/n): "))) return
         
@@ -120,7 +121,30 @@ class {
     }
 
     async pushRelease(String tagName) {
-        Git.push()
-        Git.pushTag(tagName)
+        let git = Git(airship.packageLocation.location)
+
+        let localTags = git.showRef(tags: true, silent: true).tags
+
+        if (localTags.none({ _.name == tagName })) {
+            throw InvalidCommandException("No version tag '#{tagName}'")
+        }
+
+        let message = git.show(format: "%s", noPatch: true, silent: true).stdout.join().trimEnd()
+
+        if (message == tagName) {
+            log.info("Pushing version bump commit...")
+            git.push()
+        } else {
+            log.debug("Not pushing HEAD since the last commit was not a version bump commit: '#{message}'")
+        }
+
+        let remoteTags = git.lsRemoteTags(silent: true).tags
+
+        if (remoteTags.none({ _.name == tagName })) {
+            log.debug("Pushing release tag '#{tagName}'...")
+            git.pushTag(tagName)
+        } else {
+            log.info("Release tag '#{tagName}' already pushed")
+        }
     }
 }
