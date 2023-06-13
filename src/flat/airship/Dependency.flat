@@ -11,41 +11,6 @@ abstract data class {
     visible lazy Airship airship => Airship(getLocation())
     visible lazy String name => File(getLocation()).name
 
-    public static fromPackage(String package, Bool useLinks = true) -> Dependency {
-        return if (package.toLowerCase().startsWith("npm:")) {
-            let packageName = package.contains("@") ?
-                package.substring("npm:".count, package.indexOf("@")) :
-                package.substring("npm:".count)
-
-            let version = package.contains("@") ?
-                package.substring(package.indexOf("@") + 1) :
-                "latest"
-
-            NpmDependency(packageName, version)
-        } else if (package.toLowerCase().startsWith("local:")) {
-            LocalDependency(package.substring("local:".count))
-        } else {
-            GitDependency(package, useLinks)
-        }
-
-        throw Exception("Invalid dependency \"#package\"")
-    }
-
-    public static fromKeyValue(String key, String value) -> Dependency {
-        return if (key.toLowerCase().startsWith("npm:")) {
-            NpmDependency(
-                packageName: key.substring("npm:".count),
-                version: value
-            )
-        } else if (value == "local") {
-            LocalDependency(key)
-        } else {
-            GitDependency("#{key}@#{value}")
-        }
-
-        throw Exception("Invalid dependency {\"#key\": \"#value\"}")
-    }
-
     public abstract getLocation() -> String
     public abstract toJsonKey() -> String
     public abstract toJsonValue() -> String

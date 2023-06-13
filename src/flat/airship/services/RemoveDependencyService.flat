@@ -16,7 +16,9 @@ class {
 
     public construct(
         private Airship airship,
-        private UninstallService uninstallService
+        private UninstallService uninstallService,
+        private DependencyService dependencyService,
+        private LockService lockService
     ) {}
 
     public async removeDependencies(String[] dependencyNames, Bool purge = false) {
@@ -26,7 +28,7 @@ class {
     }
 
     public async removeDependency(String dependencyName, Bool purge = false) {
-        let dependency = Dependency.fromPackage(dependencyName, useLinks: false)
+        let dependency = dependencyService.getDependencyFromPackage(dependencyName, useLinks: false)
         let source = airship.cliArgs.sourceArg.enabled
             ? airship.package.sources[airship.cliArgs.sourceValueArg.value]
             : airship.package.defaultSource
@@ -38,6 +40,11 @@ class {
         }
 
         log.debug("Removing dependency #{dependency}...")
+
+        dependencyService.removeDependencyFromSource(source, dependency)
+
+        lockService.verifyLockFile()
+        lockService.generateLockFile()
 
         let contents = FileReader(airship.flatJsonFile).readAllContents()
 

@@ -1,5 +1,6 @@
 package flat/airship
 
+import flat/airship/services
 import flat/datastruct/HashMap
 
 data class {
@@ -17,7 +18,7 @@ data class {
     visible PackageSource testSource <=> sources["test"]
     visible PackageSource defaultSource => mainSource ?: testSource
 
-    public construct(HashMap<String, Object> map) {
+    public construct(DependencyService dependencyService, HashMap<String, Object> map) {
         let String name = (String)map["name"]
         let String version = (String)map["version"]
         let String description = (String)map["description"]
@@ -33,7 +34,7 @@ data class {
         if (!sourcesMap || !sourcesMap.class.isOfType(HashMap.class)) {
             sources = HashMap()
         } else {
-            sources = sourcesMap.mapValues({ PackageSource(this, _x.key, (HashMap)_x.value) })
+            sources = sourcesMap.mapValues({ PackageSource(dependencyService, _x.key, (HashMap)_x.value) })
         }
 
         this(

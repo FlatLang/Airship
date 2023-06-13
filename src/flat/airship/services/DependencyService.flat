@@ -366,4 +366,68 @@ class {
 
         flatPackageDir.delete(recursive: true)
     }
+
+    public static async getDependencyFromPackage(String package, Bool useLinks = true) -> Dependency {
+        return if (package.toLowerCase().startsWith("npm:")) {
+            let packageName = package.contains("@") ?
+                package.substring("npm:".count, package.indexOf("@")) :
+                package.substring("npm:".count)
+
+            let version = package.contains("@") ?
+                package.substring(package.indexOf("@") + 1) :
+                "latest"
+
+            NpmDependency(packageName, version)
+        } else if (package.toLowerCase().startsWith("local:")) {
+            LocalDependency(package.substring("local:".count))
+        } else {
+            getDependencyFromUrl(package, useLinks)
+        }
+
+        throw Exception("Invalid dependency \"#package\"")
+    }
+
+    public static getDependencyFromKeyValue(String key, String value) -> Dependency {
+        return if (key.toLowerCase().startsWith("npm:")) {
+            NpmDependency(
+                packageName: key.substring("npm:".count),
+                version: value
+            )
+        } else if (value == "local") {
+            LocalDependency(key)
+        } else {
+            GitDependency(key, value)
+        }
+
+        throw Exception("Invalid dependency {\"#key\": \"#value\"}")
+    }
+
+    public static async getDependencyFromUrl(
+        String url,
+        Bool useLinks = true
+    ) -> GitDependency {
+        let lower = url.toLowerCase()
+
+        if (lower.startsWith("github:")) {
+            return getDependencyFromUrl("git@github.com:#{url.substring(7)}")
+        } else if (lower.startsWith("git@")) {
+            let branchStart = url.indexOf('@', start: 5) + 1
+
+            if (branchStart > 0) {
+                return GitDependency(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
+            } else {
+                return GitDependency(url, "master", useLinks)
+            }
+        } else if (lower.startsWith("https://")) {
+            let branchStart = url.indexOf('@', start: 9) + 1
+
+            if (branchStart > 0) {
+                return GitDependency(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
+            } else {
+                return GitDependency(url, "master", useLinks)
+            }
+        } else {
+            throw Exception("Invalid Git dependency url: #{url}")
+        }
+    }
 }

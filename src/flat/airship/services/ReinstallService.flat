@@ -9,7 +9,8 @@ class {
 
     public construct(
         private Airship airship,
-        private AirshipCli cliArgs
+        private AirshipCli cliArgs,
+        private DependencyService dependencyService
     ) {}
 
     public async reinstall() {
@@ -27,7 +28,7 @@ class {
     }
 
     async reinstall(String package) {
-        reinstallGitPackage(GitDependency(package))
+        reinstallGitPackage(dependencyService.getDependencyFromUrl(package))
     }
 
     async reinstallGitPackage(GitDependency dependency) {

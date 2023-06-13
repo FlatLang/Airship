@@ -4,6 +4,9 @@ import flat/airship
 import flat/log
 import flat/io
 import flat/git
+import flat/regex
+
+import flat/regex/RegexStringExtensions
 
 class {
     static Logger log = Logger(UpdateService.class)
@@ -35,25 +38,29 @@ class {
         let source = airship.getSourceForPackage(package)
         let response = dependencyService.getDependenciesForSource(package, source)
 
-        return response.dependencies
+        let updated = response.dependencies
             .filterParallel({ updatePackage(_) })
             :forEach({ Airship.clearCache(_.airship) })
             .map({ _.copy() })
             :forEachAsync({ installService.installDependency(_) })
+
+        log.info("Updated #{updated.count} dependenc#{updated.count == 1 ? "y" : "ies"}.")
+
+        return updated
     }
 
     public async updatePackage(
         String package,
         Bool: build = true
     ) =>
-        updatePackage(Dependency.fromPackage(package), build)
+        updatePackage(dependencyService.getDependencyFromPackage(package), build)
 
     public async updatePackage(
         Dependency dependency,
         Bool: build = true
     ) -> Bool {
         if (dependency.class.isOfType(GitDependency.class)) {
-            return updateGitPackage((GitDependency)dependency, build)
+            return updateGitPackage((GitDependency)dependency)
         } else if (dependency.class.isOfType(NpmDependency.class)) {
             log.trace("No need to update node package")
             return false
@@ -66,12 +73,11 @@ class {
     }
 
     public async updateGitPackage(
-        GitDependency dependency,
-        Bool: build = true
+        GitDependency dependency
     ) -> Bool {
-        if (!cliArgs.quietArg.enabled) {
-            log.info("Updating dependency #{dependency.getUrl()}@#{dependency.branch}...")
-        }
+        if (dependency.isLink) return false
+
+        log.info("Updating dependency #{dependency.getUrl()}@#{dependency.branch}...")
 
         let packageLocation = File(dependency.getLocation())
 
@@ -81,7 +87,13 @@ class {
 
         let git = Git(packageLocation.location)
 
-        git.checkout(dependency.branch, silent: true)
+        let branchName = git.getCurrentBranch()
+
+        if (!branchName) return updateGitPackageVersion(dependency)
+
+        if (branchName != dependency.branch) {
+            throw ExecutionFailureException("Dependency #{dependency.getUrl()}@#{dependency.branch} is on incorrect branch #{branchName}")
+        }
 
         let pullResponse = git.pull(silent: true)
 
@@ -92,5 +104,49 @@ class {
         }
 
         return !pullResponse.upToDate
+    }
+
+    public async updateGitPackageVersion(
+        GitDependency dependency
+    ) -> Bool {
+        let lsRemote = Git.lsRemoteTags(dependency.httpsUrl, silent: true)
+        let tags = lsRemote.tags
+
+        let versionTags = tags
+            .filter({ _x.name.matches(/^v\d+\.\d+\.\d+$/) })
+            .sort((a, b) => {
+                let v1 = a.name.substring(1).split(".").map({ Int.parseInt(_) })
+                let v2 = b.name.substring(1).split(".").map({ Int.parseInt(_) })
+
+                if (v1[0] != v2[0]) {
+                    return v2[0] - v1[0]
+                } else if (v1[1] != v2[1]) {
+                    return v2[1] - v1[1]
+                } else if (v1[2] != v2[2]) {
+                    return v2[2] - v1[2]
+                }
+
+                return 0
+            })
+
+        if (versionTags.isEmpty) {
+            log.debug("Dependency #{dependency.getUrl()}@#{dependency.branch} does not have any tags with the format 'v0.0.0'")
+            return false
+        }
+
+        let version = versionTags.first.name
+
+        if (dependency.version == version) {
+            log.info("Dependency #{dependency.getUrl()}@#{dependency.branch} already up to date")
+            return false
+        }
+
+        let updatedDependency = GitDependency(dependency.httpsUrl, version, useLinks: false)
+
+        installService.installDependency(updatedDependency)
+
+        log.info("Dependency #{dependency.getUrl()} updated #{dependency.version} -> #{updatedDependency.version}")
+
+        return true
     }
 }

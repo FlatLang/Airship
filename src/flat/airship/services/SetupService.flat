@@ -45,7 +45,7 @@ class {
 
         if (dependencyService.isDependencyInstalled(airshipDependency)) {
             setupLog.info("Airship already installed. Checking for updates")
-            updateService.updateGitPackage(airshipDependency, build: true)
+            updateService.updatePackage(airshipDependency, build: true)
         } else {
             setupLog.info("Installing Airship")
             airship.installService.installDependency(airshipDependency)

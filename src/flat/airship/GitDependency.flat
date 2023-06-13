@@ -19,35 +19,6 @@ data class extends Dependency {
 
     public construct(
         String url,
-        Bool useLinks = true
-    ) {
-        let lower = url.toLowerCase()
-
-        if (lower.startsWith("github:")) {
-            this("git@github.com:#{url.substring(7)}")
-        } else if (lower.startsWith("git@")) {
-            let branchStart = url.indexOf('@', start: 5) + 1
-
-            if (branchStart > 0) {
-                this(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
-            } else {
-                this(url, "master", useLinks)
-            }
-        } else if (lower.startsWith("https://")) {
-            let branchStart = url.indexOf('@', start: 9) + 1
-
-            if (branchStart > 0) {
-                this(url.substring(end: branchStart - 1), url.substring(branchStart), useLinks)
-            } else {
-                this(url, "master", useLinks)
-            }
-        } else {
-            throw Exception("Invalid Git dependency url: #{url}")
-        }
-    }
-
-    public construct(
-        String url,
         this String branch,
         Bool useLinks = true
     ) {

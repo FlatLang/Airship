@@ -23,6 +23,7 @@ class {
     visible Bool debug
     visible String flatJsonLocation
     visible File flatJsonFile
+    visible File flatLockJsonFile
     visible File packageLocation
     visible String target
     visible String targetRuntime
@@ -30,12 +31,13 @@ class {
     visible AirshipCli cliArgs = AirshipCli()
 
     visible DependencyService dependencyService = DependencyService(this, cliArgs)
+    visible LockService lockService = LockService(this, dependencyService)
     visible AssetService assetService = AssetService(this, dependencyService)
     visible PublishService publishService = PublishService(this)
     visible BinaryService binaryService = BinaryService(this, assetService)
-    visible InstallService installService = InstallService(this, cliArgs, dependencyService, binaryService, assetService)
+    visible InstallService installService = InstallService(this, cliArgs, dependencyService, binaryService, assetService, lockService)
     visible UninstallService uninstallService = UninstallService(this, cliArgs, dependencyService)
-    visible ReinstallService reinstallService = ReinstallService(this, cliArgs)
+    visible ReinstallService reinstallService = ReinstallService(this, cliArgs, dependencyService)
     visible UpdateService updateService = UpdateService(this, cliArgs, dependencyService, installService)
     visible CleanService cleanService = CleanService(this)
     visible RunScriptService runScriptService = RunScriptService(this, cliArgs)
@@ -44,8 +46,8 @@ class {
     visible CreateService createService = CreateService(this)
     visible VersionService versionService = VersionService(this)
     visible GetPackageService getPackageService = GetPackageService(this, installService, dependencyService)
-    visible AddDependencyService addDependencyService = AddDependencyService(this, getPackageService, installService)
-    visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService)
+    visible AddDependencyService addDependencyService = AddDependencyService(this, getPackageService, installService, dependencyService, lockService)
+    visible RemoveDependencyService removeDependencyService = RemoveDependencyService(this, uninstallService, dependencyService, lockService)
 
     static HashMap<String, Airship> packageCache = HashMap()
 
@@ -152,6 +154,7 @@ class {
         target = cliArgs.targetArg["target"].value
 
         flatJsonFile = File(flatJsonLocation).getCanonicalFileSync()
+        flatLockJsonFile = flatJsonFile.getParent().getChild("flat-lock.json")
         packageLocation = flatJsonFile.getParent()
 
         if (packageCache.containsKey(flatJsonFile.normalizedLocation)) {
@@ -183,7 +186,7 @@ class {
                     merge(overrideMap, map)
                 }
 
-                package = Package(map)
+                package = Package(dependencyService, map)
 
                 loadSources()
             } else {

@@ -1,5 +1,6 @@
 package flat/airship
 
+import flat/airship/services
 import flat/datastruct/HashMap
 
 data class {
@@ -17,7 +18,11 @@ data class {
         visible PackageBinary[] binaries
     ) {}
 
-    public construct(Package package, String name, HashMap<String, Object> map) {
+    public construct(
+        DependencyService dependencyService,
+        String name,
+        HashMap<String, Object> map
+    ) {
         let excludesValue = (Object)(map["excluded"])
         let excludedSourcesArray = (Array)excludesValue
         let excludedSources = excludedSourcesArray?.map({ ExcludedSource(_) })
@@ -26,7 +31,7 @@ data class {
         let defaultExports = defaultExportsArray?.map({ DefaultExport(_) })
         let dependenciesValue = (Object)(map["dependencies"])
         let dependenciesMap = (HashMap)dependenciesValue
-        let dependencies = dependenciesMap.map({ Dependency.fromKeyValue((String)_x.key, (String)_x.value) })
+        let dependencies = dependenciesMap.map({ dependencyService.getDependencyFromKeyValue((String)_x.key, (String)_x.value) })
 
         binaries = Array<PackageBinary>()
 

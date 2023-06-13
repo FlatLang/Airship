@@ -17,7 +17,8 @@ class {
         private AirshipCli cliArgs,
         private DependencyService dependencyService,
         private BinaryService binaryService,
-        private AssetService assetService
+        private AssetService assetService,
+        private LockService lockService
     ) {}
 
     public async install() {
@@ -47,7 +48,7 @@ class {
         if (cliArgs.installLinkArg.enabled) {
             installAndLink(package)
         } else if (package.contains(":")) {
-            installDependency(Dependency.fromPackage(package), install, installDependencies)
+            installDependency(dependencyService.getDependencyFromPackage(package), install, installDependencies)
         } else {
             installLocalPackage(package)
         }
@@ -61,7 +62,7 @@ class {
             "java" => return
             "flat" => {
                 let package = "git@github.com:FlatLang/Flat-Compiler"
-                let dependency = Dependency.fromPackage(package)
+                let dependency = dependencyService.getDependencyFromPackage(package)
 
                 if (!dependencyService.isDependencyInstalled(dependency)) {
                     Airship(["get", package]):run()
@@ -94,7 +95,7 @@ class {
         }
 
         let package = "git@github.com:FlatLang/Flat-#{target}"
-        return Dependency.fromPackage(package)
+        return dependencyService.getDependencyFromPackage(package)
     }
 
     getOutputDirectory(PackageSource source) => File("#{airship.packageLocation.normalizedLocation}/#{source.outDirectory}")
@@ -151,9 +152,9 @@ class {
         let args = String[]
 
         let originUrl = airship.getGitOriginUrl()
-        let gitDependency = originUrl ? GitDependency(originUrl) : null
+        let gitDependency = originUrl ? dependencyService.getDependencyFromUrl(originUrl) : null
         let currentDependencyCanonicalLocation = airship.packageLocation.getCanonicalFile().normalizedLocation
-        let currentDependency = Dependency.fromPackage("local:#{currentDependencyCanonicalLocation}")
+        let currentDependency = dependencyService.getDependencyFromPackage("local:#{currentDependencyCanonicalLocation}")
         let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
         let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
         let excludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
@@ -174,8 +175,8 @@ class {
 
         if (airship.target) {
             log.trace("Adding target: #{airship.target}")
-            args.addAll(["-target", airship.target])
             args.addAll([
+                "-target", airship.target,
                 "-engine-jar", "#{getInstallTargetDependency().getLocation()}/target/flat-#{airship.target.toLowerCase()}.jar",
             ])
         }
@@ -288,7 +289,7 @@ class {
 
         let url = Git.getOriginUrl(workingDirectory: d.getLocation(), silent: true).value
 
-        return url ? GitDependency(url) : null
+        return url ? dependencyService.getDependencyFromUrl(url) : null
     }
 
     async areDependencySourcesEquivalent(Dependency d1, Dependency d2) -> Bool {
@@ -308,7 +309,7 @@ class {
     public async getFlatcInstallArguments(String installationTarget, PackageSource source) -> String[] {
         let args = String[]
 
-        let currentDependency = Dependency.fromPackage("local:#{airship.packageLocation.normalizedLocation}")
+        let currentDependency = dependencyService.getDependencyFromPackage("local:#{airship.packageLocation.normalizedLocation}")
         let sourceLocations = dependencyService.getDependencySourceLocations(currentDependency, installationTarget)
         let excludeSources = dependencyService.getDependencyExclusions(currentDependency, installationTarget)
         let excludeSource = installationTarget == "test" ? null : dependencyService.getDependencySourceGlobLocation(currentDependency, "test")
@@ -346,6 +347,9 @@ class {
             Console.writeLine(sanitizedCmd[0] + " " + sanitizedCmd.skip(1).join(" "))
             return
         }
+
+        lockService.verifyLockFile()
+        lockService.generateLockFile()
 
         log.debug("Executing command: #cmd")
 
