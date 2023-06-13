@@ -396,6 +396,12 @@ class {
         } else if (value == "local") {
             LocalDependency(key)
         } else {
+            let lower = key.toLowerCase()
+
+            if (lower.startsWith("github:")) {
+                return GitDependency("git@github.com:#{key.substring(7)}", value)
+            }
+
             GitDependency(key, value)
         }
 
