@@ -72,10 +72,40 @@ class {
         PackageBinary bin,
         String distFileLocation
     ) {
+        if (File(distFileLocation).extensionName.toLowerCase() != "js") {
+            createAliasBinFile(bin, distFileLocation)
+            return
+        }
+
         match System.OS_INT {
             System.WINDOWS => createBinFileForWindows(bin, distFileLocation)
             default => createBinFileForLinux(bin, distFileLocation)
         }
+    }
+
+    async createAliasBinFile(
+        PackageBinary bin,
+        String distFileLocation
+    ) {
+        let binFileContents = "|
+            \#!/bin/bash
+            cd \"$(dirname \"${BASH_SOURCE[0]}\")\"
+            ./#{distFileLocation}
+            |"
+
+        let binFile = File(binDirectory, bin.name)
+
+        log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.nativeLocation}\"")
+
+        if (binFile.exists) {
+            log.debug("Overwriting existing file \"#{binFile.nativeLocation}\"")
+        }
+
+        FileWriter(binFile):write(binFileContents):close()
+
+        log.debug("Updating file permissions for file \"#{binFile.nativeLocation}\"")
+
+        binFile.chmod("755")
     }
 
     async createBinFileForLinux(
