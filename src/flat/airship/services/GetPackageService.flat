@@ -36,14 +36,9 @@ class {
 
         verifyDependencyExists(dependency)
 
-        log.debug("Downloading dependency #{dependency}...")
+        log.debug("Installing dependency #{dependency}...")
 
-        installService.installDependency(
-            dependency,
-            build: false,
-            install: false,
-            installDependencies: false
-        )
+        installService.installDependency(dependency)
     }
 
     async verifyDependencyExists(Dependency dependency) {
