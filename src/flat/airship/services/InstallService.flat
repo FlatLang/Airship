@@ -377,11 +377,13 @@ class {
             log.debug("Dependency #{dependency} already installed")
         }
 
+        let installable = install && (dependency.airship.target != null || dependency.airship.package.defaultTarget != null)
+
         if (dependency.isFlatPackage()) {
             postInstallPackage(
                 File(dependency.getLocation()),
                 build,
-                install,
+                install: installable,
                 installDependencies
             )
         }
