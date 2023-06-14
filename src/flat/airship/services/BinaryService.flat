@@ -72,8 +72,15 @@ class {
         PackageBinary bin,
         String distFileLocation
     ) {
-        if (File(distFileLocation).extensionName.toLowerCase() != "js") {
-            createAliasBinFile(bin, distFileLocation)
+        let distFile = File(distFileLocation)
+        let extension = distFile.extensionName.toLowerCase()
+
+        if (extension != "js") {
+            match System.OS_INT {
+                System.WINDOWS => createAliasBatFile(bin, distFileLocation)
+                default => createAliasBinFile(bin, distFileLocation)
+            }
+
             return
         }
 
@@ -93,6 +100,30 @@ class {
             |"
 
         let binFile = File(binDirectory, bin.name)
+
+        log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.nativeLocation}\"")
+
+        if (binFile.exists) {
+            log.debug("Overwriting existing file \"#{binFile.nativeLocation}\"")
+        }
+
+        FileWriter(binFile):write(binFileContents):close()
+
+        log.debug("Updating file permissions for file \"#{binFile.nativeLocation}\"")
+
+        binFile.chmod("755")
+    }
+
+    async createAliasBatFile(
+        PackageBinary bin,
+        String distFileLocation
+    ) {
+        let binFileContents = "|
+            @echo off
+            %~p0/#{distFileLocation} %*
+            |"
+
+        let binFile = File(binDirectory, "#{bin.name}.bat")
 
         log.debug("Creating \"#{bin.name}\" bin file at \"#{binFile.nativeLocation}\"")
 
