@@ -89,8 +89,7 @@ class {
     ) {
         let binFileContents = "|
             \#!/bin/bash
-            cd \"$(dirname \"${BASH_SOURCE[0]}\")\"
-            ./#{distFileLocation}
+            \"$(dirname \"${BASH_SOURCE[0]}\")/#{distFileLocation}\" \"$@\"
             |"
 
         let binFile = File(binDirectory, bin.name)
