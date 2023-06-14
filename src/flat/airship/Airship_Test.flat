@@ -1,11 +1,10 @@
 package flat/airship
 
-import flat/airship/Airship
-import flat/airship/Dependency
+import flat/airship
+import flat/airship/services
 import flat/fucli/FuCli.InvalidCliArgumentException
 import flat/fucli/FuCli.RequiredCliArgumentException
-import flat/airship/InvalidOutDirException
-import flat/io/File
+import flat/io
 import flat/datastruct
 import flat/regex
 
@@ -47,7 +46,7 @@ testable class {
 
         let cmd = [
             "java", "-jar", "#{flat.getLocation()}/target/flatc.jar",
-            "#{airship.packageLocation.normalizedLocation}/src",
+            InstallService.sanitizeFileLocation("#{airship.packageLocation.normalizedLocation}/src"),
             "-install-dir", "#{flatHome}/packages",
             "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
             "-target", "js",
@@ -55,24 +54,24 @@ testable class {
             "-parallel",
         ]
 
-        excludeSources.forEach({ cmd.addAll(["-x", _]) })
+        excludeSources.forEach({ cmd.addAll(["-x", InstallService.sanitizeFileLocation(_)]) })
 
         if (excludeSource) {
-            cmd.addAll(["-x", excludeSource])
+            cmd.addAll(["-x", InstallService.sanitizeFileLocation(excludeSource)])
         }
 
         response.dependencies.forEach((dependency) => {
             airship.dependencyService.getDependencySourceLocations(dependency).forEach({
-                cmd.addAll(["-l", _])
+                cmd.addAll(["-l", InstallService.sanitizeFileLocation(_)])
             })
             airship.dependencyService.getDependencyExclusions(dependency, package).forEach({
-                cmd.addAll(["-x", _])
+                cmd.addAll(["-x", InstallService.sanitizeFileLocation(_)])
             })
 
             let dependencyExcludeSource = airship.dependencyService.getDependencySourceGlobLocation(dependency, "test")
 
             if (dependencyExcludeSource) {
-                cmd.addAll(["-x", dependencyExcludeSource])
+                cmd.addAll(["-x", InstallService.sanitizeFileLocation(dependencyExcludeSource)])
             }
         })
 
@@ -103,10 +102,7 @@ testable class {
 
         cmd.addAll(["-app-props", appProps.toJson()])
 
-        let sanitizedCmd = cmd.stream()
-            .map({ _.replace("\"", "\\\"") })
-            .map({ _x.contains(/\s/) ? "\"#{_x}\"" : _x })
-            .toArray()
+        let sanitizedCmd = cmd.map({ System.sanitizeCliArgument(_) })
 
         expect(cmdOutput).toBe(sanitizedCmd)
     }

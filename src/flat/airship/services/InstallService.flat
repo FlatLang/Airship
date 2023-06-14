@@ -5,9 +5,6 @@ import flat/datastruct
 import flat/log
 import flat/io
 import flat/git
-import flat/regex
-
-import flat/regex/RegexStringExtensions
 
 class {
     static Logger log = Logger(InstallService.class)
@@ -148,6 +145,9 @@ class {
         }
     }
 
+    public static sanitizeFileLocation(String location) =>
+        location.contains("*") ? "\"#{location}\"" : location
+
     public async getLegacyInstallArguments(String installationTarget, PackageSource source) -> String[] {
         let args = String[]
 
@@ -161,7 +161,7 @@ class {
         let canonicalSourceLocations = sourceLocations.mapParallel({ File(_).getCanonicalPath() }).unique()
 
         log.trace("Adding source locations: #{sourceLocations}")
-        args.addAll(sourceLocations.map({ _ }))
+        args.addAll(sourceLocations.map({ sanitizeFileLocation(_) }))
 
         args.addAll([
             "-install-dir", "#{Airship.flatHome}/packages",
@@ -192,10 +192,10 @@ class {
         }
 
         log.trace("Adding source exclusions: #{excludeSources}")
-        excludeSources.forEach({ args.addAll(["-x", _]) })
+        excludeSources.forEach({ args.addAll(["-x", sanitizeFileLocation(_)]) })
 
         if (excludeSource) {
-            args.addAll(["-x", excludeSource])
+            args.addAll(["-x", sanitizeFileLocation(excludeSource)])
         }
 
         let response = dependencyService.getDependenciesForSource(installationTarget, source)
@@ -226,16 +226,16 @@ class {
             .forEach({
                 dependencyService
                     .getDependencySourceLocations(_x)
-                    .forEach({ args.addAll(["-l", _]) })
+                    .forEach({ args.addAll(["-l", sanitizeFileLocation(_)]) })
 
                 dependencyService
                     .getDependencyExclusions(_x, installationTarget)
-                    .forEach({ args.addAll(["-x", _]) })
+                    .forEach({ args.addAll(["-x", sanitizeFileLocation(_)]) })
 
                 let dependencyExcludeSource = dependencyService.getDependencySourceGlobLocation(_x, "test")
 
                 if (dependencyExcludeSource) {
-                    args.addAll(["-x", dependencyExcludeSource])
+                    args.addAll(["-x", sanitizeFileLocation(dependencyExcludeSource)])
                 }
             })
 
@@ -340,11 +340,7 @@ class {
         let cmd = getInstallCommand(package, source, dependencies)
 
         if (airship.debug) {
-            let sanitizedCmd = cmd.stream()
-                .map({ _.replace("\"", "\\\"") })
-                .map({ _x.contains(/\s/) ? "\"#{_x}\"" : _x })
-                .toArray()
-            Console.writeLine(sanitizedCmd[0] + " " + sanitizedCmd.skip(1).join(" "))
+            Console.writeLine(cmd.map({ System.sanitizeCliArgument(_) }).join(" "))
             return
         }
 
