@@ -62,64 +62,64 @@ class {
                 name: Test #{airship.package.name}
 
                 on:
-                    push:
-                        branches: [ \"master\" ]
-                    pull_request:
-                        branches: [ \"master\" ]
+                  push:
+                    branches: [ \"master\" ]
+                  pull_request:
+                    branches: [ \"master\" ]
 
                 env:
-                    LOGGING_DEFAULT_SHOW_PREFIX: true
-                    LOGGING_DEFAULT_LOGGING_LEVEL: DEBUG
-                    LOGGING_DEFAULT_SHOW_FORMATTING: true
+                  LOGGING_DEFAULT_SHOW_PREFIX: true
+                  LOGGING_DEFAULT_LOGGING_LEVEL: DEBUG
+                  LOGGING_DEFAULT_SHOW_FORMATTING: true
 
                 jobs:
-                    build:
+                  build:
 
-                        runs-on: ubuntu-latest
+                    runs-on: ubuntu-latest
 
-                        steps:
-                            - name: Setup Maven Action
-                                uses: s4u/setup-maven-action@v1.5.0
-                                with:
-                                    java-version: 8
-                                    maven-version: 3.8.6
+                    steps:
+                      - name: Setup Maven Action
+                        uses: s4u/setup-maven-action@v1.5.0
+                        with:
+                          java-version: 8
+                          maven-version: 3.8.6
 
-                            - uses: actions/checkout@v3
+                      - uses: actions/checkout@v3
 
-                            - name: Download latest Airship
-                                uses: FlatLang/fetch-airship@master
-                                with:
-                                    includePrerelease: true
+                      - name: Download latest Airship
+                        uses: FlatLang/fetch-airship@master
+                        with:
+                          includePrerelease: true
 
-                            - uses: actions/setup-node@v3
-                                with:
-                                    node-version: 16
+                      - uses: actions/setup-node@v3
+                        with:
+                          node-version: 16
 
-                            - name: Cache Maven dependencies
-                                uses: actions/cache@v3
-                                with:
-                                    path: |
-                                        ~/.m2/repository
-                                    key: ${{ runner.os }}-build-${{ env.cache-name }}
-                                    restore-keys: |
-                                        ${{ runner.os }}-build-${{ env.cache-name }}-
-                                        ${{ runner.os }}-build-
-                                        ${{ runner.os }}-
+                      - name: Cache Maven dependencies
+                        uses: actions/cache@v3
+                        with:
+                          path: |
+                            ~/.m2/repository
+                          key: ${{ runner.os }}-build-${{ env.cache-name }}
+                          restore-keys: |
+                            ${{ runner.os }}-build-${{ env.cache-name }}-
+                            ${{ runner.os }}-build-
+                            ${{ runner.os }}-
 
-                            - name: Build #{airship.package.name} Test
-                                run: |
-                                    node airship.js install test#{target ? " -t #target" : ""}
+                      - name: Build #{airship.package.name} Test
+                        run: |
+                          node airship.js install test#{target ? " -t #target" : ""}
 
-                            - uses: actions/upload-artifact@v3
-                                if: failure()
-                                with:
-                                    name: #{airship.package.testSource.outFile}
-                                    path: #{airship.package.testSource.outDirectory}/#{airship.package.testSource.outFile}
+                      - uses: actions/upload-artifact@v3
+                        if: failure()
+                        with:
+                          name: #{airship.package.testSource.outFile}
+                          path: #{airship.package.testSource.outDirectory}/#{airship.package.testSource.outFile}
 
-                            - name: Run #{airship.package.name} Test
-                                run: |
-                                    node airship.js run test#{target ? " -t #target" : ""}
-                |")
+                      - name: Run #{airship.package.name} Test
+                        run: |
+                          node airship.js run test#{target ? " -t #target" : ""}
+            |")
             :close()
 
             log.info("Pipeline file created at \"#{pipelineFile.normalizedLocation}\"")
