@@ -130,19 +130,19 @@ testable class {
             .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with \\")
     }
 
-    test `fails on dot backslash start outDirectory path`() {
+    test `allows dot backslash start outDirectory path`() {
         expect({ Airship(["-f", "res/test/flat-dot-backslash-start-outDirectory-path.json"]) })
-            .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
+            .toNotThrow(InvalidOutDirException.class)
     }
 
-    test `fails on dot forward slash start outDirectory path`() {
+    test `allows dot forward slash start outDirectory path`() {
         expect({ Airship(["-f", "res/test/flat-dot-forward-slash-start-outDirectory-path.json"]) })
-            .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
+            .toNotThrow(InvalidOutDirException.class)
     }
 
-    test `fails on double dot start outDirectory path`() {
+    test `allows double dot start outDirectory path`() {
         expect({ Airship(["-f", "res/test/flat-double-dot-start-outDirectory-path.json"]) })
-            .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
+            .toNotThrow(InvalidOutDirException.class)
     }
 
     test `fails on empty outDirectory path`() {
@@ -155,9 +155,9 @@ testable class {
             .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with /")
     }
 
-    test `fails on single dot start outDirectory path`() {
+    test `allows single dot start outDirectory path`() {
         expect({ Airship(["-f", "res/test/flat-single-dot-start-outDirectory-path.json"]) })
-            .toThrowWithMessage(InvalidOutDirException.class, "outDirectory cannot start with .")
+            .toNotThrow(InvalidOutDirException.class)
     }
 
     test async `can set target compile language`() {

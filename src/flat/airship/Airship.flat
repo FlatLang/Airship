@@ -460,7 +460,7 @@ class {
     validateOutDirectory(String location) => location {
         if (location.trim().count == 0) {
             throw InvalidOutDirException("outDirectory cannot be empty")
-        } else if (location.trim().startsWith(/[/\\.]/)) {
+        } else if (location.trim().startsWith(/[/\\]/)) {
             throw InvalidOutDirException("outDirectory cannot start with #location.first")
         } else if (location.contains(":/") || location.contains(":\\")) {
             throw InvalidOutDirException("outDirectory cannot be absolute")
