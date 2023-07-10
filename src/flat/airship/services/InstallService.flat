@@ -169,9 +169,9 @@ class {
 
         if (source.outFile) {
             args.addAll(["-o", "#{getOutputDirectory(source).location}/#{source.outFile}"])
-        } else {
-            args.addAll(["-d", getOutputDirectory(source).location])
         }
+
+        args.addAll(["-d", getOutputDirectory(source).location])
 
         if (airship.target) {
             log.trace("Adding target: #{airship.target}")
