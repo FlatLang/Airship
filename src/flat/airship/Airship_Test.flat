@@ -49,6 +49,7 @@ testable class {
             InstallService.sanitizeFileLocation("#{airship.packageLocation.normalizedLocation}/src"),
             "-install-dir", "#{flatHome}/packages",
             "-o", "#{airship.packageLocation.normalizedLocation}/dist/airship.js",
+            "-d", "#{airship.packageLocation.normalizedLocation}/dist",
             "-target", "js",
             "-engine-jar", "#{flatjsDependency.getLocation()}/target/flat-js.jar",
             "-parallel",
