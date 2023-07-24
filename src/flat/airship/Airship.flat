@@ -147,7 +147,7 @@ class {
             Logger.defaultLoggingLevel = Logger.OFF
         }
 
-        log.trace("Creating Airship with CLI args: #cli")
+        log.trace("Creating Airship with CLI args: #{cli}")
 
         flatJsonLocation = getFlatJsonLocation(cliArgs.fileArg["file"].value)
         debug = cliArgs.debugArg.enabled
@@ -276,7 +276,7 @@ class {
         } else if (file.isFile) {
             file.normalizedLocation
         } else {
-            throw InvalidFlatJsonException("Invalid flat.json location '#file.location'")
+            throw InvalidFlatJsonException("Invalid flat.json location '#{file.location}'")
         }
     }
 
@@ -461,7 +461,7 @@ class {
         if (location.trim().count == 0) {
             throw InvalidOutDirException("outDirectory cannot be empty")
         } else if (location.trim().startsWith(/[/\\]/)) {
-            throw InvalidOutDirException("outDirectory cannot start with #location.first")
+            throw InvalidOutDirException("outDirectory cannot start with #{location.first}")
         } else if (location.contains(":/") || location.contains(":\\")) {
             throw InvalidOutDirException("outDirectory cannot be absolute")
         }
@@ -477,7 +477,7 @@ class {
             .toArray()
 
         for (command in commands) {
-            log.debug("Running command \"#command\"")
+            log.debug("Running command \"#{command}\"")
 
             match (command) {
                 cliArgs.setupCommand => setupService.setup()
