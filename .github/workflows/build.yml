@@ -2,11 +2,11 @@ name: Test Airship
 
 on:
   push:
-    branches: [ "*" ]
+    branches: ["*"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
   schedule:
-    - cron: '0 5 * * *'
+    - cron: "0 5 * * *"
 
 env:
   LOGGING_DEFAULT_SHOW_PREFIX: true
@@ -15,7 +15,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
 
     strategy:
