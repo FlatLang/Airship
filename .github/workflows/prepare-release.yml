@@ -6,8 +6,15 @@ on:
 
 jobs:
   package:
+    runs-on: ${{ matrix.release.os }}
 
-    runs-on: ubuntu-latest
+    strategy:
+    fail-fast: false
+    matrix:
+      release:
+        - os: ubuntu-latest
+        - os: windows-latest
+        - os: macos-latest
 
     steps:
       - name: Download Airship ${{ github.event.release.tag_name }}
@@ -19,15 +26,36 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pkg
-        run: |
-          npm install -g pkg
+      - uses: pnpm/action-setup@v3
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
 
-      - name: Package airship.js
+      - name: Prepare binary
         run: |
-          pkg airship.js
+          node --experimental-sea-config sea-config.json
+
+      - name: Build windows binary
+        if: ${{ matrix.release.os == 'windows-latest' }}
+        run: |
+          cp $(command -v node) airship-win.exe
+          pnpm dlx postject airship-win.exe NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+
+      - name: Build macos binary
+        if: ${{ matrix.release.os == 'macos-latest' }}
+        run: |
+          cp $(command -v node) airship-macos
+          pnpm dlx postject airship-macos NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --macho-segment-name NODE_SEA
+
+      - name: Build linux binary
+        if: ${{ matrix.release.os == 'ubuntu-latest' }}
+        run: |
+          cp $(command -v node) airship-linux
+          pnpm dlx postject airship-linux NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
       - name: Delete airship-win.exe Asset
+        if: ${{ matrix.release.os == 'windows-latest' }}
         uses: mknejp/delete-release-assets@v1
         with:
           fail-if-no-assets: false
@@ -37,6 +65,7 @@ jobs:
           assets: airship-win.exe
 
       - name: Upload Windows Asset
+        if: ${{ matrix.release.os == 'windows-latest' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,6 +76,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Delete airship-macos Asset
+        if: ${{ matrix.release.os == 'macos-latest' }}
         uses: mknejp/delete-release-assets@v1
         with:
           fail-if-no-assets: false
@@ -56,6 +86,7 @@ jobs:
           assets: airship-macos
 
       - name: Upload Mac Asset
+        if: ${{ matrix.release.os == 'macos-latest' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,6 +97,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Delete airship-linux Asset
+        if: ${{ matrix.release.os == 'ubuntu-latest' }}
         uses: mknejp/delete-release-assets@v1
         with:
           fail-if-no-assets: false
@@ -75,6 +107,7 @@ jobs:
           assets: airship-linux
 
       - name: Upload Linux Asset
+        if: ${{ matrix.release.os == 'ubuntu-latest' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,7 +118,6 @@ jobs:
           asset_content_type: application/octet-stream
 
   compress:
-
     runs-on: ubuntu-latest
     needs: package
 
@@ -119,7 +151,6 @@ jobs:
             content_type: application/x-zip-compressed
 
     steps:
-
       - name: Download airship.js ${{ github.event.release.tag_name }}
         uses: FlatLang/fetch-airship@master
         with:
