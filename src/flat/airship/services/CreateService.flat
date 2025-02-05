@@ -109,7 +109,7 @@ class {
                         run: |
                           node airship.js install test#{target ? " -t #{target}" : ""}
 
-                      - uses: actions/upload-artifact@v3
+                      - uses: actions/upload-artifact@v4
                         if: failure()
                         with:
                           name: #{airship.package.testSource.outFile}
